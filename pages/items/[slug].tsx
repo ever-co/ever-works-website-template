@@ -24,7 +24,7 @@ export const getStaticPaths = (async () => {
 export const getStaticProps = (async (context) => {
     const slug = context.params?.slug as string;
     const item = await fetchItem(slug);
-    const source = item.content ? await serialize(item.content) : undefined;
+    const source = item.content ? await serialize(item.content) : {};
     return { props: { ...item, source } }
   }) satisfies GetStaticProps;
 
@@ -35,7 +35,7 @@ export default function ItemDetails({ meta, content, source }: { meta: ItemData,
             <span>{ meta.description }</span>
 
             <div className='mt-8'>
-                { content ? (<MDX {...source} />) : <p className='text-gray-300'>No content provided</p> }
+                { content ? (<MDX {...source} />) : <p className='text-gray-400'>No content provided</p> }
             </div>
         </div>
     );

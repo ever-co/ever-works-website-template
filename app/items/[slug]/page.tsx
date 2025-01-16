@@ -11,8 +11,8 @@ export async function generateStaticParams() {
     return items.map(item => ({ slug: item.slug }));
 }
 
-export default async function ItemDetails({ params }: { params: { slug: string } }) {
-    const slug = params?.slug as string;
+export default async function ItemDetails({ params }: { params: Promise<{ slug: string }> }) {
+    const slug = (await params).slug;
     const { meta, content } = await fetchItem(slug);
 
     return (

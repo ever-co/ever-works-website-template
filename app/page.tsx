@@ -1,22 +1,27 @@
-import getConfig from 'next/config';
 import { tryFetchRepository, fetchItems } from "@/lib/content";
 import Link from 'next/link';
 
 export default async function Home() {
-  const { serverRuntimeConfig } = getConfig()
-  const options = serverRuntimeConfig;
-  await tryFetchRepository(options);
+  await tryFetchRepository();
   const items = await fetchItems();
 
   return (
-    <div className='p-8 lg:p-16 max-w-[900px]'>
-      <h1 className='text-lg font-extrabold'>Items</h1>
+    <div className='container mx-auto p-8'>
+      <h1 className='text-2xl font-extrabold'>Items</h1>
 
-      { items.map(item => (
-        <div key={item.slug}>
-          <Link href={`/items/${item.slug}`}> {item.name} ({item.slug}) </Link>
-        </div>
-      )) }
+      <div className='py-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-7'>
+        {items.map(item => (
+          <Link href={`/items/${item.slug}`} key={item.slug} className='hover:opacity-80 transition-opacity border rounded-lg flex flex-col'>
+            <div className='bg-gray-400 w-full h-36'></div>
+            <div className='px-2 py-4'>
+              <span className='font-bold text-lg'> {item.name} </span>
+              <p className='text-gray-500 text-sm line-clamp-3'>
+                {item.description}
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
     </div>
   );
 }

@@ -4,11 +4,6 @@ import * as http from 'isomorphic-git/http/node';
 import * as fs from 'fs';
 import * as path from 'path'
 
-interface ContentOptions {
-    cloneUrl: string;  // repository clone url
-    token?: string;    // auth token
-}
-
 function getContentPath() {
     return path.join(process.cwd(), '.content');
 }
@@ -29,9 +24,15 @@ async function fsExists(filepath: string): Promise<boolean> {
     }
 }
 
-export async function tryFetchRepository(options: ContentOptions): Promise<void> {
+export async function tryFetchRepository(): Promise<void> {
+    const token = process.env.GITHUB_APIKEY;
+    const url = process.env.GITHUB_REPOSITORY;
+    if (!url) {
+        throw new Error("'GITHUB_REPOSITORY' must be definied as environment variable.");
+    }
+
     const dest = getContentPath();
-    const auth = getGitAuth(options.token);
+    const auth = getGitAuth(token);
 
     const exists = await fsExists(path.join(dest, '.git'))
     if (exists) {
@@ -51,7 +52,7 @@ export async function tryFetchRepository(options: ContentOptions): Promise<void>
 
     console.log('Fetching data...')
     await fs.promises.mkdir(dest, { recursive: true });
-    await git.clone({ onAuth: () => auth, fs, http, url: options.cloneUrl, dir: dest, singleBranch: true });
+    await git.clone({ onAuth: () => auth, fs, http, url, dir: dest, singleBranch: true });
 }
 
 export interface ItemData {
@@ -88,12 +89,16 @@ export async function fetchItem(slug: string) {
     const mdxPath = path.join(base, 'details', `${slug}.mdx`);
     const mdPath = path.join(base, 'details', `${slug}.md`);
 
-    const meta = await getMeta(metaPath, `${slug}.yml`);
-    const contentPath = await fsExists(mdxPath) ? mdxPath : (await fsExists(mdPath) ? mdPath : null);
-    if (!contentPath) {
-        return { meta };
+    try {
+        const meta = await getMeta(metaPath, `${slug}.yml`);
+        const contentPath = await fsExists(mdxPath) ? mdxPath : (await fsExists(mdPath) ? mdPath : null);
+        if (!contentPath) {
+            return { meta };
+        }
+    
+        const content = await fs.promises.readFile(contentPath, { encoding: 'utf8' });
+        return { meta, content };
+    } catch {
+        return;
     }
-
-    const content = await fs.promises.readFile(contentPath, { encoding: 'utf8' });
-    return { meta, content };
 }

@@ -1,11 +1,11 @@
-import getConfig from 'next/config';
 import { fetchItem, fetchItems, tryFetchRepository } from '@/lib/content'
 import { MDX } from '@/components/mdx';
+import { notFound } from 'next/navigation';
+
+export const revalidate = 10;
 
 export async function generateStaticParams() {
-    const { serverRuntimeConfig } = getConfig()
-    const options = serverRuntimeConfig;
-    await tryFetchRepository(options);
+    await tryFetchRepository();
 
     const items = await fetchItems();
     return items.map(item => ({ slug: item.slug }));
@@ -13,14 +13,19 @@ export async function generateStaticParams() {
 
 export default async function ItemDetails({ params }: { params: Promise<{ slug: string }> }) {
     const slug = (await params).slug;
-    const { meta, content } = await fetchItem(slug);
+    const item = await fetchItem(slug);
+    if (!item) {
+        return notFound();
+    }
+
+    const { meta, content } = item;
 
     return (
-        <div className='p-8 lg:p-16 max-w-[900px]'>
-            <h1 className='text-lg font-extrabold'>{meta.name}</h1>
+        <div className='container mx-auto p-8'>
+            <h1 className='text-2xl font-extrabold'>{meta.name}</h1>
             <span>{meta.description}</span>
 
-            <div className='mt-8'>
+            <div className='mt-8 max-w-[900px]'>
                 {content ? (<MDX source={content} />) : <p className='text-gray-400'>No content provided</p>}
             </div>
         </div>

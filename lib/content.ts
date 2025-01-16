@@ -10,7 +10,7 @@ interface ContentOptions {
 }
 
 function getContentPath() {
-    return path.join(process.cwd(), 'pages', 'content');
+    return path.join(process.cwd(), '.content');
 }
 
 function getGitAuth(token?: string) {
@@ -22,17 +22,17 @@ function getGitAuth(token?: string) {
 
 async function fsExists(filepath: string): Promise<boolean> {
     try {
-      await fs.promises.access(filepath);
-      return true;
+        await fs.promises.access(filepath);
+        return true;
     } catch {
-      return false;
+        return false;
     }
-  }
+}
 
 export async function tryFetchRepository(options: ContentOptions): Promise<void> {
     const dest = getContentPath();
     const auth = getGitAuth(options.token);
-    
+
     const exists = await fsExists(path.join(dest, '.git'))
     if (exists) {
         console.log('Git repository already exists.');

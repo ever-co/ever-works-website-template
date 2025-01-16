@@ -1,4 +1,4 @@
-import { MDXRemote } from 'next-mdx-remote'
+import { MDXRemote } from 'next-mdx-remote/rsc'
 
 const components = {
     h1: ({ children }: any) => <h1 className='font-extrabold text-lg leading-loose'>{children}</h1>

@@ -1,11 +1,16 @@
 import git from 'isomorphic-git';
 import yaml from 'yaml';
+import { unstable_cache } from 'next/cache';
 import * as http from 'isomorphic-git/http/node';
 import * as fs from 'fs';
 import * as path from 'path'
 
-function getContentPath() {
+export function getContentPath() {
     return path.join(process.cwd(), '.content');
+}
+
+export function getPagePath(slug: string) {
+    return `/items/${slug}`;
 }
 
 function getGitAuth(token?: string) {
@@ -24,7 +29,7 @@ async function fsExists(filepath: string): Promise<boolean> {
     }
 }
 
-export async function tryFetchRepository(): Promise<void> {
+export async function tryFetchRepository() {
     const token = process.env.GITHUB_APIKEY;
     const url = process.env.GITHUB_REPOSITORY;
     if (!url) {
@@ -36,29 +41,34 @@ export async function tryFetchRepository(): Promise<void> {
 
     const exists = await fsExists(path.join(dest, '.git'))
     if (exists) {
-        console.log('Git repository already exists.');
-        /*console.log('Pulling data...');
-        await git.pull({ 
+        console.log('Pulling repository data...');
+        await git.pull({
             onAuth: () => auth,
             fs, http,
-            url: options.cloneUrl,
-            dir: dest, 
+            url,
+            dir: dest,
             singleBranch: true,
-            author: { name: 'directory' }, 
-        });*/
-
-        return;
+            author: { name: 'directory' },
+        });
+        return {};
     }
 
-    console.log('Fetching data...')
+    console.log('Clonning repository...')
     await fs.promises.mkdir(dest, { recursive: true });
     await git.clone({ onAuth: () => auth, fs, http, url, dir: dest, singleBranch: true });
+
+    return {};
 }
+
+export const tryFetchCachedRepository = unstable_cache(
+    tryFetchRepository,
+    ['repo:status'],
+    { revalidate: 10 },
+);
 
 export interface ItemData {
     name: string;
     slug: string;
-    filename: string;
     description: string;
     source_url: string;
     category: string;
@@ -69,12 +79,12 @@ async function getMeta(base: string, filename: string) {
     const content = await fs.promises.readFile(filepath, { encoding: 'utf8' });
     const meta = yaml.parse(content) as ItemData;
     meta.slug = path.basename(filename, path.extname(filename));
-    meta.filename = filename;
 
     return meta;
 }
 
 export async function fetchItems() {
+    //console.log('Fetching items...');
     const dest = path.join(getContentPath(), 'data');
     const files = await fs.promises.readdir(dest);
 
@@ -84,6 +94,7 @@ export async function fetchItems() {
 }
 
 export async function fetchItem(slug: string) {
+    //console.log('Fetching item details...');
     const base = getContentPath();
     const metaPath = path.join(base, 'data');
     const mdxPath = path.join(base, 'details', `${slug}.mdx`);
@@ -95,7 +106,7 @@ export async function fetchItem(slug: string) {
         if (!contentPath) {
             return { meta };
         }
-    
+
         const content = await fs.promises.readFile(contentPath, { encoding: 'utf8' });
         return { meta, content };
     } catch {

@@ -1,4 +1,4 @@
-import { fetchItem, fetchItems, tryFetchRepository } from '@/lib/content'
+import { fetchItem, fetchItems, tryFetchCachedRepository, tryFetchRepository } from '@/lib/content'
 import { MDX } from '@/components/mdx';
 import { notFound } from 'next/navigation';
 
@@ -6,13 +6,14 @@ export const revalidate = 10;
 
 export async function generateStaticParams() {
     await tryFetchRepository();
-
     const items = await fetchItems();
     return items.map(item => ({ slug: item.slug }));
 }
 
 export default async function ItemDetails({ params }: { params: Promise<{ slug: string }> }) {
+    console.log('ItemDetails():');
     const slug = (await params).slug;
+    await tryFetchCachedRepository();
     const item = await fetchItem(slug);
     if (!item) {
         return notFound();

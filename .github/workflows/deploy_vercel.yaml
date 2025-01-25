@@ -1,0 +1,36 @@
+name: Vercel Deployment
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        required: true
+        type: string
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+env:
+  DATA_REPOSITORY: "https://github.com/${{ github.repository_owner }}/${{ secrets.DATA_REPOSITORY }}"
+
+jobs:
+  Deploy-Preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+      - name: Link Vercel project
+        run: vercel link --yes --project ${{ github.event.repository.name }} --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Set data repository env variable
+        run:  echo "$DATA_REPOSITORY" | vercel env add DATA_REPOSITORY ${{ inputs.environment }} --token ${{ secrets.VERCEL_TOKEN }}
+      - name: Pull settings
+        run: vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy Project Artifacts to Vercel
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}

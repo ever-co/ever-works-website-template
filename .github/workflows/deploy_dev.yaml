@@ -7,5 +7,6 @@ jobs:
     Vercel:
         if: ${{ vars.DEPLOY_PROVIDER == 'vercel' }}
         uses: ./.github/workflows/deploy_vercel.yaml
+        secrets: inherit
         with:
-            environment: development
+            environment: preview

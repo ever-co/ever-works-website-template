@@ -30,6 +30,7 @@ jobs:
         run: vercel link --yes --project ${{ github.event.repository.name }} --token=${{ secrets.VERCEL_TOKEN }}
       - name: Set data repository env variable
         run:  echo "$DATA_REPOSITORY" | vercel env add DATA_REPOSITORY ${{ inputs.environment }} --token ${{ secrets.VERCEL_TOKEN }}
+        continue-on-error: true
       - name: Pull settings
         run: vercel pull --yes  --environment=${{ inputs.environment }} --token=${{ secrets.VERCEL_TOKEN }}
       - name: Build Project Artifacts

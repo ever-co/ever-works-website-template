@@ -6,7 +6,6 @@ on:
         required: true
         type: string
   workflow_call:
-    secrets: inherit
     inputs:
       environment:
         required: true

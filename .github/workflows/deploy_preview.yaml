@@ -1,0 +1,12 @@
+name: Preview deployment
+on:
+    push:
+        branches-ignore:
+          - main
+          - develop
+jobs:
+    Vercel:
+        if: ${{ vars.DEPLOY_PROVIDER == 'vercel' }}
+        uses: ./.github/workflows/deploy_vercel.yaml
+        with:
+            environment: preview

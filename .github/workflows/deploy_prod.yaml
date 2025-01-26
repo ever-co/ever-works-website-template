@@ -1,0 +1,11 @@
+name: Production deployment
+on:
+    push:
+        branches:
+          - main
+jobs:
+    Vercel:
+        if: ${{ vars.DEPLOY_PROVIDER == 'vercel' }}
+        uses: ./.github/workflows/deploy_vercel.yaml
+        with:
+            environment: production

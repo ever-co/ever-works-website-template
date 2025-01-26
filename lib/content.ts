@@ -4,9 +4,15 @@ import { unstable_cache } from 'next/cache';
 import * as http from 'isomorphic-git/http/node';
 import * as fs from 'fs';
 import * as path from 'path'
+import * as os from 'os';
 
 export function getContentPath() {
-    return path.join(process.cwd(), '.content');
+    const contentDir = '.content';
+    if (process.env.VERCEL) {
+        return path.join(os.tmpdir(), contentDir);
+    }
+
+    return path.join(process.cwd(), contentDir);
 }
 
 export function getPagePath(slug: string) {
@@ -31,9 +37,9 @@ async function fsExists(filepath: string): Promise<boolean> {
 
 export async function tryFetchRepository() {
     const token = process.env.GITHUB_APIKEY;
-    const url = process.env.GITHUB_REPOSITORY;
+    const url = process.env.DATA_REPOSITORY;
     if (!url) {
-        throw new Error("'GITHUB_REPOSITORY' must be definied as environment variable.");
+        throw new Error("'DATA_REPOSITORY' must be definied as environment variable.");
     }
 
     const dest = getContentPath();

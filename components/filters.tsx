@@ -1,14 +1,13 @@
 'use client'
 
-import { Accordion, AccordionItem, Autocomplete, AutocompleteItem, Button, Link, Pagination } from "@heroui/react";
-import clsx from "clsx";
+import { Accordion, AccordionItem, Autocomplete, AutocompleteItem, Button, cn, Link, Pagination } from "@heroui/react";
 import { usePathname, useRouter } from "next/navigation";
 import { PropsWithChildren } from "react";
 
 function BlockLink({ href, isActive, children }: PropsWithChildren<{ href: string, isActive: boolean }>) {
   return (
     <Button
-      className={clsx('text-black font-medium text-left justify-start', { 'bg-primary-50 data-[hover]:bg-primary-100': isActive })}
+      className={cn('text-black font-medium text-left justify-start', { 'bg-primary-50 data-[hover]:bg-primary-100': isActive })}
       radius="sm" variant='light' as={Link} href={href}>
       {children}
     </Button>

@@ -1,15 +1,14 @@
 'use client'
 
 import { ItemData } from "@/lib/content";
-import { Card, CardHeader, CardBody, Divider, Image } from "@heroui/react";
-import { clsx } from 'clsx';
+import { Card, CardHeader, CardBody, Divider, Image, cn } from "@heroui/react";
 
 type ItemProps = ItemData;
 
 export default function Item(props: ItemProps) {
   return (
     <Card className={
-      clsx("w-full h-h-full border", { 
+      cn("w-full h-h-full border", { 
         'bg-yellow-400/10 border-yellow-500 hover:bg-yellow-400/15': props.featured,
         'border-blue-300 hover:bg-blue-50/40': !props.featured,
       })}>

@@ -1,11 +1,11 @@
-import { fetchItem, fetchItems } from '@/lib/content'
+import { fetchItems, fetchItem } from '@/lib/content'
 import { MDX } from '@/components/mdx';
 import { notFound } from 'next/navigation';
 
-export const revalidate = 60;
+export const revalidate = 10;
 
 export async function generateStaticParams() {
-    const items = await fetchItems();
+    const { items } = await fetchItems();
     return items.map(item => ({ slug: item.slug }));
 }
 

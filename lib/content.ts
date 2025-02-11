@@ -1,69 +1,11 @@
-import git from 'isomorphic-git';
+'use server'
+
+import 'server-only';
 import yaml from 'yaml';
-import * as http from 'isomorphic-git/http/node';
 import * as fs from 'fs';
-import * as path from 'path'
-import * as os from 'os';
-
-export function getContentPath() {
-    const contentDir = '.content';
-    if (process.env.VERCEL) {
-        return path.join(os.tmpdir(), contentDir);
-    }
-
-    return path.join(process.cwd(), contentDir);
-}
-
-export function getPagePath(slug: string) {
-    return `/items/${slug}`;
-}
-
-function getGitAuth(token?: string) {
-    if (!token) {
-        return {};
-    }
-    return { username: 'x-access-token', password: token };
-}
-
-async function fsExists(filepath: string): Promise<boolean> {
-    try {
-        await fs.promises.access(filepath);
-        return true;
-    } catch {
-        return false;
-    }
-}
-
-async function trySyncRepository() {
-    const token = process.env.GITHUB_APIKEY;
-    const url = process.env.DATA_REPOSITORY;
-    if (!url) {
-        throw new Error("'DATA_REPOSITORY' must be definied as environment variable.");
-    }
-
-    const dest = getContentPath();
-    const auth = getGitAuth(token);
-
-    const exists = await fsExists(path.join(dest, '.git'));
-    if (exists) {
-        console.log('Pulling repository data...');
-        await git.pull({
-            onAuth: () => auth,
-            fs, http,
-            url,
-            dir: dest,
-            singleBranch: true,
-            author: { name: 'directory' },  // for some reason git author name is need, but it doesn't matter
-        });
-        return {};
-    }
-
-    console.log('Clonning repository...')
-    await fs.promises.mkdir(dest, { recursive: true });
-    await git.clone({ onAuth: () => auth, fs, http, url, dir: dest, singleBranch: true });
-
-    return {};
-}
+import * as path from 'path';
+import { trySyncRepository } from './repository';
+import { fsExists, getContentPath } from './lib';
 
 export interface ItemData {
     name: string;
@@ -71,6 +13,9 @@ export interface ItemData {
     description: string;
     source_url: string;
     category: string;
+    featured?: boolean;
+    updated_at: string; // raw string timestamp
+    updatedAt: number;  // timestamp
 }
 
 async function getMeta(base: string, filename: string) {
@@ -78,6 +23,7 @@ async function getMeta(base: string, filename: string) {
     const content = await fs.promises.readFile(filepath, { encoding: 'utf8' });
     const meta = yaml.parse(content) as ItemData;
     meta.slug = path.basename(filename, path.extname(filename));
+    meta.updatedAt = Date.parse(meta.updated_at);
 
     return meta;
 }
@@ -86,12 +32,29 @@ export async function fetchItems() {
     await trySyncRepository();
     const dest = path.join(getContentPath(), 'data');
     const files = await fs.promises.readdir(dest);
+    const categoryCounts: Record<string, number> = {};
 
-    const items = files
-        .filter((filename) => path.extname(filename) === '.yml')
-        .map(async (filename) => getMeta(dest, filename));
+    const items = await Promise.all(
+        files
+            .filter((filename) => path.extname(filename) === '.yml')
+            .map(async (filename) => {
+                const meta = await getMeta(dest, filename);
+                if (meta.category) {
+                    categoryCounts[meta.category] = (categoryCounts[meta.category] || 0) + 1;
+                }
+                return meta;
+            })
+    );
 
-    return Promise.all(items);
+    return {
+        total: items.length,
+        items: items.sort((a, b) => {
+            if (a.featured && !b.featured) return -1;
+            if (!a.featured && b.featured) return 1;
+            return b.updatedAt - a.updatedAt;
+        }),
+        categories: categoryCounts,
+    };
 }
 
 export async function fetchItem(slug: string) {
@@ -113,5 +76,15 @@ export async function fetchItem(slug: string) {
         return { meta, content };
     } catch {
         return;
+    }
+}
+
+export async function fetchByCategory(raw: string) {
+    const category = decodeURI(raw);
+    const { categories, items, total } = await fetchItems();
+    return {
+        categories,
+        total,
+        items: items.filter(item => item.category === category),
     }
 }

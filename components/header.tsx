@@ -1,6 +1,7 @@
 'use client'
 
-import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Button } from "@heroui/react";
+import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Button } from "@heroui/react";
+import Link from 'next/link';
 
 export const AcmeLogo = () => {
   return (
@@ -19,13 +20,15 @@ export default function Header() {
   return (
     <Navbar maxWidth="2xl">
       <NavbarBrand>
-        <AcmeLogo />
-        <p className="font-bold text-inherit">ACME</p>
+        <Link href="/" className="flex items-center">
+          <AcmeLogo />
+          <p className="font-bold text-inherit">ACME</p>
+        </Link>
       </NavbarBrand>
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         <NavbarItem>
           <Link aria-current="page" color="foreground" href="#">
-            Items
+            Discover
           </Link>
         </NavbarItem>
         <NavbarItem>

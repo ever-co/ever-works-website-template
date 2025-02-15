@@ -1,5 +1,6 @@
 'use client'
 
+import { Category } from "@/lib/content";
 import { Accordion, AccordionItem, Autocomplete, AutocompleteItem, Button, cn, Link, Pagination } from "@heroui/react";
 import { usePathname, useRouter } from "next/navigation";
 import { PropsWithChildren } from "react";
@@ -14,25 +15,27 @@ function BlockLink({ href, isActive, children }: PropsWithChildren<{ href: strin
   )
 }
 
-export function CategoriesList({ categories, total }: { total: number, categories: Record<string, number> }) {
+export function CategoriesList({ categories, total }: { total: number, categories: Category[] }) {
   const pathname = usePathname();
 
   return (<>
     <BlockLink
       isActive={pathname === '/' || pathname.startsWith('/discover')}
       href="/">All ({total})</BlockLink>
-    {Object.keys(categories).map(category => {
-      const href = `/categories/${category}`;
+    {categories.map(category => {
+      if (!category.count) return null;
+
+      const href = `/categories/${category.id}`;
       return (<BlockLink isActive={pathname.startsWith(encodeURI(href))}
-        key={category}
+        key={category.id}
         href={href}>
-          {category} ({categories[category]})
+          {category.name} ({category.count || 0})
       </BlockLink>)
     })}
   </>)
 }
 
-export function Categories(props: { total: number, categories: Record<string, number> }) {
+export function Categories(props: { total: number, categories: Category[] }) {
   return (
     <>
       <div className="md:hidden">

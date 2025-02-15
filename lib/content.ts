@@ -18,6 +18,12 @@ export interface ItemData {
     updatedAt: number;  // timestamp
 }
 
+export interface Category {
+    id: string;
+    name: string;
+    count?: number;
+}
+
 async function getMeta(base: string, filename: string) {
     const filepath = path.join(base, filename);
     const content = await fs.promises.readFile(filepath, { encoding: 'utf8' });
@@ -28,11 +34,26 @@ async function getMeta(base: string, filename: string) {
     return meta;
 }
 
+async function readCategories(): Promise<Category[]> {
+    try {
+        const raw =  await fs.promises.readFile(path.join(getContentPath(), 'categories.yml'), 'utf-8');
+        return yaml.parse(raw);
+    } catch (err) {
+        if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
+            return [];
+        }
+        throw err;
+    }
+}
+
 export async function fetchItems() {
     await trySyncRepository();
     const dest = path.join(getContentPath(), 'data');
     const files = await fs.promises.readdir(dest);
-    const categoryCounts: Record<string, number> = {};
+    
+    const categoryCounts = new Map<string, Category>();
+    const categories = await readCategories();
+    categories.forEach(category => categoryCounts.set(category.id, category));
 
     const items = await Promise.all(
         files
@@ -40,7 +61,12 @@ export async function fetchItems() {
             .map(async (filename) => {
                 const meta = await getMeta(dest, filename);
                 if (meta.category) {
-                    categoryCounts[meta.category] = (categoryCounts[meta.category] || 0) + 1;
+                    const category = categoryCounts.get(meta.category);
+                    if (category) {
+                        category.count = (category.count || 0) + 1;
+                    } else {
+                        categoryCounts.set(meta.category, { id: meta.category, name: meta.category, count: 1 });
+                    }
                 }
                 return meta;
             })
@@ -53,7 +79,7 @@ export async function fetchItems() {
             if (!a.featured && b.featured) return 1;
             return b.updatedAt - a.updatedAt;
         }),
-        categories: categoryCounts,
+        categories: Array.from(categoryCounts.values()),
     };
 }
 

@@ -1,7 +1,7 @@
 import { Categories, Paginate } from "@/components/filters";
 import Item from "@/components/item";
 import Link from 'next/link';
-import { ItemData } from "@/lib/content";
+import { Category, ItemData } from "@/lib/content";
 import { PER_PAGE, totalPages } from "@/lib/paginate";
 import { getItemPath } from "@/lib/utils";
 
@@ -10,7 +10,7 @@ type ListingProps = {
     start: number;
     page: number;
     basePath: string;
-    categories: Record<string, number>;
+    categories: Category[];
     items: ItemData[];
 }
 

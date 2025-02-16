@@ -7,21 +7,21 @@ import * as path from 'path';
 import { trySyncRepository } from './repository';
 import { fsExists, getContentPath } from './lib';
 
+export interface Category {
+    id: string;
+    name: string;
+    count?: number;
+}
+
 export interface ItemData {
     name: string;
     slug: string;
     description: string;
     source_url: string;
-    category: string;
+    category: string | Category;
     featured?: boolean;
     updated_at: string; // raw string timestamp
     updatedAt: number;  // timestamp
-}
-
-export interface Category {
-    id: string;
-    name: string;
-    count?: number;
 }
 
 async function getMeta(base: string, filename: string) {
@@ -60,12 +60,15 @@ export async function fetchItems() {
             .filter((filename) => path.extname(filename) === '.yml')
             .map(async (filename) => {
                 const meta = await getMeta(dest, filename);
-                if (meta.category) {
+                if (meta.category && typeof meta.category === 'string') {
                     const category = categoryCounts.get(meta.category);
                     if (category) {
+                        meta.category = category;
                         category.count = (category.count || 0) + 1;
-                    } else {
-                        categoryCounts.set(meta.category, { id: meta.category, name: meta.category, count: 1 });
+                    } else {;
+                        const category: Category = { id: meta.category, name: meta.category };
+                        categoryCounts.set(meta.category, { ...category, count: 1 });
+                        meta.category = category;
                     }
                 }
                 return meta;
@@ -111,6 +114,11 @@ export async function fetchByCategory(raw: string) {
     return {
         categories,
         total,
-        items: items.filter(item => item.category === category),
+        items: items.filter(item => {
+            if (typeof item.category === 'string') {
+                return item.category === category;
+            }
+            return item.category.id === category;
+        }),
     }
 }

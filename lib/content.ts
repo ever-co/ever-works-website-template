@@ -63,7 +63,7 @@ export async function fetchItems() {
                 if (meta.category && typeof meta.category === 'string') {
                     const category = categoryCounts.get(meta.category);
                     if (category) {
-                        meta.category = category;
+                        meta.category = { id: category.id, name: category.name };
                         category.count = (category.count || 0) + 1;
                     } else {;
                         const category: Category = { id: meta.category, name: meta.category };
@@ -94,9 +94,15 @@ export async function fetchItem(slug: string) {
     const mdxPath = path.join(base, dataDir, `${slug}.mdx`);
     const mdPath = path.join(base, dataDir, `${slug}.md`);
 
+    const categories = await readCategories();
+
     try {
         const meta = await getMeta(metaPath, `${slug}.yml`);
         const contentPath = await fsExists(mdxPath) ? mdxPath : (await fsExists(mdPath) ? mdPath : null);
+        if (meta.category && typeof meta.category === 'string') {
+            meta.category = categories.find(category => category.id === meta.category) || { id: meta.category, name: meta.category };
+        }
+
         if (!contentPath) {
             return { meta };
         }

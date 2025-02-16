@@ -1,6 +1,7 @@
 'use client'
 
 import { ItemData } from "@/lib/content";
+import { getCategoryName } from "@/lib/utils";
 import { Card, CardHeader, CardBody, Divider, Image, cn } from "@heroui/react";
 
 type ItemProps = ItemData;
@@ -22,7 +23,7 @@ export default function Item(props: ItemProps) {
         />
         <div className="flex flex-col">
           <h3 className="text-medium font-semibold">{props.name}</h3>
-          <p className="text-small text-default-500">{typeof props.category === 'string' ? props.category : props.category.name}</p>
+          <p className="text-small text-default-500">{getCategoryName(props.category)}</p>
         </div>
       </CardHeader>
       <Divider />

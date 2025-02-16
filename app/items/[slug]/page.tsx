@@ -1,6 +1,7 @@
 import { fetchItems, fetchItem } from '@/lib/content'
 import { MDX } from '@/components/mdx';
 import { notFound } from 'next/navigation';
+import { getCategoryName } from '@/lib/utils';
 
 export const revalidate = 10;
 
@@ -21,7 +22,8 @@ export default async function ItemDetails({ params }: { params: Promise<{ slug: 
     return (
         <div className='container mx-auto p-8'>
             <h1 className='text-2xl font-extrabold'>{meta.name}</h1>
-            <span>{meta.description}</span>
+            <span className='text-gray-500'>{getCategoryName(meta.category)}</span>
+            <p>{meta.description}</p>
 
             <div className='mt-8 max-w-[900px]'>
                 {content ? (<MDX source={content} />) : <p className='text-gray-400'>No content provided</p>}

@@ -34,13 +34,14 @@ async function parseItem(base: string, filename: string) {
     return meta;
 }
 
-async function readCategories(): Promise<Category[]> {
+async function readCategories(): Promise<Map<string, Category>> {
     try {
         const raw = await fs.promises.readFile(path.join(getContentPath(), 'categories.yml'), 'utf-8');
-        return yaml.parse(raw);
+        const list: Category[] = yaml.parse(raw);
+        return new Map(list.map(cat => [cat.id, cat]));
     } catch (err) {
         if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
-            return [];
+            return new Map();
         }
         throw err;
     }
@@ -66,10 +67,7 @@ export async function fetchItems() {
     await trySyncRepository();
     const dest = path.join(getContentPath(), 'data');
     const files = await fs.promises.readdir(dest);
-
-    const categoryCounts = new Map<string, Category>();
     const categories = await readCategories();
-    categories.forEach(category => categoryCounts.set(category.id, category));
 
     const items = await Promise.all(
         files
@@ -77,9 +75,9 @@ export async function fetchItems() {
             .map(async (filename) => {
                 const item = await parseItem(dest, filename);
                 if (Array.isArray(item.category)) {
-                    item.category = item.category.map(cat => populateCategory(cat, categoryCounts));
+                    item.category = item.category.map(cat => populateCategory(cat, categories));
                 } else {
-                    item.category = populateCategory(item.category, categoryCounts);
+                    item.category = populateCategory(item.category, categories);
                 }
 
                 return item;
@@ -93,7 +91,7 @@ export async function fetchItems() {
             if (!a.featured && b.featured) return 1;
             return b.updatedAt - a.updatedAt;
         }),
-        categories: Array.from(categoryCounts.values()),
+        categories: Array.from(categories.values()),
     };
 }
 
@@ -110,16 +108,10 @@ export async function fetchItem(slug: string) {
     try {
         const meta = await parseItem(metaPath, `${slug}.yml`);
         const contentPath = await fsExists(mdxPath) ? mdxPath : (await fsExists(mdPath) ? mdPath : null);
-        if (meta.category && typeof meta.category === 'string') {
-            meta.category = categories.find(category => category.id === meta.category) || { id: meta.category, name: meta.category };
-        }
-
         if (Array.isArray(meta.category)) {
-            meta.category = meta.category.map(cat => {
-                const id = typeof cat === 'string' ? cat : cat.id;
-                const name = typeof cat === 'string' ? cat : cat.name;
-                return categories.find(category => category.id === id) || { id, name };
-            });
+            meta.category = meta.category.map(cat => populateCategory(cat, categories));
+        } else {
+            meta.category = populateCategory(meta.category, categories);
         }
 
         if (!contentPath) {

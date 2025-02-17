@@ -1,38 +1,76 @@
-'use client'
+"use client";
 
-import { Accordion, AccordionItem, Autocomplete, AutocompleteItem, Button, cn, Link, Pagination } from "@heroui/react";
+import {
+  Accordion,
+  AccordionItem,
+  Autocomplete,
+  AutocompleteItem,
+  Button,
+  cn,
+  Link,
+  Pagination,
+} from "@heroui/react";
 import { usePathname, useRouter } from "next/navigation";
 import { PropsWithChildren } from "react";
 
-function BlockLink({ href, isActive, children }: PropsWithChildren<{ href: string, isActive: boolean }>) {
+function BlockLink({
+  href,
+  isActive,
+  children,
+}: PropsWithChildren<{ href: string; isActive: boolean }>) {
   return (
     <Button
-      className={cn('text-black font-medium text-left justify-start', { 'bg-primary-50 data-[hover]:bg-primary-100': isActive })}
-      radius="sm" variant='light' as={Link} href={href}>
+      className={cn(
+        "text-black dark:text-white font-medium text-left justify-start",
+        { "bg-primary-50 data-[hover]:bg-primary-100": isActive }
+      )}
+      radius="sm"
+      variant="light"
+      as={Link}
+      href={href}
+    >
       {children}
     </Button>
-  )
+  );
 }
 
-export function CategoriesList({ categories, total }: { total: number, categories: Record<string, number> }) {
+export function CategoriesList({
+  categories,
+  total,
+}: {
+  total: number;
+  categories: Record<string, number>;
+}) {
   const pathname = usePathname();
 
-  return (<>
-    <BlockLink
-      isActive={pathname === '/' || pathname.startsWith('/discover')}
-      href="/">All ({total})</BlockLink>
-    {Object.keys(categories).map(category => {
-      const href = `/categories/${category}`;
-      return (<BlockLink isActive={pathname.startsWith(encodeURI(href))}
-        key={category}
-        href={href}>
-          {category} ({categories[category]})
-      </BlockLink>)
-    })}
-  </>)
+  return (
+    <>
+      <BlockLink
+        isActive={pathname === "/" || pathname.startsWith("/discover")}
+        href="/"
+      >
+        All ({total})
+      </BlockLink>
+      {Object.keys(categories).map((category) => {
+        const href = `/categories/${category}`;
+        return (
+          <BlockLink
+            isActive={pathname.startsWith(encodeURI(href))}
+            key={category}
+            href={href}
+          >
+            {category} ({categories[category]})
+          </BlockLink>
+        );
+      })}
+    </>
+  );
 }
 
-export function Categories(props: { total: number, categories: Record<string, number> }) {
+export function Categories(props: {
+  total: number;
+  categories: Record<string, number>;
+}) {
   return (
     <>
       <div className="md:hidden">
@@ -56,7 +94,12 @@ export function Categories(props: { total: number, categories: Record<string, nu
 export function Sort() {
   return (
     <div className="flex flex-wrap md:flex-nowrap">
-      <Autocomplete variant="bordered" size="sm" className="max-w-xs" label="Sort">
+      <Autocomplete
+        variant="bordered"
+        size="sm"
+        className="max-w-xs"
+        label="Sort"
+      >
         <AutocompleteItem>Newest</AutocompleteItem>
         <AutocompleteItem>Oldest</AutocompleteItem>
       </Autocomplete>
@@ -67,7 +110,12 @@ export function Sort() {
 export function Filters() {
   return (
     <div className="flex flex-wrap md:flex-nowrap">
-      <Autocomplete size="sm" variant="bordered" className="max-w-xs" label="Filters">
+      <Autocomplete
+        size="sm"
+        variant="bordered"
+        className="max-w-xs"
+        label="Filters"
+      >
         <AutocompleteItem>Featured</AutocompleteItem>
       </Autocomplete>
     </div>
@@ -75,14 +123,26 @@ export function Filters() {
 }
 
 export function Reset() {
-  return (<Button radius="sm" size="lg" className="text-sm" variant="bordered">Reset</Button>);
+  return (
+    <Button radius="sm" size="lg" className="text-sm" variant="bordered">
+      Reset
+    </Button>
+  );
 }
 
-export function Paginate({ basePath, initialPage, total }: { basePath: string, initialPage: number, total: number }) {
+export function Paginate({
+  basePath,
+  initialPage,
+  total,
+}: {
+  basePath: string;
+  initialPage: number;
+  total: number;
+}) {
   const router = useRouter();
 
   function redirect(page: number) {
-    const path = basePath + ((page === 1) ? '' : `/${page}`);
+    const path = basePath + (page === 1 ? "" : `/${page}`);
     router.push(path);
   }
 
@@ -93,5 +153,6 @@ export function Paginate({ basePath, initialPage, total }: { basePath: string, i
       initialPage={initialPage}
       total={total}
       onChange={redirect}
-    />);
+    />
+  );
 }

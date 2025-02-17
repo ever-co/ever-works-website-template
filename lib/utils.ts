@@ -11,3 +11,11 @@ export function getCategoryName(category: string | Category) {
 
     return category.name;
 }
+
+export function getCategoriesName(categories: Category | Category[] | string | string[]) {
+    if (Array.isArray(categories)) {
+        return categories.map(getCategoryName).join(', ');
+    }
+
+    return getCategoryName(categories);
+}

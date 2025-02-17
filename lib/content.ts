@@ -18,13 +18,13 @@ export interface ItemData {
     slug: string;
     description: string;
     source_url: string;
-    category: string | Category;
+    category: string | Category | Category[] | string[];
     featured?: boolean;
     updated_at: string; // raw string timestamp
     updatedAt: number;  // timestamp
 }
 
-async function getMeta(base: string, filename: string) {
+async function parseItem(base: string, filename: string) {
     const filepath = path.join(base, filename);
     const content = await fs.promises.readFile(filepath, { encoding: 'utf8' });
     const meta = yaml.parse(content) as ItemData;
@@ -36,7 +36,7 @@ async function getMeta(base: string, filename: string) {
 
 async function readCategories(): Promise<Category[]> {
     try {
-        const raw =  await fs.promises.readFile(path.join(getContentPath(), 'categories.yml'), 'utf-8');
+        const raw = await fs.promises.readFile(path.join(getContentPath(), 'categories.yml'), 'utf-8');
         return yaml.parse(raw);
     } catch (err) {
         if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
@@ -46,11 +46,27 @@ async function readCategories(): Promise<Category[]> {
     }
 }
 
+function populateCategory(category: string | Category, categories: Map<string, Category>) {
+    const id = typeof category === 'string' ? category : category.id;
+    const name = typeof category === 'string' ? category : category.name;
+    const result: Category = { id, name };
+
+    const populated = categories.get(id);
+    if (populated) {
+        result.name = populated.name;
+        populated.count = (populated.count || 0) + 1;
+    } else {
+        categories.set(id, { ...result, count: 1 });
+    }
+
+    return result;
+}
+
 export async function fetchItems() {
     await trySyncRepository();
     const dest = path.join(getContentPath(), 'data');
     const files = await fs.promises.readdir(dest);
-    
+
     const categoryCounts = new Map<string, Category>();
     const categories = await readCategories();
     categories.forEach(category => categoryCounts.set(category.id, category));
@@ -59,19 +75,14 @@ export async function fetchItems() {
         files
             .filter((filename) => path.extname(filename) === '.yml')
             .map(async (filename) => {
-                const meta = await getMeta(dest, filename);
-                if (meta.category && typeof meta.category === 'string') {
-                    const category = categoryCounts.get(meta.category);
-                    if (category) {
-                        meta.category = { id: category.id, name: category.name };
-                        category.count = (category.count || 0) + 1;
-                    } else {;
-                        const category: Category = { id: meta.category, name: meta.category };
-                        categoryCounts.set(meta.category, { ...category, count: 1 });
-                        meta.category = category;
-                    }
+                const item = await parseItem(dest, filename);
+                if (Array.isArray(item.category)) {
+                    item.category = item.category.map(cat => populateCategory(cat, categoryCounts));
+                } else {
+                    item.category = populateCategory(item.category, categoryCounts);
                 }
-                return meta;
+
+                return item;
             })
     );
 
@@ -97,10 +108,18 @@ export async function fetchItem(slug: string) {
     const categories = await readCategories();
 
     try {
-        const meta = await getMeta(metaPath, `${slug}.yml`);
+        const meta = await parseItem(metaPath, `${slug}.yml`);
         const contentPath = await fsExists(mdxPath) ? mdxPath : (await fsExists(mdPath) ? mdPath : null);
         if (meta.category && typeof meta.category === 'string') {
             meta.category = categories.find(category => category.id === meta.category) || { id: meta.category, name: meta.category };
+        }
+
+        if (Array.isArray(meta.category)) {
+            meta.category = meta.category.map(cat => {
+                const id = typeof cat === 'string' ? cat : cat.id;
+                const name = typeof cat === 'string' ? cat : cat.name;
+                return categories.find(category => category.id === id) || { id, name };
+            });
         }
 
         if (!contentPath) {
@@ -114,6 +133,14 @@ export async function fetchItem(slug: string) {
     }
 }
 
+function eqCategory(category: string | Category, id: string) {
+    if (typeof category === 'string') {
+        return category === id;
+    }
+
+    return category.id === id;
+}
+
 export async function fetchByCategory(raw: string) {
     const category = decodeURI(raw);
     const { categories, items, total } = await fetchItems();
@@ -121,10 +148,10 @@ export async function fetchByCategory(raw: string) {
         categories,
         total,
         items: items.filter(item => {
-            if (typeof item.category === 'string') {
-                return item.category === category;
+            if (Array.isArray(item.category)) {
+                return item.category.some(cat => eqCategory(cat, category));
             }
-            return item.category.id === category;
+            return eqCategory(item.category, category);
         }),
     }
 }

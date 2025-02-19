@@ -6,13 +6,13 @@ import { getCategoriesName } from '@/lib/utils';
 export const revalidate = 10;
 
 export async function generateStaticParams() {
-    const { items } = await fetchItems({ lang: 'pl' });
+    const { items } = await fetchItems();
     return items.map(item => ({ slug: item.slug }));
 }
 
 export default async function ItemDetails({ params }: { params: Promise<{ slug: string }> }) {
     const slug = (await params).slug;
-    const item = await fetchItem(slug, { lang: 'pl' });
+    const item = await fetchItem(slug);
     if (!item) {
         return notFound();
     }

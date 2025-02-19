@@ -1,18 +1,18 @@
 import { fetchItems, fetchItem } from '@/lib/content'
 import { MDX } from '@/components/mdx';
 import { notFound } from 'next/navigation';
-import { getCategoriesName, getCategoryName } from '@/lib/utils';
+import { getCategoriesName } from '@/lib/utils';
 
 export const revalidate = 10;
 
 export async function generateStaticParams() {
-    const { items } = await fetchItems();
+    const { items } = await fetchItems({ lang: 'pl' });
     return items.map(item => ({ slug: item.slug }));
 }
 
 export default async function ItemDetails({ params }: { params: Promise<{ slug: string }> }) {
     const slug = (await params).slug;
-    const item = await fetchItem(slug);
+    const item = await fetchItem(slug, { lang: 'pl' });
     if (!item) {
         return notFound();
     }

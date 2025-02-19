@@ -4,6 +4,7 @@ import 'server-only';
 import yaml from 'yaml';
 import * as fs from 'fs';
 import * as path from 'path';
+import { parse } from 'date-fns'
 import { trySyncRepository } from './repository';
 import { fsExists, getContentPath } from './lib';
 
@@ -21,7 +22,7 @@ export interface ItemData {
     category: string | Category | Category[] | string[];
     featured?: boolean;
     updated_at: string; // raw string timestamp
-    updatedAt: number;  // timestamp
+    updatedAt: Date;  // timestamp
 }
 
 async function parseItem(base: string, filename: string) {
@@ -29,9 +30,19 @@ async function parseItem(base: string, filename: string) {
     const content = await fs.promises.readFile(filepath, { encoding: 'utf8' });
     const meta = yaml.parse(content) as ItemData;
     meta.slug = path.basename(filename, path.extname(filename));
-    meta.updatedAt = Date.parse(meta.updated_at);
+    meta.updatedAt = parse(meta.updated_at, "yyyy-MM-dd HH:mm", new Date());
 
     return meta;
+}
+
+async function parseTranslation(base: string, filename: string) {
+    try {
+        const filepath = path.join(base, filename);
+        const content = await fs.promises.readFile(filepath, { encoding: 'utf8' });
+        return yaml.parse(content);
+    } catch {
+        return null;
+    }
 }
 
 async function readCategories(): Promise<Map<string, Category>> {
@@ -63,17 +74,21 @@ function populateCategory(category: string | Category, categories: Map<string, C
     return result;
 }
 
-export async function fetchItems() {
+export async function fetchItems(options: { lang?: string } = {}) {
     await trySyncRepository();
     const dest = path.join(getContentPath(), 'data');
     const files = await fs.promises.readdir(dest);
     const categories = await readCategories();
 
     const items = await Promise.all(
-        files
-            .filter((filename) => path.extname(filename) === '.yml')
-            .map(async (filename) => {
-                const item = await parseItem(dest, filename);
+        files.map(async (slug) => {
+                const base = path.join(dest, slug);
+                const item = await parseItem(base, `${slug}.yml`);
+                if (options.lang && options.lang !== 'en') {
+                    const translation = await parseTranslation(base, `${slug}.${options.lang}.yml`);
+                    if (translation) Object.assign(item, translation);
+                }
+                
                 if (Array.isArray(item.category)) {
                     item.category = item.category.map(cat => populateCategory(cat, categories));
                 } else {
@@ -89,15 +104,15 @@ export async function fetchItems() {
         items: items.sort((a, b) => {
             if (a.featured && !b.featured) return -1;
             if (!a.featured && b.featured) return 1;
-            return b.updatedAt - a.updatedAt;
+            return b.updatedAt.getDate() - a.updatedAt.getDate();
         }),
         categories: Array.from(categories.values()),
     };
 }
 
-export async function fetchItem(slug: string) {
+export async function fetchItem(slug: string, options: { lang?: string } = {}) {
     await trySyncRepository();
-    const dataDir = 'data';
+    const dataDir = path.join('data', slug);
     const base = getContentPath();
     const metaPath = path.join(base, dataDir);
     const mdxPath = path.join(base, dataDir, `${slug}.mdx`);
@@ -107,11 +122,30 @@ export async function fetchItem(slug: string) {
 
     try {
         const meta = await parseItem(metaPath, `${slug}.yml`);
-        const contentPath = await fsExists(mdxPath) ? mdxPath : (await fsExists(mdPath) ? mdPath : null);
+        if (options.lang && options.lang !== 'en') {
+            console.log('fetching translation', slug, options.lang);
+            const translation = await parseTranslation(metaPath, `${slug}.${options.lang}.yml`);
+            if (translation) Object.assign(meta, translation);
+        }
+
         if (Array.isArray(meta.category)) {
             meta.category = meta.category.map(cat => populateCategory(cat, categories));
         } else {
             meta.category = populateCategory(meta.category, categories);
+        }
+
+        const langMdxPath = options.lang ? path.join(base, dataDir, `${slug}.${options.lang}.mdx`) : null;
+        const langMdPath = options.lang ? path.join(base, dataDir, `${slug}.${options.lang}.md`) : null;
+
+        let contentPath = null;
+        if (langMdxPath && await fsExists(langMdxPath)) {
+            contentPath = langMdxPath;
+        } else if (langMdPath && await fsExists(langMdPath)) {
+            contentPath = langMdPath;
+        } else if (await fsExists(mdxPath)) {
+            contentPath = mdxPath;
+        } else if (await fsExists(mdPath)) {
+            contentPath = mdPath;
         }
 
         if (!contentPath) {

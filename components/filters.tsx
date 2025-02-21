@@ -1,15 +1,7 @@
 "use client";
 
-import {
-  Accordion,
-  AccordionItem,
-  Autocomplete,
-  AutocompleteItem,
-  Button,
-  cn,
-  Link,
-  Pagination,
-} from "@heroui/react";
+import { Category, Tag } from "@/lib/content";
+import { Accordion, AccordionItem, Button, cn, Link, Pagination } from "@heroui/react";
 import { usePathname, useRouter } from "next/navigation";
 import { PropsWithChildren } from "react";
 
@@ -34,43 +26,27 @@ function BlockLink({
   );
 }
 
-export function CategoriesList({
-  categories,
-  total,
-}: {
-  total: number;
-  categories: Record<string, number>;
-}) {
+export function CategoriesList({ categories, total }: { total: number, categories: Category[] }) {
   const pathname = usePathname();
 
-  return (
-    <>
-      <BlockLink
-        isActive={pathname === "/" || pathname.startsWith("/discover")}
-        href="/"
-      >
-        All ({total})
-      </BlockLink>
-      {Object.keys(categories).map((category) => {
-        const href = `/categories/${category}`;
-        return (
-          <BlockLink
-            isActive={pathname.startsWith(encodeURI(href))}
-            key={category}
-            href={href}
-          >
-            {category} ({categories[category]})
-          </BlockLink>
-        );
-      })}
-    </>
-  );
+  return (<>
+    <BlockLink
+      isActive={pathname === '/' || pathname.startsWith('/discover')}
+      href="/">All ({total})</BlockLink>
+    {categories.map(category => {
+      if (!category.count) return null;
+
+      const href = `/categories/${category.id}`;
+      return (<BlockLink isActive={pathname.startsWith(encodeURI(href))}
+        key={category.id}
+        href={href}>
+          {category.name} ({category.count || 0})
+      </BlockLink>)
+    })}
+  </>)
 }
 
-export function Categories(props: {
-  total: number;
-  categories: Record<string, number>;
-}) {
+export function Categories(props: { total: number, categories: Category[] }) {
   return (
     <>
       <div className="md:hidden">
@@ -88,45 +64,6 @@ export function Categories(props: {
         <CategoriesList {...props} />
       </div>
     </>
-  );
-}
-
-export function Sort() {
-  return (
-    <div className="flex flex-wrap md:flex-nowrap">
-      <Autocomplete
-        variant="bordered"
-        size="sm"
-        className="max-w-xs"
-        label="Sort"
-      >
-        <AutocompleteItem>Newest</AutocompleteItem>
-        <AutocompleteItem>Oldest</AutocompleteItem>
-      </Autocomplete>
-    </div>
-  );
-}
-
-export function Filters() {
-  return (
-    <div className="flex flex-wrap md:flex-nowrap">
-      <Autocomplete
-        size="sm"
-        variant="bordered"
-        className="max-w-xs"
-        label="Filters"
-      >
-        <AutocompleteItem>Featured</AutocompleteItem>
-      </Autocomplete>
-    </div>
-  );
-}
-
-export function Reset() {
-  return (
-    <Button radius="sm" size="lg" className="text-sm" variant="bordered">
-      Reset
-    </Button>
   );
 }
 
@@ -153,6 +90,26 @@ export function Paginate({
       initialPage={initialPage}
       total={total}
       onChange={redirect}
-    />
+    />);
+}
+
+export function Tags(props: { tags: Tag[] }) {
+  const pathname = usePathname();
+
+  return (
+    <div className="w-fill flex gap-2 flex-wrap">
+    { props.tags.map(tag => (
+        <Button 
+          key={tag.id}
+          variant={pathname.startsWith(encodeURI(`/tags/${tag.id}`)) ? 'solid' : 'bordered'}
+          color="default"
+          size="sm"
+          as={Link}
+          href={`/tags/${tag.id}`}
+        >{
+            tag.name
+        }</Button>
+    ))}
+</div>
   );
 }

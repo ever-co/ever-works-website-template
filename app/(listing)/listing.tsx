@@ -1,7 +1,7 @@
-import { Categories, Paginate } from "@/components/filters";
+import { Categories, Paginate, Tags } from "@/components/filters";
 import Item from "@/components/item";
 import Link from 'next/link';
-import { ItemData } from "@/lib/content";
+import { Category, ItemData, Tag } from "@/lib/content";
 import { PER_PAGE, totalPages } from "@/lib/paginate";
 import { getItemPath } from "@/lib/utils";
 
@@ -10,7 +10,8 @@ type ListingProps = {
     start: number;
     page: number;
     basePath: string;
-    categories: Record<string, number>;
+    categories: Category[];
+    tags: Tag[];
     items: ItemData[];
 }
 
@@ -24,6 +25,7 @@ export function Listing(props: ListingProps) {
             <div className='flex flex-col md:flex-row w-full gap-5'>
                 <Categories total={props.total} categories={props.categories} />
                 <div className="w-full">
+                    <Tags tags={props.tags} />
                     <div className='py-8 grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5'>
                         {props.items.slice(props.start, props.start + PER_PAGE).map(item => (
                             <Link className="hover:opacity-90" prefetch={false} href={getItemPath(item.slug)} key={item.slug}>

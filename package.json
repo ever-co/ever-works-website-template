@@ -11,6 +11,7 @@
   "dependencies": {
     "@heroui/react": "^2.6.14",
     "@tailwindcss/typography": "^0.5.16",
+    "date-fns": "^4.1.0",
     "framer-motion": "^12.4.0",
     "isomorphic-git": "^1.29.0",
     "lucide-react": "^0.475.0",

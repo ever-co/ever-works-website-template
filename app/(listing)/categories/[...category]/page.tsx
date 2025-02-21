@@ -8,14 +8,14 @@ export async function generateStaticParams() {
     const { categories } = await fetchItems();
     const paths = [];
 
-    for (const cat of Object.keys(categories)) {
-        const pages = totalPages(categories[cat]);
+    for (const category of categories) {
+        const pages = totalPages(category.count || 0);
 
         for (let i = 1; i <= pages; ++i) {
             if (i === 1)
-                paths.push({ category: [cat]});
+                paths.push({ category: [category.id]});
             else
-                paths.push({ category: [cat, i.toString()] });
+                paths.push({ category: [category.id, i.toString()] });
         }
     }
 
@@ -26,10 +26,11 @@ export default async function CategoryListing({ params }: { params: Promise<{ ca
     const cat = (await params).category;
     const category = decodeURI(cat[0]);
     const { start, page } = paginateMeta(cat[1]);
-    const { items, categories, total } = await fetchByCategory(category);
+    const { items, categories, total, tags  } = await fetchByCategory(category);
 
     return <Listing 
         categories={categories}
+        tags={tags}
         items={items} 
         start={start}
         page={page}

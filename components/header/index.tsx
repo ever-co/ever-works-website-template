@@ -1,5 +1,6 @@
 "use client";
 
+import { useConfig } from "@/app/config";
 import {
   Navbar,
   NavbarBrand,
@@ -23,12 +24,14 @@ export const AcmeLogo = () => {
 };
 
 export default function Header() {
+  const config = useConfig();
+
   return (
     <Navbar maxWidth="2xl">
       <NavbarBrand>
         <Link href="/" className="flex items-center">
           <AcmeLogo />
-          <p className="font-bold text-inherit">ACME</p>
+          <p className="font-bold text-inherit">{config.item_name}</p>
         </Link>
       </NavbarBrand>
       <NavbarContent className="hidden sm:flex gap-4" justify="center">

@@ -7,6 +7,7 @@ import * as path from 'path';
 import { parse } from 'date-fns'
 import { trySyncRepository } from './repository';
 import { fsExists, getContentPath } from './lib';
+import { unstable_cache } from 'next/cache';
 
 export interface Category {
     id: string;
@@ -31,6 +32,29 @@ export interface ItemData {
     updated_at: string; // raw string timestamp
     updatedAt: Date;  // timestamp
 }
+
+export interface Config {
+    content_table?: boolean;
+    item_name?: string;
+    items_name?: string;
+}
+
+async function getConfig() {
+    console.log('Fetching config');
+    try {
+        const raw = await fs.promises.readFile(path.join(getContentPath(), 'config.yml'), 'utf-8');
+        return yaml.parse(raw) as Config;
+    } catch (err) {
+        if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
+            return {};
+        }
+        throw err;
+    }
+}
+
+export const getCachedConfig = unstable_cache(async () => {
+    return await getConfig();
+}, ['config'], { revalidate: 60 });
 
 async function parseItem(base: string, filename: string) {
     const filepath = path.join(base, filename);
@@ -119,25 +143,25 @@ export async function fetchItems(options: { lang?: string } = {}) {
 
     const items = await Promise.all(
         files.map(async (slug) => {
-                const base = path.join(dest, slug);
-                const item = await parseItem(base, `${slug}.yml`);
-                if (options.lang && options.lang !== 'en') {
-                    const translation = await parseTranslation(base, `${slug}.${options.lang}.yml`);
-                    if (translation) Object.assign(item, translation);
-                }
+            const base = path.join(dest, slug);
+            const item = await parseItem(base, `${slug}.yml`);
+            if (options.lang && options.lang !== 'en') {
+                const translation = await parseTranslation(base, `${slug}.${options.lang}.yml`);
+                if (translation) Object.assign(item, translation);
+            }
 
-                if (Array.isArray(item.tags)) {
-                    item.tags = item.tags.map(tag => populateTag(tag, tags));
-                }
-                
-                if (Array.isArray(item.category)) {
-                    item.category = item.category.map(cat => populateCategory(cat, categories));
-                } else {
-                    item.category = populateCategory(item.category, categories);
-                }
+            if (Array.isArray(item.tags)) {
+                item.tags = item.tags.map(tag => populateTag(tag, tags));
+            }
 
-                return item;
-            })
+            if (Array.isArray(item.category)) {
+                item.category = item.category.map(cat => populateCategory(cat, categories));
+            } else {
+                item.category = populateCategory(item.category, categories);
+            }
+
+            return item;
+        })
     );
 
     return {

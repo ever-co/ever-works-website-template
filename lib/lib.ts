@@ -19,3 +19,15 @@ export async function fsExists(filepath: string): Promise<boolean> {
         return false;
     }
 }
+
+export async function dirExists(dirpath: string) {
+    try {
+        const stat = await fs.stat(dirpath);
+        return stat.isDirectory();
+    } catch (err) {
+        if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
+            return false;
+        }
+        throw err;
+    }
+}

@@ -19,7 +19,7 @@ export async function generateStaticParams() {
 export default async function DiscoverListing({ params }: { params: Promise<{ page: string }> }) {
     const rawPage = (await params).page;
     const { start, page } = paginateMeta(rawPage);
-    const { items, categories, total, tags } = await fetchItems();
+    const { items, categories, total, tags } = await fetchItems({ lang: 'pl' });
 
     return <Listing 
         tags={tags}

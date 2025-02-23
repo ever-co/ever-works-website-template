@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { parse } from 'date-fns'
 import { trySyncRepository } from './repository';
-import { fsExists, getContentPath } from './lib';
+import { dirExists, fsExists, getContentPath } from './lib';
 import { unstable_cache } from 'next/cache';
 
 export interface Category {
@@ -38,6 +38,10 @@ export interface Config {
     content_table?: boolean;
     item_name?: string;
     items_name?: string;
+}
+
+interface FetchOptions {
+    lang?: string;
 }
 
 async function getConfig() {
@@ -77,11 +81,35 @@ async function parseTranslation(base: string, filename: string) {
     }
 }
 
-async function readCategories(): Promise<Map<string, Category>> {
+async function readCategories(options: FetchOptions): Promise<Map<string, Category>> {
     try {
-        const raw = await fs.promises.readFile(path.join(getContentPath(), 'categories.yml'), 'utf-8');
+        const contentPath = getContentPath();
+        const categoriesDir = path.join(contentPath, 'categories');
+
+        const useDir = await dirExists(categoriesDir);
+        const categoriesPath = useDir
+            ? path.join(categoriesDir, 'categories.yml')
+            : path.join(contentPath, 'categories.yml');
+
+        const raw = await fs.promises.readFile(categoriesPath, 'utf-8');
         const list: Category[] = yaml.parse(raw);
-        return new Map(list.map(cat => [cat.id, cat]));
+        const categories = new Map(list.map(cat => [cat.id, cat]));
+
+        if (!useDir || !options.lang || options.lang === 'en') {
+            return categories;
+        }
+
+        const translations = await parseTranslation(categoriesDir, `categories.${options.lang}.yml`);
+        if (!translations) return categories;
+
+        for (const translation of translations) {
+            const category = categories.get(translation.id);
+            if (category) {
+                categories.set(translation.id, { ...category, ...translation });
+            }
+        }
+
+        return categories;
     } catch (err) {
         if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
             return new Map();
@@ -135,11 +163,12 @@ function populateTag(tag: string | Tag, tags: Map<string, Tag>) {
     return result;
 }
 
-export async function fetchItems(options: { lang?: string } = {}) {
+export async function fetchItems(options: FetchOptions = {}) {
     await trySyncRepository();
     const dest = path.join(getContentPath(), 'data');
     const files = await fs.promises.readdir(dest);
-    const categories = await readCategories();
+    const categories = await readCategories(options);
+    console.log('categories', categories);
     const tags = await readTags();
 
     const items = await Promise.all(
@@ -177,7 +206,7 @@ export async function fetchItems(options: { lang?: string } = {}) {
     };
 }
 
-export async function fetchItem(slug: string, options: { lang?: string } = {}) {
+export async function fetchItem(slug: string, options: FetchOptions = {}) {
     await trySyncRepository();
     const dataDir = path.join('data', slug);
     const base = getContentPath();
@@ -185,7 +214,7 @@ export async function fetchItem(slug: string, options: { lang?: string } = {}) {
     const mdxPath = path.join(base, dataDir, `${slug}.mdx`);
     const mdPath = path.join(base, dataDir, `${slug}.md`);
 
-    const categories = await readCategories();
+    const categories = await readCategories(options);
     const tags = await readTags();
 
     try {

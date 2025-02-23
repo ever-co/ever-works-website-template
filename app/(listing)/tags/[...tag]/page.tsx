@@ -27,7 +27,7 @@ export default async function TagListing({ params }: { params: Promise<{ tag: st
     const tag = decodeURI(rawTag);
     const { start, page } = paginateMeta(rawPage);
     const { items, categories, total, tags  } = await fetchByTag(tag);
-
+    
     return <Listing 
         categories={categories}
         tags={tags}

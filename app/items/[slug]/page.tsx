@@ -22,7 +22,7 @@ export default async function ItemDetails({ params }: { params: Promise<{ slug: 
     return (
         <div className='container mx-auto p-8'>
             <h1 className='text-2xl font-extrabold'>{meta.name}</h1>
-            <span className='text-gray-500'>{getCategoriesName(meta.category)}</span>
+            <span className='text-foreground-600'>{getCategoriesName(meta.category)}</span>
             <p>{meta.description}</p>
 
             <div className='mt-8 max-w-[900px]'>

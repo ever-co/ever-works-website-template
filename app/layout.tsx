@@ -38,7 +38,7 @@ export default async function RootLayout({
 
           {children}
 
-          <Footer />
+          <Footer companyName={config.company_name} />
         </Providers>
       </body>
     </html>

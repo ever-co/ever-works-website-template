@@ -20,7 +20,7 @@ export function Listing(props: ListingProps) {
         <div className='container mx-auto p-8'>
             <div className="py-16 flex flex-col gap-2">
                 <h1 className='text-4xl font-bold text-center'>The Best Directory Website Template</h1>
-                <p className='text-lg text-slate-500 text-center'>This is a demo directory website.</p>
+                <p className='text-lg text-foreground-600 text-center'>This is a demo directory website.</p>
             </div>
             <div className='flex flex-col md:flex-row w-full gap-5'>
                 <Categories total={props.total} categories={props.categories} />

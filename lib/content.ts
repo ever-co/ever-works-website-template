@@ -34,6 +34,7 @@ export interface ItemData {
 }
 
 export interface Config {
+    company_name?: string;
     content_table?: boolean;
     item_name?: string;
     items_name?: string;
@@ -230,12 +231,12 @@ export async function fetchItem(slug: string, options: { lang?: string } = {}) {
     }
 }
 
-function eqID(category: string | { id: string }, id: string) {
-    if (typeof category === 'string') {
-        return category === id;
+function eqID(value: string | { id: string }, id: string) {
+    if (typeof value === 'string') {
+        return value === id;
     }
 
-    return category.id === id;
+    return value.id === id;
 }
 
 export async function fetchByCategory(raw: string) {

@@ -128,36 +128,31 @@ async function readTags(options: FetchOptions): Promise<Map<string, Tag>> {
     return readCollection<Tag>('tags', options);
 }
 
-function populateCategory(category: string | Category, categories: Map<string, Category>) {
-    const id = typeof category === 'string' ? category : category.id;
-    const name = typeof category === 'string' ? category : category.name;
-    const result: Category = { id, name };
+function populate<T extends Identifiable>(
+    item: string | T,
+    collection: Map<string, T & { count?: number }>
+): T {
+    const id = typeof item === 'string' ? item : item.id;
+    const name = typeof item === 'string' ? item : item.name;
+    const result = { id, name } as T;
 
-    const populated = categories.get(id);
+    const populated = collection.get(id);
     if (populated) {
         result.name = populated.name;
         populated.count = (populated.count || 0) + 1;
     } else {
-        categories.set(id, { ...result, count: 1 });
+        collection.set(id, { ...result, count: 1 });
     }
 
     return result;
 }
 
+function populateCategory(category: string | Category, categories: Map<string, Category>) {
+    return populate<Category>(category, categories);
+}
+
 function populateTag(tag: string | Tag, tags: Map<string, Tag>) {
-    const id = typeof tag === 'string' ? tag : tag.id;
-    const name = typeof tag === 'string' ? tag : tag.name;
-    const result: Tag = { id, name };
-
-    const populated = tags.get(id);
-    if (populated) {
-        result.name = populated.name;
-        populated.count = (populated.count || 0) + 1;
-    } else {
-        tags.set(id, { ...result, count: 1 });
-    }
-
-    return result;
+    return populate<Tag>(tag, tags);
 }
 
 export async function fetchItems(options: FetchOptions = {}) {

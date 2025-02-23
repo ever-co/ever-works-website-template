@@ -9,15 +9,16 @@ import { trySyncRepository } from './repository';
 import { dirExists, fsExists, getContentPath } from './lib';
 import { unstable_cache } from 'next/cache';
 
-export interface Category {
+interface Identifiable {
     id: string;
     name: string;
+}
+
+export interface Category extends Identifiable {
     count?: number;
 }
 
-export interface Tag {
-    id: string;
-    name: string;
+export interface Tag extends Identifiable {
     count?: number;
 }
 
@@ -81,35 +82,36 @@ async function parseTranslation(base: string, filename: string) {
     }
 }
 
-async function readCategories(options: FetchOptions): Promise<Map<string, Category>> {
+async function readCollection<T extends Identifiable>(
+    type: 'categories' | 'tags',
+    options: FetchOptions = {}
+): Promise<Map<string, T>> {
     try {
         const contentPath = getContentPath();
-        const categoriesDir = path.join(contentPath, 'categories');
+        const collectionDir = path.join(contentPath, type);
+        
+        const useDir = await dirExists(collectionDir);
+        const collectionPath = useDir
+            ? path.join(collectionDir, `${type}.yml`)
+            : path.join(contentPath, `${type}.yml`);
 
-        const useDir = await dirExists(categoriesDir);
-        const categoriesPath = useDir
-            ? path.join(categoriesDir, 'categories.yml')
-            : path.join(contentPath, 'categories.yml');
+        const raw = await fs.promises.readFile(collectionPath, 'utf-8');
+        const list: T[] = yaml.parse(raw);
+        const collection = new Map(list.map(item => [item.id, item]));
 
-        const raw = await fs.promises.readFile(categoriesPath, 'utf-8');
-        const list: Category[] = yaml.parse(raw);
-        const categories = new Map(list.map(cat => [cat.id, cat]));
-
-        if (!useDir || !options.lang || options.lang === 'en') {
-            return categories;
-        }
-
-        const translations = await parseTranslation(categoriesDir, `categories.${options.lang}.yml`);
-        if (!translations) return categories;
-
-        for (const translation of translations) {
-            const category = categories.get(translation.id);
-            if (category) {
-                categories.set(translation.id, { ...category, ...translation });
+        if (useDir && options.lang && options.lang !== 'en') {
+            const translations = await parseTranslation(collectionDir, `${type}.${options.lang}.yml`);
+            if (translations) {
+                for (const translation of translations) {
+                    const item = collection.get(translation.id);
+                    if (item) {
+                        collection.set(translation.id, { ...item, ...translation });
+                    }
+                }
             }
         }
 
-        return categories;
+        return collection;
     } catch (err) {
         if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
             return new Map();
@@ -118,17 +120,12 @@ async function readCategories(options: FetchOptions): Promise<Map<string, Catego
     }
 }
 
-async function readTags(): Promise<Map<string, Tag>> {
-    try {
-        const raw = await fs.promises.readFile(path.join(getContentPath(), 'tags.yml'), 'utf-8');
-        const list: Tag[] = yaml.parse(raw);
-        return new Map(list.map(tag => [tag.id, tag]));
-    } catch (err) {
-        if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
-            return new Map();
-        }
-        throw err;
-    }
+async function readCategories(options: FetchOptions): Promise<Map<string, Category>> {
+    return readCollection<Category>('categories', options);
+}
+
+async function readTags(options: FetchOptions): Promise<Map<string, Tag>> {
+    return readCollection<Tag>('tags', options);
 }
 
 function populateCategory(category: string | Category, categories: Map<string, Category>) {
@@ -168,8 +165,7 @@ export async function fetchItems(options: FetchOptions = {}) {
     const dest = path.join(getContentPath(), 'data');
     const files = await fs.promises.readdir(dest);
     const categories = await readCategories(options);
-    console.log('categories', categories);
-    const tags = await readTags();
+    const tags = await readTags(options);
 
     const items = await Promise.all(
         files.map(async (slug) => {
@@ -215,7 +211,7 @@ export async function fetchItem(slug: string, options: FetchOptions = {}) {
     const mdPath = path.join(base, dataDir, `${slug}.md`);
 
     const categories = await readCategories(options);
-    const tags = await readTags();
+    const tags = await readTags(options);
 
     try {
         const meta = await parseItem(metaPath, `${slug}.yml`);

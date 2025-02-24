@@ -36,6 +36,7 @@ export interface ItemData {
 
 export interface Config {
     company_name?: string;
+    copyright_year?: number;
     content_table?: boolean;
     item_name?: string;
     items_name?: string;

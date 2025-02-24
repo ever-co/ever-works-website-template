@@ -35,10 +35,8 @@ export default async function RootLayout({
       >
         <Providers config={config}>
           <Header />
-
           {children}
-
-          <Footer companyName={config.company_name} />
+          <Footer />
         </Providers>
       </body>
     </html>

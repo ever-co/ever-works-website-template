@@ -32,7 +32,7 @@ jobs:
         run:  echo "$DATA_REPOSITORY" | vercel env add DATA_REPOSITORY ${{ inputs.environment }} --token ${{ secrets.VERCEL_TOKEN }}
         continue-on-error: true
       - name: Set GitHub API KEY env variable
-        run: echo "${{ secrets.GH_APIKEY }}" | vercel env add GITHUB_APIKEY ${{ inputs.environment }} --token ${{ secrets.VERCEL_TOKEN }}
+        run: echo "${{ secrets.GH_TOKEN }}" | vercel env add GITHUB_APIKEY ${{ inputs.environment }} --token ${{ secrets.VERCEL_TOKEN }}
         continue-on-error: true
       - name: Pull settings
         run: vercel pull --yes  --environment=${{ inputs.environment }} --token=${{ secrets.VERCEL_TOKEN }}

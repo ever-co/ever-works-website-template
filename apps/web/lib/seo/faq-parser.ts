@@ -127,24 +127,93 @@ function stripHtml(input: string): string {
 }
 
 /**
+ * Body of a multi-character span: starts and ends on a non-space character
+ * and may run across single newlines but never across a blank line, so an
+ * unclosed `**` cannot swallow the paragraphs after it.
+ */
+const SPAN_BODY = String.raw`(\S(?:(?:[^\n]|\n(?!\s*\n))*?\S)?)`;
+
+/**
  * Emphasis / strong / strikethrough delimiters, removed only where they
  * actually wrap a span.
  *
  * Deleting every `*` and `_` unconditionally corrupts ordinary prose: the
  * rendered page shows `snake_case` and `5*3`, and the structured data has to
- * say the same thing rather than `snakecase` and `53`. The single-character
- * rules additionally require a non-word character outside the delimiter,
- * which is also what CommonMark uses to reject intra-word `_` emphasis.
+ * say the same thing rather than `snakecase` and `53`.
+ *
+ * The two single-character rules differ on purpose, following CommonMark:
+ * `*` may open and close inside a word (`2*3*4` renders as 2<em>3</em>4, so
+ * the schema must say `234`), while `_` may not (`snake_case` is literal).
+ * Both still require the opener to be followed, and the closer preceded, by a
+ * non-space character — which is what leaves an unpaired `5*3` or `a * b * c`
+ * alone.
  */
 const EMPHASIS_RULES: ReadonlyArray<readonly [RegExp, string]> = [
-	[/\*\*\*(\S(?:[^*]*?\S)?)\*\*\*/g, '$1'],
-	[/___(\S(?:[^_]*?\S)?)___/g, '$1'],
-	[/\*\*(\S(?:[^*]*?\S)?)\*\*/g, '$1'],
-	[/__(\S(?:[^_]*?\S)?)__/g, '$1'],
-	[/~~(\S(?:[^~]*?\S)?)~~/g, '$1'],
-	[/(^|[^\w*])\*(\S(?:[^*\n]*?\S)?)\*(?!\w)/gm, '$1$2'],
-	[/(^|[^\w_])_(\S(?:[^_\n]*?\S)?)_(?!\w)/gm, '$1$2']
+	[new RegExp(String.raw`\*\*\*${SPAN_BODY}\*\*\*`, 'g'), '$1'],
+	[new RegExp(String.raw`___${SPAN_BODY}___`, 'g'), '$1'],
+	[new RegExp(String.raw`\*\*${SPAN_BODY}\*\*`, 'g'), '$1'],
+	[new RegExp(String.raw`__${SPAN_BODY}__`, 'g'), '$1'],
+	[new RegExp(String.raw`~~${SPAN_BODY}~~`, 'g'), '$1'],
+	[new RegExp(String.raw`\*${SPAN_BODY}\*`, 'g'), '$1'],
+	[new RegExp(String.raw`(^|[^\w_])_${SPAN_BODY}_(?!\w)`, 'gm'), '$1$2']
 ];
+
+/**
+ * Apply the emphasis rules until they stop changing the text.
+ *
+ * One pass leaves nested spans behind — `**bold *nested* text**` came out as
+ * `**bold nested text**`, delimiters and all, because the inner `*` blocks the
+ * outer match on the first try. Every pass that changes anything removes at
+ * least two characters, so the loop terminates.
+ */
+function stripEmphasis(input: string): string {
+	let current = input;
+	for (;;) {
+		let next = current;
+		for (const [pattern, replacement] of EMPHASIS_RULES) {
+			next = next.replace(pattern, replacement);
+		}
+		if (next === current) return current;
+		current = next;
+	}
+}
+
+/**
+ * Sentinel wrapped around a protected code span. U+0000 never occurs in
+ * Markdown source, is not matched by `\s` or `\w`, and carries no meaning to
+ * any rule below, so a placeholder passes through those rules untouched.
+ */
+const CODE_MARK = '\u0000';
+
+/**
+ * Pull code out of the text before any other rule can touch it, returning the
+ * placeholder-bearing text and the code to put back afterwards.
+ *
+ * Code is the one place where Markdown punctuation is literal: a page that
+ * renders `` `_setup_` `` must be marked up as `_setup_`, not `setup`. Running
+ * the inline-code rule first and the emphasis rules afterwards — which is what
+ * this replaces — quietly re-interpreted every code span's contents.
+ */
+function extractCode(input: string): { text: string; code: string[] } {
+	const code: string[] = [];
+	const hold = (value: string): string => `${CODE_MARK}${code.push(value) - 1}${CODE_MARK}`;
+
+	const text = input
+		// Fenced blocks: keep the code, drop the fences.
+		.replace(/^```[^\n]*\n([\s\S]*?)^```[ \t]*$/gm, (_match, body: string) => hold(body))
+		// Inline spans.
+		.replace(/`([^`]*)`/g, (_match, body: string) => hold(body));
+
+	return { text, code };
+}
+
+/** Put the protected code back, innermost placeholders included. */
+function restoreCode(text: string, code: string[]): string {
+	return text.replace(new RegExp(`${CODE_MARK}(\\d+)${CODE_MARK}`, 'g'), (match, index: string) => {
+		const value = code[Number(index)];
+		return value === undefined ? match : value;
+	});
+}
 
 /**
  * Strip Markdown syntax down to readable plain text.
@@ -153,14 +222,21 @@ const EMPHASIS_RULES: ReadonlyArray<readonly [RegExp, string]> = [
  * always valid and avoids having to sanitise author-controlled HTML that ends
  * up inside a `<script type="application/ld+json">` block.
  *
- * Line-level constructs (blockquotes, headings, rules, list markers) are
- * removed before the inline ones, so a `***` thematic break is recognised as
- * a rule rather than being half-eaten as emphasis.
+ * The order is load-bearing:
+ *
+ * 1. Code comes out first, into placeholders — inside a code span Markdown
+ *    punctuation is literal, and every rule below would otherwise re-interpret
+ *    it.
+ * 2. Line-level constructs (blockquotes, headings, rules, list markers) go
+ *    before the inline ones, so a `***` thematic break is recognised as a rule
+ *    rather than half-eaten as emphasis.
+ * 3. Code goes back in last, after the table pipes, so a `|` inside code
+ *    survives as the page shows it.
  */
 export function stripMarkdown(input: string): string {
-	let text = input
-		// Fenced code blocks: keep the code, drop the fences.
-		.replace(/^```[^\n]*\n([\s\S]*?)^```\s*$/gm, '$1')
+	const { text: held, code } = extractCode(input);
+
+	let text = held
 		// Images: drop entirely (alt text rarely reads as part of an answer).
 		.replace(/!\[[^\]]*\]\([^)]*\)/g, '')
 		// Links: keep the label, drop the target.
@@ -172,13 +248,10 @@ export function stripMarkdown(input: string): string {
 	text = stripHtml(text);
 
 	text = text
-		// Inline code.
-		.replace(/`([^`]*)`/g, '$1')
 		// Blockquote markers at line start.
 		.replace(/^\s{0,3}>\s?/gm, '')
 		// Leading heading hashes. Real headings are consumed by the block
-		// splitter, so what reaches here is `#` inside retained fenced-code
-		// text — which should read as words, not as stray hashes.
+		// splitter, so what reaches here is a `#` the author wrote in prose.
 		.replace(/^\s{0,3}#{1,6}\s+/gm, '')
 		// Horizontal rules.
 		.replace(/^\s*([-*_])\s*(\1\s*){2,}$/gm, '')
@@ -187,14 +260,13 @@ export function stripMarkdown(input: string): string {
 		// Ordered list markers at line start.
 		.replace(/^\s*\d+[.)]\s+/gm, '');
 
-	for (const [pattern, replacement] of EMPHASIS_RULES) {
-		text = text.replace(pattern, replacement);
-	}
+	text = stripEmphasis(text);
+
+	// Table pipes — the cells still read as text.
+	text = text.replace(/\|/g, ' ');
 
 	return (
-		text
-			// Table pipes — the cells still read as text.
-			.replace(/\|/g, ' ')
+		restoreCode(text, code)
 			// Collapse all whitespace runs into single spaces.
 			.replace(/\s+/g, ' ')
 			.trim()

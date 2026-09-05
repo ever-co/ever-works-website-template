@@ -87,7 +87,11 @@ test.describe('Public: FAQ', () => {
 		// `faq.<locale>.md` with frontmatter but no body used to render the
 		// built-in FAQ at /faq while /faq.md returned a heading and nothing
 		// else, so the alternate advertised to crawlers said less than the page.
-		expect(body, '/faq.md should carry question headings, not just a title').toMatch(/^##\s+\S/m);
+		//
+		// Any level from `##` to `######` counts: the parser treats them all as
+		// question headings, so a data repository whose FAQ nests questions
+		// under `###` sections is valid content and must not fail here.
+		expect(body, '/faq.md should carry question headings, not just a title').toMatch(/^#{2,6}\s+\S/m);
 	});
 
 	test('faq is reachable from the footer', async ({ page }) => {

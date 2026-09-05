@@ -63,7 +63,8 @@ written FAQ needs no extra authoring:
   where they actually delimit a span, so an answer that mentions `snake_case`,
   `5*3` or `a < b` is marked up with those characters intact — search engines
   treat a marked-up answer that disagrees with the visible one as a
-  structured-data violation.
+  structured-data violation. Text inside a code span or fenced block is copied
+  through verbatim, since Markdown punctuation is literal there.
 
 If your page's prose does not map cleanly onto headings, declare the pairs
 explicitly in frontmatter — this takes priority over heading detection:

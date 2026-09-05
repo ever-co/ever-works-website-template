@@ -34,10 +34,35 @@ describe('stripMarkdown', () => {
 		assert.equal(stripMarkdown('Calculate 5*3 per listing.'), 'Calculate 5*3 per listing.');
 		assert.equal(stripMarkdown('Files named foo_bar_baz.md are fine.'), 'Files named foo_bar_baz.md are fine.');
 		assert.equal(stripMarkdown('A single * on its own.'), 'A single * on its own.');
+		assert.equal(stripMarkdown('a * b * c'), 'a * b * c');
+	});
+
+	it('strips intra-word `*` emphasis but never intra-word `_`', () => {
+		// CommonMark allows `*` to open and close inside a word and does not
+		// allow `_` to. The page renders 2<em>3</em>4 and a literal
+		// `snake_case`, so the schema has to say `234` and `snake_case`.
+		assert.equal(stripMarkdown('Calculate 2*3*4 here.'), 'Calculate 234 here.');
+		assert.equal(stripMarkdown('Use snake_case_here for the slug.'), 'Use snake_case_here for the slug.');
+	});
+
+	it('unwraps nested emphasis completely', () => {
+		// One pass left the outer delimiters behind (`**bold nested text**`)
+		// because the inner `*` blocks the outer match on the first try.
+		assert.equal(stripMarkdown('**bold *nested* text**'), 'bold nested text');
+		assert.equal(stripMarkdown('*a **b** c*'), 'a b c');
 	});
 
 	it('keeps literal characters that come out of inline code', () => {
 		assert.equal(stripMarkdown('Add `faq.en.md` using `snake_case`.'), 'Add faq.en.md using snake_case.');
+		// Inside a code span Markdown punctuation is literal, so the schema
+		// must repeat it rather than re-interpret it as formatting.
+		assert.equal(stripMarkdown('Run `_setup_` now.'), 'Run _setup_ now.');
+		assert.equal(stripMarkdown('Run `**literal**` now.'), 'Run **literal** now.');
+		assert.equal(stripMarkdown('Pipe with `a|b` inside.'), 'Pipe with a|b inside.');
+	});
+
+	it('keeps a fenced block as written', () => {
+		assert.equal(stripMarkdown('```js\nconst a = `x_y`;\n```'), 'const a = `x_y`;');
 	});
 
 	it('drops HTML tags and comments', () => {

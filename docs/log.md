@@ -14,6 +14,7 @@ sidebar_position: 99
 - `docs/features`: `seo.md` documented a `FAQPage` generator that did not exist; `lib/seo/schema.ts` now has one, and the page describes how the content contract drives it ([spec 046](spec/046-faq-page/spec.md), PR #1044).
 - `questions`: added Q-046a — should the FAQ render as an accordion rather than plain prose ([spec 046](spec/046-faq-page/spec.md), PR #1044).
 - `spec-046`: review follow-ups — the Markdown-to-text reduction that feeds the schema now keeps literal `*` and `_` (a page rendering `snake_case` was published as `snakecase`), removes raw HTML with a scanner run to a fixpoint instead of one `String.replace` pass (CodeQL `js/incomplete-multi-character-sanitization`), and `renderStaticPageMarkdown` falls back on an empty body the way the HTML pages already did, so no static page and its `.md` mirror can disagree. Added `apps/web/lib/seo/__tests__/faq-parser.spec.ts` ([spec 046](spec/046-faq-page/spec.md), PR #1044).
+- `spec-046`: further review follow-ups on the same reduction — code spans and fenced blocks are now lifted out before any other rule and restored last (a page rendering `` `_setup_` `` was marked up as `_setup_` losing its underscores), `*` may open and close inside a word as CommonMark specifies while `_` may not, and the emphasis rules run to a fixpoint so nested spans such as `**bold *nested* text**` no longer leave their outer delimiters in the schema ([spec 046](spec/046-faq-page/spec.md), PR #1044).
 
 ## 2026-08-25
 

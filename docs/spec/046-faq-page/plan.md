@@ -121,7 +121,21 @@ catch-all, and every existing route list keep their prior entries.
   structured-data violation, so `stripMarkdown` removes `*` / `_` / `~` only
   where they actually delimit a span. A blanket removal of every marker
   character published `snakecase` and `53` for pages that render `snake_case`
-  and `5*3`.
+  and `5*3`. Three rules follow from "say what the page says":
+  - **Code first.** Code spans and fenced blocks are lifted into placeholders
+    before anything else runs and put back at the very end. Inside code,
+    Markdown punctuation is literal: a page rendering `` `_setup_` `` must be
+    marked up as `_setup_`. Restoring after the table-pipe rule also keeps a
+    `|` inside code intact.
+  - **`*` and `_` are not symmetric.** CommonMark lets `*` open and close
+    inside a word and does not let `_`, so `2*3*4` renders as 2<em>3</em>4 and
+    is marked up as `234`, while `snake_case` stays literal. Both still need a
+    non-space character inside the delimiters, which is what leaves an
+    unpaired `5*3` and a spaced `a * b * c` alone.
+  - **Emphasis runs to a fixpoint.** A single pass cannot unwrap
+    `**bold *nested* text**` — the inner `*` blocks the outer match — and left
+    the outer delimiters in the schema. Each changing pass removes at least
+    two characters, so it terminates.
 - **HTML removal is a scanner run to a fixpoint, not one `String.replace`.** A
   single global `<[^>]*>` pass is an incomplete sanitiser: deleting the inner
   tag of `<scr<script>ipt>` splices the remainder into a fresh `<script>`

@@ -29,6 +29,7 @@ sidebar_label: 046 Tasks
 - [ ] T-015: commit `pages/faq.en.md` to the demo data repository (`ever-works/awesome-time-tracking-data`). Out of this repo's scope; the built-in fallback covers every site until it lands.
 - [x] T-016: add `apps/web/lib/seo/__tests__/faq-parser.spec.ts` (`node:test`), covering emphasis handling, literal `snake_case` / `5*3`, HTML and comment removal, tag-reassembly resistance, heading extraction, frontmatter validation and the `faqs: []` opt-out.
 - [x] T-017: address review findings — keep literal `*` / `_` out of the emphasis stripper, replace the single-pass HTML regex with a scanner run to a fixpoint (CodeQL `js/incomplete-multi-character-sanitization`), and give `renderStaticPageMarkdown` the same empty-body fallback the HTML pages use so `/faq` and `/faq.md` cannot disagree.
+- [x] T-018: second review round on the same reduction — protect code spans and fenced blocks from every other rule, allow intra-word `*` emphasis (but not `_`) per CommonMark, run the emphasis rules to a fixpoint so nested spans unwrap, and accept any `##`–`######` question heading in the `/faq.md` e2e assertion.
 
 ## Acceptance criteria → task map
 
@@ -43,5 +44,5 @@ sidebar_label: 046 Tasks
 | AC-7 | T-006                |
 | AC-8 | T-005                |
 | AC-9 | T-009                |
-| AC-10 | T-002, T-016, T-017 |
+| AC-10 | T-002, T-016, T-017, T-018 |
 | AC-11 | T-006, T-016, T-017 |

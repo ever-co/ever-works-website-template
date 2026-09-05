@@ -91,8 +91,12 @@ catch-all, and every existing route list keep their prior entries.
 
 ## 4. Parser design decisions
 
-- **Frontmatter beats headings.** An explicit `faqs:` array is unambiguous, so
-  it wins when present; heading extraction is the zero-effort default.
+- **Frontmatter beats headings.** A `faqs:` array is authoritative whenever it
+  is *present* — including when it is empty or every row failed validation.
+  Falling back to headings there would publish questions the author explicitly
+  did not select, which is the opposite of "explicit control", and it makes
+  `faqs: []` a usable opt-out. Heading extraction is the zero-effort default
+  for pages with no `faqs` key at all.
 - **Skip H1.** It is the document title. Emitting it as a question produces a
   `Question` whose answer is the whole page.
 - **Skip headings with no body.** This is what makes grouping headings
@@ -102,8 +106,9 @@ catch-all, and every existing route list keep their prior entries.
 - **Plain text, not HTML.** `acceptedAnswer.text` accepts a limited HTML subset,
   but the content is author-controlled text from a Git repository that ends up
   inside a `<script>` block. Stripping to plain text removes the need to
-  sanitise an HTML subset; the serialiser additionally escapes `<` as `<`,
-  the same guard `breadcrumb-json-ld.tsx` uses.
+  sanitise an HTML subset; the serialiser additionally rewrites every `<` to
+  its JSON unicode escape `\u003c`, the same guard
+  `breadcrumb-json-ld.tsx` uses.
 - **Caps.** 50 entries, 1200 characters per answer, 300 per question. Google's
   own limit is far higher; these keep an inline JSON-LD payload that is parsed
   on every page view inside the performance budget (AGENTS.md §5).

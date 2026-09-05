@@ -236,9 +236,15 @@ export function extractFaqsFromMarkdown(markdown: string): FaqEntry[] {
  * Resolve the FAQ entries for a page: explicit frontmatter wins, and the
  * Markdown headings are the fallback so an ordinary FAQ document needs no
  * extra authoring to earn its rich result.
+ *
+ * A `faqs` array in the frontmatter is **authoritative** whenever it is
+ * present — including when it is empty, or when every row failed validation.
+ * Falling back to the headings in that case would publish questions the author
+ * explicitly did not select, which is the opposite of what "explicit control"
+ * should mean. `faqs: []` is therefore how a page opts out of the rich result
+ * while keeping its prose.
  */
 export function extractFaqEntries(content: string, metadata?: Record<string, unknown> | null): FaqEntry[] {
-	const fromMetadata = extractFaqsFromMetadata(metadata);
-	if (fromMetadata.length > 0) return fromMetadata;
+	if (Array.isArray(metadata?.faqs)) return extractFaqsFromMetadata(metadata);
 	return extractFaqsFromMarkdown(content);
 }

@@ -116,7 +116,9 @@ is a **grouping** heading — it contributes no answer, so it is skipped rather
 than emitted as an empty question.
 
 **Explicit frontmatter** (the escape hatch when the prose does not map onto
-headings) takes priority when present:
+headings) is authoritative whenever a `faqs` array is present — the headings
+are not consulted at all, so `faqs: []` is how a page keeps its prose but opts
+out of the rich result:
 
 ```yaml
 ---
@@ -132,6 +134,15 @@ faqs:
 Tracked in [`docs/questions.md`](../../questions.md): **Q-046a** (should the
 FAQ render as an accordion rather than plain prose).
 
-## 7. Status
+## 7. Documentation
 
-**shipped** — see [`plan.md`](./plan.md) and [`tasks.md`](./tasks.md).
+End-user page: [`docs/features/faq-page.md`](../../features/faq-page.md)
+(content contract, question detection, defaults and discovery). The
+structured-data half is documented in
+[`docs/features/seo.md`](../../features/seo.md).
+
+## 8. Status
+
+**in-progress** — implementation complete and under review in PR #1044; flips
+to `shipped` when that PR merges to `develop`. See [`plan.md`](./plan.md) and
+[`tasks.md`](./tasks.md).

@@ -36,7 +36,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     alternates: {
       canonical: getLocalizedUrl('/faq', locale as Locale),
       languages: generateHreflangAlternates('/faq'),
-      types: { 'text/markdown': `${appUrl}${getLocalizedUrl('/faq', locale as Locale)}.md` }
+      // getLocalizedUrl already returns an absolute URL, so it is NOT prefixed
+      // with appUrl here — /help and /pricing get this right; /about, /cookies,
+      // /privacy-policy and /terms-of-service currently double the origin.
+      types: { 'text/markdown': `${getLocalizedUrl('/faq', locale as Locale)}.md` }
     }
   };
 }

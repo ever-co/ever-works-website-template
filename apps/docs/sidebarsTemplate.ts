@@ -494,6 +494,7 @@ const sidebars: SidebarsConfig = {
         "features/maps-location",
         "features/analytics",
         "features/seo",
+        "features/faq-page",
         "features/feature-flags",
         "features/sponsor-ads",
         "features/surveys",

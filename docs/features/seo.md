@@ -68,8 +68,10 @@ matches what a visitor reads:
   and the prose beneath it becomes the `acceptedAnswer`. `#` (H1) is the
   document title and is ignored, and a heading immediately followed by another
   heading is treated as a section grouping rather than a question.
-- A `faqs: [{ question, answer }]` array in the file's frontmatter overrides
-  the heading extraction when a page needs explicit control.
+- A `faqs: [{ question, answer }]` array in the file's frontmatter is
+  authoritative whenever it is present -- the headings are not consulted at
+  all, so `faqs: []` opts a page out of the rich result while keeping its
+  prose.
 - Nothing is emitted when no question/answer pair can be extracted -- an
   `FAQPage` with an empty `mainEntity` is invalid structured data.
 

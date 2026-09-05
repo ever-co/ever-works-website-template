@@ -44,7 +44,7 @@ export function FaqJsonLd({ entries, url, name, description }: FaqJsonLdProps) {
 		<script
 			type="application/ld+json"
 			dangerouslySetInnerHTML={{
-				// Why: escape every '<' as the < JSON escape so a stray
+				// Why: rewrite every '<' to its JSON unicode escape (\\u003c) so a stray
 				// '</script>' inside a question or answer — both come from the
 				// Work's data repository, i.e. author-controlled text — cannot
 				// terminate this inline <script> block and inject HTML. The

@@ -367,6 +367,26 @@ jobs:
 
           Account details are used only to operate the directory.
           MD
+          # Hostile frontmatter fixture. Every field here is a legal YAML value
+          # that is NOT a string, which is what author-supplied frontmatter can
+          # actually contain. `frontmatter-hostile` is a slug no other spec
+          # visits, so it exercises `pages/[slug]` without changing what the
+          # rest of the suite sees.
+          cat > apps/web/.content/pages/frontmatter-hostile.en.md <<'MD'
+          ---
+          title:
+            nested: not a string
+          description:
+            nested: not a string either
+          lastUpdated: 2026
+          ---
+
+          ## Hostile Frontmatter
+
+          The frontmatter above parses to mappings and a number rather than to
+          strings. The route must fall back to its slug-derived title and emit
+          no metadata, instead of rendering `[object Object]` or crashing.
+          MD
           # The runtime's hasUsableContent() check requires a `.git`
           # directory inside `.content/` when DATA_REPOSITORY is set. We
           # don't actually want CI to clone the real data repo (it

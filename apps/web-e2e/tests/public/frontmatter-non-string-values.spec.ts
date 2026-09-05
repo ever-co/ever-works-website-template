@@ -47,9 +47,15 @@ test.describe('Non-string frontmatter values fall back instead of leaking', () =
 		expect(response!.status(), `${HOSTILE_PATH} status`).toBeLessThan(400);
 
 		// `title:` parsed to a mapping, so the slug-derived name must win.
-		const heading = page.getByRole('heading', { level: 1 }).first();
-		await expect(heading).toBeVisible({ timeout: 30_000 });
-		expect((await heading.innerText()).trim(), `${HOSTILE_PATH} h1 falls back to the slug`).toBe(
+		//
+		// This route has no `<h1>`: `DynamicPage` renders a `<Breadcrumb>` (a
+		// `<nav aria-label="Breadcrumb">`) above the Markdown body, and the body
+		// here starts at `##`. The last breadcrumb item — the one carrying
+		// `aria-current="page"` — is where `getPageTitle`'s result actually
+		// reaches the DOM, so that is the surface to pin.
+		const currentCrumb = page.locator('nav[aria-label="Breadcrumb"] li[aria-current="page"]').first();
+		await expect(currentCrumb).toBeVisible({ timeout: 30_000 });
+		expect((await currentCrumb.innerText()).trim(), `${HOSTILE_PATH} breadcrumb falls back to the slug`).toBe(
 			SLUG_FALLBACK_TITLE
 		);
 

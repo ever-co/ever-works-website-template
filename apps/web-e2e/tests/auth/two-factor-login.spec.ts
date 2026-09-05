@@ -15,11 +15,12 @@ import {
  * enable it in the security settings, sign in and be stopped by the code
  * step, satisfy it with the real emailed code, then turn it off again.
  *
- * The plaintext code never reaches the database — only a SHA-256 digest —
- * so the helper recovers it by exhausting the six-digit space against that
- * digest. That is both how the test gets a usable code without an inbox and
- * a standing assertion that the column is a hash (`recoverTwoFactorCode`
- * returns `null` if it ever stops being one).
+ * The plaintext code never reaches the database — only a keyed HMAC-SHA256
+ * digest — so the helper recovers it by exhausting the six-digit space
+ * against that digest under the same server secret. That is both how the
+ * test gets a usable code without an inbox and a standing assertion that
+ * the column is a hash (`recoverTwoFactorCode` returns `null` if it ever
+ * stops being one).
  *
  * Requires `DATABASE_URL`; skipped without one, like the rest of the
  * database-dependent suite.
@@ -191,10 +192,27 @@ test.describe('Email 2FA: enable, sign in with a code, disable', () => {
 		expect(locked?.lockedUntil, 'the account should be locked after five failures').not.toBeNull();
 		expect(locked!.lockedUntil!.getTime()).toBeGreaterThan(Date.now());
 
-		// Even the RIGHT code is refused while the lock stands.
+		// The fifth failure itself must report the LOCK, not another wrong code.
+		await expect(page.getByTestId('auth-error')).toContainText(/temporarily blocked/i);
+
+		// Even the RIGHT code is refused while the lock stands — and it must be
+		// refused BY THE LOCK. Asserting only that "some error" appears would pass
+		// on a build with no lockout at all: crossing the threshold also deletes
+		// the code row, so a correct code would then come back as `not_found` →
+		// TWO_FACTOR_EXPIRED → "This code has expired". Pinning the lock copy (and
+		// ruling out the expiry copy) is what separates "verification is locked"
+		// from "the code merely went missing", which is the whole of EW-141.
 		await submitCode(page, code!);
 		await expect(page.getByTestId('auth-error')).toBeVisible({ timeout: 60_000 });
+		await expect(page.getByTestId('auth-error')).toContainText(/temporarily blocked/i);
+		await expect(page.getByTestId('auth-error')).not.toContainText(/expired/i);
 		expect(page.url()).not.toContain('/client/dashboard');
+
+		// The lock is still standing afterwards: submitting the correct code did
+		// not clear it, so a guesser cannot spend the lock by knowing the answer.
+		const stillLocked = await getTwoFactorLockState(email);
+		expect(stillLocked?.lockedUntil).not.toBeNull();
+		expect(stillLocked!.lockedUntil!.getTime()).toBeGreaterThan(Date.now());
 
 		// Housekeeping so a re-run of this generated account is not stuck.
 		await clearTwoFactorLock(email);

@@ -87,7 +87,9 @@ tries without my intervention.
 - [x] AC-3 (EW-138): with 2FA on, signing in mints a cryptographically random
       six-digit code, stores **only a keyed HMAC-SHA256 of it** with a timestamp
       and the owning user, and emails the plaintext in a branded template that
-      states the expiry.
+      states the expiry. The code appears in the message **body only** — never
+      in the subject, which leaks to lock-screen previews and to every mail log
+      on the path without the message being opened.
 - [x] AC-4 (EW-139): the sign-in form asks for that code after the password,
       issues no session until it verifies, offers a resend, and shows distinct
       messages for wrong / expired / locked.

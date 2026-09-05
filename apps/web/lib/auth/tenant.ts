@@ -1,4 +1,5 @@
 import { coreConfig } from '@/lib/config/config-service';
+import { tenantHostFromHeaders } from './tenant-host';
 
 // --- Configuration & Caching --- //
 
@@ -94,14 +95,14 @@ async function resolveFromEnv(): Promise<string | null> {
 }
 
 /**
- * 3. Resolves tenant from HTTP headers (x-tenant-domain).
- * Supports Subdomain/Domain routing.
+ * 3. Resolves tenant from HTTP headers (`x-tenant-domain`, falling back to
+ * the request's own `host`). Supports Subdomain/Domain routing.
  */
 async function resolveFromHeaders(): Promise<string | null> {
 	try {
 		const { headers } = await import('next/headers');
 		const headersList = await headers();
-		const domain = headersList.get('x-tenant-domain');
+		const domain = tenantHostFromHeaders(headersList);
 
 		if (!domain) return null;
 
@@ -225,7 +226,9 @@ async function resolveFromDatabase(): Promise<string | null> {
  * Resolution order:
  * 1. Authenticated session (`user.tenantId`)
  * 2. Environment variable (`TENANT_ID`)
- * 3. HTTP Header (`x-tenant-domain`) via Subdomain routing
+ * 3. HTTP Header (`x-tenant-domain`, or the request's own `host` — the
+ *    middleware matcher excludes `/api`, so the injected header is absent
+ *    there) via Subdomain routing
  * 4. Database fallback (first active tenant)
  * 5. Lazy-create the `default` tenant (single-tenant / demo deployments)
  *

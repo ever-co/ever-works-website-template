@@ -26,11 +26,29 @@ import { getRuntimeAuthSecret } from './auth-secret';
 /** Number of decimal digits in a generated code. */
 export const TWO_FACTOR_CODE_LENGTH = 6;
 
-function readPositiveIntEnv(name: string, fallback: number): number {
+/**
+ * Read a `TWO_FACTOR_*` override, falling back on anything that is not a
+ * positive whole number.
+ *
+ * Exported for the unit spec: every constant below is resolved once at
+ * import time from `process.env`, so the only way to pin the parsing rules
+ * is to call the parser directly.
+ *
+ * `Number.isSafeInteger` rather than `Number.isFinite` + `Math.floor`.
+ * Flooring silently turned a positive fraction into ZERO, and zero is not
+ * an inert value here — it is the most dangerous one these settings can
+ * take: `TWO_FACTOR_CODE_TTL_MS=0.5` would have made every code expire the
+ * instant it was minted (nobody with 2FA on could ever sign in), and
+ * `TWO_FACTOR_MAX_ATTEMPTS=0.5` would have locked an account on its first
+ * wrong digit. A typo must land on the documented default, never
+ * reconfigure the control. Values past `Number.MAX_SAFE_INTEGER` are
+ * refused for the same reason: they no longer round-trip as themselves.
+ */
+export function readPositiveIntEnv(name: string, fallback: number): number {
 	const raw = process.env[name];
 	if (!raw) return fallback;
 	const parsed = Number(raw);
-	return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : fallback;
+	return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : fallback;
 }
 
 /**

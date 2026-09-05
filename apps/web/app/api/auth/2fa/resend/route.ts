@@ -4,6 +4,7 @@ import { getClientAccountByEmail, getClientProfileByUserId, verifyClientPassword
 import { issueTwoFactorCode } from '@/lib/auth/two-factor';
 import { TWO_FACTOR_CODE_TTL_MINUTES } from '@/lib/auth/two-factor-code';
 import { ratelimit } from '@/lib/utils/rate-limit';
+import { resendResponseForIssuance } from '@/lib/auth/two-factor-resend';
 import { comparePasswords } from '@/lib/auth/credentials';
 
 /**
@@ -56,7 +57,7 @@ const resendSchema = z.object({
  *   post:
  *     tags: ["Authentication"]
  *     summary: "Resend the email two-factor sign-in code"
- *     description: "Issues a fresh one-time code for an account with 2FA enabled and emails it, invalidating any previous code. Requires the account password because no session exists mid-login. Always answers 200 for well-formed requests so it cannot be used to enumerate accounts; rate limited to 3 requests per 10 minutes per IP and per email."
+ *     description: "Issues a fresh one-time code for an account with 2FA enabled and emails it, invalidating any previous code. Requires the account password because no session exists mid-login. Every outcome that depends on whether the address exists, the password is right or 2FA is on shares one generic 200 envelope, so it cannot be used to enumerate accounts. Once the credentials have checked out it reports the truth: 429 when a resend or issuance budget is spent, 502 when the code could not be emailed. Rate limited to 3 requests per 10 minutes per IP and per email."
  *     requestBody:
  *       required: true
  *       content:
@@ -75,9 +76,11 @@ const resendSchema = z.object({
  *       400:
  *         description: "Invalid request body"
  *       429:
- *         description: "Too many resend requests"
+ *         description: "Too many resend requests, or the account's issuance budget is spent"
  *       500:
  *         description: "Internal server error"
+ *       502:
+ *         description: "The credentials checked out but the code could not be emailed"
  */
 export async function POST(request: NextRequest) {
 	try {
@@ -153,14 +156,26 @@ export async function POST(request: NextRequest) {
 			return tooManyRequests(emailBudget.retryAfter);
 		}
 
-		await issueTwoFactorCode({
+		const issued = await issueTwoFactorCode({
 			userId: profile.userId,
 			email: profile.email,
 			tenantId: profile.tenantId,
 			userName: profile.displayName || profile.name
 		});
 
-		return accepted;
+		// Answer what actually happened. Returning the generic `accepted` here
+		// regardless would tell the sign-in form "a new code is on its way",
+		// which resets its countdown and CLEARS the code box — stranding a user
+		// whose issuance budget was spent (or whose mail send failed) with no
+		// code, no way to reach the one they already had, and a timer counting
+		// down on nothing. This branch is only reachable once the account, the
+		// password and the 2FA flag have all checked out — the same point the
+		// per-address 429 above sits at — so it leaks nothing to a caller who
+		// does not already hold the password. See `lib/auth/two-factor-resend.ts`.
+		const outcome = resendResponseForIssuance(issued, TWO_FACTOR_CODE_TTL_MINUTES);
+		if (outcome.status === 200) return accepted;
+
+		return NextResponse.json(outcome.body, { status: outcome.status });
 	} catch (error) {
 		console.error('Two-factor resend error:', error);
 		return NextResponse.json(

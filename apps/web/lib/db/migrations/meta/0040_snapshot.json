@@ -6521,6 +6521,22 @@
           "concurrently": false,
           "method": "btree",
           "with": {}
+        },
+        "two_factor_codes_active_user_idx": {
+          "name": "two_factor_codes_active_user_idx",
+          "columns": [
+            {
+              "expression": "userId",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "where": "consumed_at IS NULL",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
         }
       },
       "foreignKeys": {

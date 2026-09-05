@@ -2,6 +2,10 @@ import { test, expect } from '@playwright/test';
 import crypto from 'crypto';
 import {
 	TWO_FACTOR_CODE_LENGTH,
+	TWO_FACTOR_CODE_TTL_MINUTES,
+	TWO_FACTOR_CODE_TTL_MS,
+	TWO_FACTOR_LOCK_MS,
+	TWO_FACTOR_MAX_ATTEMPTS,
 	constantTimeEqualsHex,
 	generateTwoFactorCode,
 	hashTwoFactorCode,
@@ -9,6 +13,7 @@ import {
 	isTwoFactorLocked,
 	isWellFormedTwoFactorCode,
 	normalizeTwoFactorCode,
+	readPositiveIntEnv,
 	registerFailedAttempt,
 	remainingTwoFactorAttempts,
 	twoFactorCodeExpiry,
@@ -212,5 +217,93 @@ test.describe('Email 2FA: brute-force lockout (EW-141)', () => {
 		expect(remainingTwoFactorAttempts(3, 5)).toBe(2);
 		expect(remainingTwoFactorAttempts(5, 5)).toBe(0);
 		expect(remainingTwoFactorAttempts(9, 5)).toBe(0);
+	});
+});
+
+test.describe('Email 2FA: TWO_FACTOR_* env parsing', () => {
+	const NAME = 'TWO_FACTOR_UNIT_TEST_SETTING';
+
+	test.afterEach(() => {
+		delete process.env[NAME];
+	});
+
+	function withEnv(value: string, fallback = 600_000): number {
+		process.env[NAME] = value;
+		return readPositiveIntEnv(NAME, fallback);
+	}
+
+	test('a positive whole number is taken as written', () => {
+		expect(withEnv('1')).toBe(1);
+		expect(withEnv('900000')).toBe(900_000);
+		// Exponent notation still denotes a whole number.
+		expect(withEnv('1e3')).toBe(1000);
+	});
+
+	test('a positive FRACTION falls back instead of flooring to zero', () => {
+		// The bug this pins: flooring turned every value below 1 into ZERO, and
+		// zero is the most dangerous setting these controls can take.
+		// `TWO_FACTOR_CODE_TTL_MS=0.5` made every code expire the instant it was
+		// minted, so nobody with 2FA on could ever sign in; and
+		// `TWO_FACTOR_MAX_ATTEMPTS=0.5` locked an account on its first wrong
+		// digit. A typo must land on the documented default, not reconfigure the
+		// control.
+		expect(withEnv('0.5')).toBe(600_000);
+		expect(withEnv('0.999')).toBe(600_000);
+		expect(withEnv('.4')).toBe(600_000);
+		expect(withEnv('0.5', 5)).toBe(5);
+	});
+
+	test('a fraction ABOVE one is refused too, rather than silently truncated', () => {
+		// `TWO_FACTOR_MAX_ATTEMPTS=1.9` meaning "one attempt" is a guess about
+		// what the operator intended; the default is the honest answer.
+		expect(withEnv('1.9', 5)).toBe(5);
+		expect(withEnv('600000.5')).toBe(600_000);
+	});
+
+	test('zero, negatives and nonsense fall back', () => {
+		expect(withEnv('0')).toBe(600_000);
+		expect(withEnv('-1')).toBe(600_000);
+		expect(withEnv('-0.5')).toBe(600_000);
+		expect(withEnv('abc')).toBe(600_000);
+		expect(withEnv('Infinity')).toBe(600_000);
+		expect(withEnv('NaN')).toBe(600_000);
+	});
+
+	test('a value beyond the safe integer range falls back', () => {
+		// Above 2^53 the number no longer round-trips as itself, so honouring it
+		// would silently apply a different setting than the one configured.
+		expect(withEnv('9007199254740993')).toBe(600_000);
+		expect(withEnv('1e400')).toBe(600_000);
+	});
+
+	test('an unset or empty variable uses the fallback', () => {
+		delete process.env[NAME];
+		expect(readPositiveIntEnv(NAME, 42)).toBe(42);
+		expect(withEnv('', 42)).toBe(42);
+	});
+
+	test('the shipped defaults are the ones the ticket asks for', () => {
+		// Guards against a future refactor changing a default by accident: ten
+		// minutes of validity (EW-140), five attempts and a fifteen-minute lock
+		// (EW-141). Each assertion is skipped when the runner's environment
+		// overrides that setting — the constants are resolved once at import time,
+		// so an operator override is a legitimate value here, not a failure.
+		if (!process.env.TWO_FACTOR_CODE_TTL_MS) {
+			expect(TWO_FACTOR_CODE_TTL_MS).toBe(10 * 60 * 1000);
+			expect(TWO_FACTOR_CODE_TTL_MINUTES).toBe(10);
+		}
+		if (!process.env.TWO_FACTOR_MAX_ATTEMPTS) {
+			expect(TWO_FACTOR_MAX_ATTEMPTS).toBe(5);
+		}
+		if (!process.env.TWO_FACTOR_LOCK_MS) {
+			expect(TWO_FACTOR_LOCK_MS).toBe(15 * 60 * 1000);
+		}
+
+		// Whatever the environment says, every one of them must be a positive
+		// whole number — the property the parser exists to guarantee.
+		for (const value of [TWO_FACTOR_CODE_TTL_MS, TWO_FACTOR_MAX_ATTEMPTS, TWO_FACTOR_LOCK_MS]) {
+			expect(Number.isSafeInteger(value)).toBe(true);
+			expect(value).toBeGreaterThan(0);
+		}
 	});
 });

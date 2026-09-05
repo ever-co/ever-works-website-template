@@ -19,10 +19,12 @@ import { test, expect } from '@playwright/test';
  *     `tests/auth/two-factor-login.spec.ts`.
  *   - `resend` is deliberately session-free (there is no session mid-login)
  *     and re-checks the account password instead. It answers 400 for a
- *     malformed body and 200 for a well-formed one whatever the account
- *     state, so the body cannot be used to probe which addresses exist.
- *     429 is the only other distinguishable answer, once the 3-per-10-minutes
- *     budget is spent.
+ *     malformed body, and one generic 200 for every outcome that depends on
+ *     whether the address exists, the password is right or 2FA is on — so the
+ *     body cannot be used to probe which addresses exist. Its other answers
+ *     (429 once a budget is spent, 502 when a code could not be emailed) sit
+ *     BEHIND the password check, so reaching them tells a caller nothing the
+ *     password they already hold did not.
  *
  * The 404-tolerance in the "route exists" assertions keeps this spec honest
  * on a deployment that has not shipped spec 046 yet, in the same spirit as

@@ -451,7 +451,22 @@ export const twoFactorCodes = pgTable(
 	(table) => [
 		index('two_factor_codes_user_id_idx').on(table.userId),
 		index('two_factor_codes_expires_idx').on(table.expires),
-		index('two_factor_codes_tenant_id_idx').on(table.tenantId)
+		index('two_factor_codes_tenant_id_idx').on(table.tenantId),
+		// "At most one live code per user" is not a convention here, it is the
+		// invariant the whole verification path is written against:
+		// `verifyTwoFactorCode` reads the NEWEST row with `consumed_at IS NULL`
+		// and treats it as *the* code, so a second unconsumed row would leave a
+		// stale code silently valid behind the one the user was just emailed.
+		// `issueTwoFactorCode` upholds it by marking earlier rows consumed inside
+		// a transaction guarded by a per-user advisory lock — but that is a
+		// property of one function, and this is the same statement made where it
+		// cannot be bypassed: any future insert that forgets the rotation, or a
+		// race the lock does not cover, fails loudly instead of quietly leaving
+		// two codes alive. PARTIAL, so consumed rows (kept because the issuance
+		// budget counts them) stay unconstrained.
+		uniqueIndex('two_factor_codes_active_user_idx')
+			.on(table.userId)
+			.where(sql`consumed_at IS NULL`)
 	]
 );
 

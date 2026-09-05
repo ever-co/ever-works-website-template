@@ -384,9 +384,13 @@ export function CredentialsForm({
 
 	/**
 	 * Ask for a fresh code (EW-140's "request a new one" path). The endpoint
-	 * re-checks the password because there is no session yet mid-login, and it
-	 * always answers 200 so it cannot be used to probe for accounts — the only
-	 * distinguishable outcome is 429 when the 3-per-10-minutes budget is spent.
+	 * re-checks the password because there is no session yet mid-login. Every
+	 * outcome that would reveal whether the address exists, whether the password
+	 * was right or whether 2FA is on shares one generic 200, so it cannot be
+	 * used to probe for accounts. Once the credentials have checked out it does
+	 * report the truth — 429 when a budget is spent, 502 when the code could not
+	 * be emailed — and both are surfaced here rather than being shown as
+	 * "a new code is on its way" over a code that was never sent.
 	 */
 	const handleResendCode = async () => {
 		const emailValue = state?.email || (document.getElementById('email') as HTMLInputElement | null)?.value;

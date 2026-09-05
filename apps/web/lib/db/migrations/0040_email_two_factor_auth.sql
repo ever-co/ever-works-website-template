@@ -43,4 +43,11 @@ EXCEPTION
 END $$;--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "two_factor_codes_user_id_idx" ON "twoFactorCodes" USING btree ("userId");--> statement-breakpoint
 CREATE INDEX IF NOT EXISTS "two_factor_codes_expires_idx" ON "twoFactorCodes" USING btree ("expires");--> statement-breakpoint
-CREATE INDEX IF NOT EXISTS "two_factor_codes_tenant_id_idx" ON "twoFactorCodes" USING btree ("tenant_id");
+CREATE INDEX IF NOT EXISTS "two_factor_codes_tenant_id_idx" ON "twoFactorCodes" USING btree ("tenant_id");--> statement-breakpoint
+-- At most one LIVE code per user, enforced by the database rather than only
+-- by `issueTwoFactorCode`'s rotate-inside-an-advisory-lock. Verification reads
+-- the newest row with consumed_at IS NULL and treats it as *the* code, so a
+-- second unconsumed row would leave a stale code quietly valid. PARTIAL:
+-- consumed rows are kept (the issuance budget counts them) and stay
+-- unconstrained. Idempotent like the rest of this file.
+CREATE UNIQUE INDEX IF NOT EXISTS "two_factor_codes_active_user_idx" ON "twoFactorCodes" USING btree ("userId") WHERE consumed_at IS NULL;

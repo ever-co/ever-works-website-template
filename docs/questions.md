@@ -606,10 +606,17 @@ confirm, override, or refine.
   - Make the resend button re-submit the sign-in server action without a
     code, so the issuing path is always the tenant-correct one, and keep the
     route for programmatic callers.
-- **Default.** **Leave it**, and revisit as part of a repo-wide fix for
-  tenant resolution in `/api` routes rather than one route at a time.
+- **Default.** ~~Leave it~~ — **resolved at the resolver**, which turned out
+  to be a fourth option none of the three above described: `getTenantId()`'s
+  header step now falls back to the request's own `Host` when
+  `x-tenant-domain` is absent. That is the same value `proxy.ts` copies into
+  the header, so it trusts nothing new; it changes no signature, so the shared
+  helpers keep their callers; and it fixes every session-free `/api` route at
+  once, including a POST straight to `/api/auth/callback/credentials`. It can
+  only ever select an **existing** `tenant` row, so an unrecognised host falls
+  through to `TENANT_ID` / the default tenant exactly as before.
 - **Owner.** Template maintainers.
-- **Status.** `open`.
+- **Status.** `resolved` (PR #1048).
 
 ---
 

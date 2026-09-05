@@ -84,7 +84,16 @@ export const getTwoFactorCodeTemplate = (data: TwoFactorCodeEmailData) => {
 	const supportEmail = escapeHtml(rawSupportEmail);
 
 	// The subject is plain text, so it uses the unescaped values.
-	const subject = `${rawCode} is your ${rawCompanyName} verification code`;
+	//
+	// The CODE IS DELIBERATELY NOT IN THE SUBJECT. A subject line is the one
+	// part of this mail that leaks without the mail ever being opened: it shows
+	// up in a lock-screen notification, in the mail app's message list over a
+	// colleague's shoulder, in push previews, and in the `Subject:` header that
+	// every relay on the path logs in the clear. Anyone who can see the screen
+	// or the mail metadata would then hold the second factor without holding the
+	// mailbox, which is exactly the property the factor exists to provide. The
+	// code lives in the body, where it takes a deliberate act to read it.
+	const subject = `Your ${rawCompanyName} verification code`;
 
 	const html = `
     <!DOCTYPE html>

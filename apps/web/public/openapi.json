@@ -33903,6 +33903,119 @@
           }
         }
       }
+    },
+    "/api/auth/2fa/resend": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Resend the email two-factor sign-in code",
+        "description": "Issues a fresh one-time code for an account with 2FA enabled and emails it, invalidating any previous code. Requires the account password because no session exists mid-login. Every outcome that depends on whether the address exists, the password is right or 2FA is on shares one generic 200 envelope, so it cannot be used to enumerate accounts. Once the credentials have checked out it reports the truth: 429 when a resend or issuance budget is spent, 502 when the code could not be emailed. Rate limited to 3 requests per 10 minutes per IP and per email.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "password"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Request accepted; a code was sent when the credentials and 2FA state allow it"
+          },
+          "400": {
+            "description": "Invalid request body"
+          },
+          "429": {
+            "description": "Too many resend requests, or the account's issuance budget is spent"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "502": {
+            "description": "The credentials checked out but the code could not be emailed"
+          }
+        }
+      }
+    },
+    "/api/auth/security/2fa/disable": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Disable email two-factor authentication",
+        "description": "Turns off email 2FA for the authenticated user and discards any pending verification code and lockout state.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Two-factor authentication disabled"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Tenant not found"
+          },
+          "404": {
+            "description": "Client profile not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/api/auth/security/2fa/enable": {
+      "post": {
+        "tags": [
+          "Authentication"
+        ],
+        "summary": "Enable email two-factor authentication",
+        "description": "Turns on email 2FA for the authenticated user. Allowed only for accounts registered with email and password; OAuth-only accounts are refused with 403 and code OAUTH_ACCOUNT.",
+        "security": [
+          {
+            "sessionAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Two-factor authentication enabled"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Tenant not found, or the account signed up with OAuth"
+          },
+          "404": {
+            "description": "Client profile not found"
+          },
+          "500": {
+            "description": "Internal server error"
+          },
+          "503": {
+            "description": "Email delivery is not configured, so codes could never be sent"
+          }
+        }
+      }
     }
   },
   "tags": []

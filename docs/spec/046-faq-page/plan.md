@@ -67,7 +67,7 @@ flowchart LR
 | `apps/web/app/[locale]/faq/page.tsx`     | The route. Mirrors `cookies/page.tsx`.                                      |
 | `apps/web/lib/seo/faq-parser.ts`         | Pure frontmatter + Markdown → `FaqEntry[]` extraction.                      |
 | `apps/web/components/seo/faq-json-ld.tsx`| Server component emitting the `FAQPage` script block.                       |
-| `apps/web/lib/default-page-content.ts`   | `DEFAULT_FAQ_CONTENT`, shared by the page and the `.md` mirror.             |
+| `apps/web/lib/default-page-content.ts`   | `DEFAULT_FAQ_CONTENT` and `resolveStaticPageBody`, both shared by the page and the `.md` mirror. |
 | `apps/web-e2e/tests/public/faq.spec.ts`  | Dedicated Playwright coverage.                                              |
 | `apps/web/lib/seo/__tests__/faq-parser.spec.ts` | `node:test` unit coverage for the parser (fidelity + no tag reassembly). |
 
@@ -76,7 +76,7 @@ flowchart LR
 | File                                         | Change                                                            |
 | -------------------------------------------- | ----------------------------------------------------------------- |
 | `apps/web/lib/seo/schema.ts`                  | Add `generateFaqPageSchema` + `FaqEntry` / `FaqPageSchemaInput`.   |
-| `apps/web/lib/seo/markdown-mirror.ts`         | `renderStaticPageMarkdown` treats an empty body as absent, so every `.md` mirror falls back the way its HTML page does. |
+| `apps/web/lib/seo/markdown-mirror.ts`         | `renderStaticPageMarkdown` resolves its body through `resolveStaticPageBody`, so every `.md` mirror falls back exactly when its HTML page does. |
 | `apps/web/app/[locale]/_static-md/[slug]/route.ts` | `faq` added to `ALLOWED_STATIC_SLUGS`, `TITLES`, `DEFAULT_BODIES`. |
 | `apps/web/next.config.ts`                     | `faq` added to both `staticSlug` rewrite groups.                   |
 | `apps/web/app/sitemap.ts`                     | `/faq` added to `STATIC_ROUTES` (also feeds the per-locale block). |
@@ -145,13 +145,24 @@ catch-all, and every existing route list keep their prior entries.
   a comment nor a tag is prose ("orders under < 10 items") and is kept; one
   that opens something tag-shaped but never closes is dropped, because keeping
   it is exactly what would let two fragments recombine.
-- **The `.md` mirror falls back the same way the HTML page does.** A
-  `faq.<locale>.md` carrying frontmatter but no body loads as `content: ''`,
-  which means "the data repository ships no body", not "an intentionally empty
-  body". `renderStaticPageMarkdown` therefore uses `||`, not `??`, so `/faq`
-  and the `/faq.md` it advertises to crawlers never disagree. The same applies
-  to `/about`, `/cookies`, `/privacy-policy` and `/terms-of-service`, whose
-  HTML pages already fell back on falsy content while their mirrors did not.
+- **One emptiness rule, called by every representation of a page.**
+  `resolveStaticPageBody` in `lib/default-page-content.ts` is the single place
+  that decides whether the data repository shipped a body; the HTML pages and
+  `renderStaticPageMarkdown` both call it. A `faq.<locale>.md` carrying only
+  frontmatter loads as `content: ''`, and one carrying frontmatter plus a
+  trailing blank line — the ordinary shape of a hand-written file — loads as
+  `content: '\n\n'`, which is **truthy**. Both mean "no body shipped", so the
+  rule trims before deciding.
+
+  Two hand-written fallback expressions is how this diverged twice. `||` on the
+  page and `??` in the mirror meant a frontmatter-only file rendered the
+  built-in FAQ at `/faq` while `/faq.md` came back bodyless; giving the mirror
+  its own `content?.trim() ||` then inverted it, so a blank-line-only body
+  blanked `/faq` — dropping the `FAQPage` rich result entirely — while the
+  mirror still served ten questions. Since `/faq` advertises `/faq.md` to
+  crawlers as `<link rel="alternate" type="text/markdown">`, either direction
+  is a page and an alternate that say different things. `/about`, `/cookies`,
+  `/privacy-policy` and `/terms-of-service` resolve through the same helper.
 
 ## 5. Constitution check
 

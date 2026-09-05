@@ -94,6 +94,38 @@ test.describe('Public: FAQ', () => {
 		expect(body, '/faq.md should carry question headings, not just a title').toMatch(/^#{2,6}\s+\S/m);
 	});
 
+	test('faq page and faq.md agree on the questions they publish', async ({ page, request }) => {
+		// /faq advertises /faq.md as its `text/markdown` alternate, so a crawler
+		// is told the two URLs are the same document. They diverged twice while
+		// each surface decided for itself what an empty body meant: a
+		// frontmatter-only `faq.<locale>.md` first left the mirror bodyless while
+		// the page rendered the built-in FAQ, then a body of nothing but blank
+		// lines (truthy!) did the reverse and blanked the page — dropping the
+		// FAQPage rich result — while the mirror still served every question.
+		// Both now resolve through `resolveStaticPageBody`.
+		await page.goto('/faq', { waitUntil: 'domcontentloaded' });
+
+		const blocks = await page.locator('script[type="application/ld+json"]').allTextContents();
+		const faqBlock = blocks
+			.map((raw) => {
+				try {
+					return JSON.parse(raw) as Record<string, unknown>;
+				} catch {
+					return null;
+				}
+			})
+			.find((parsed) => parsed?.['@type'] === 'FAQPage');
+
+		expect(faqBlock, '/faq should publish an FAQPage block').toBeTruthy();
+		const questions = (faqBlock!.mainEntity as Array<Record<string, unknown>>).map((q) => q.name as string);
+		expect(questions.length, '/faq should publish at least one question').toBeGreaterThan(0);
+
+		const mirror = await (await request.get('/faq.md')).text();
+		for (const question of questions) {
+			expect(mirror, `/faq.md should carry the question /faq marks up: ${question}`).toContain(question);
+		}
+	});
+
 	test('faq is reachable from the footer', async ({ page }) => {
 		await page.goto('/', { waitUntil: 'domcontentloaded' });
 

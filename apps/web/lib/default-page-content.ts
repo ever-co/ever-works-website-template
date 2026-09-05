@@ -14,7 +14,38 @@
  * Authored as heading-per-question Markdown so `lib/seo/faq-parser.ts`
  * extracts question/answer pairs from it and the page emits a valid
  * `FAQPage` rich result out of the box — the whole SEO point of an FAQ.
+ *
+ * Sharing the words is only half of it: the two surfaces must also agree on
+ * *when* the default applies, which is what `resolveStaticPageBody` below is
+ * for.
  */
+
+/**
+ * Decide which body a static info page should render: the one shipped by the
+ * data repository, or the built-in default.
+ *
+ * A `pages/<slug>.<locale>.md` whose frontmatter is followed by nothing loads
+ * with `content: ''`, and one followed by a blank line or two — which is what
+ * a hand-written file actually looks like — loads with `content: '\n\n'`.
+ * Both mean "this repository shipped no body", not "an intentionally empty
+ * body", so blank content resolves to the default. Trimming rather than a
+ * bare truthiness check is the whole point: `'\n\n'` is truthy.
+ *
+ * **Every representation of a page must call this.** `/faq` advertises
+ * `/faq.md` to crawlers as `<link rel="alternate" type="text/markdown">`, so
+ * the two disagreeing about emptiness ships a page and an alternate that say
+ * different things — and in the FAQ's case the blank side also drops the
+ * `FAQPage` rich result entirely while the other side keeps advertising ten
+ * questions. Two hand-written fallback expressions (`content || DEFAULT` on
+ * one side, `content?.trim() || DEFAULT` on the other) is exactly how that
+ * divergence got shipped once already.
+ *
+ * @param content Raw body from `getCachedPageContent`, or nothing at all.
+ * @param fallback Built-in default for the slug.
+ */
+export function resolveStaticPageBody(content: string | null | undefined, fallback: string): string {
+	return content && content.trim().length > 0 ? content : fallback;
+}
 
 /**
  * Generic, directory-agnostic answers that hold for any site generated from

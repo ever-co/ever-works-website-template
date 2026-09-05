@@ -96,9 +96,13 @@ directory-agnostic FAQ** (what the directory is, how to search, how to submit,
 review times, pricing, corrections, contact) so a freshly generated site is
 never blank. Replace it by committing your own file.
 
-A `faq.<locale>.md` that carries only frontmatter counts as "no body", so `/faq`
-and the `/faq.md` mirror both fall back to the built-in FAQ rather than one of
-them going blank. The same rule now applies to the other static info pages.
+A `faq.<locale>.md` that carries no body — nothing after the closing `---`, or
+nothing but blank lines — counts as "no body", so `/faq` and the `/faq.md`
+mirror both fall back to the built-in FAQ rather than one of them going blank.
+Both call the same helper (`resolveStaticPageBody`), which is the point: the
+page advertises the mirror to crawlers as the same document, so the two must
+never disagree about what "empty" means. The same rule applies to the other
+static info pages.
 
 The page is wired into discovery the same way its siblings are:
 

@@ -15,6 +15,7 @@ sidebar_position: 99
 - `questions`: added Q-046a — should the FAQ render as an accordion rather than plain prose ([spec 046](spec/046-faq-page/spec.md), PR #1044).
 - `spec-046`: review follow-ups — the Markdown-to-text reduction that feeds the schema now keeps literal `*` and `_` (a page rendering `snake_case` was published as `snakecase`), removes raw HTML with a scanner run to a fixpoint instead of one `String.replace` pass (CodeQL `js/incomplete-multi-character-sanitization`), and `renderStaticPageMarkdown` falls back on an empty body the way the HTML pages already did, so no static page and its `.md` mirror can disagree. Added `apps/web/lib/seo/__tests__/faq-parser.spec.ts` ([spec 046](spec/046-faq-page/spec.md), PR #1044).
 - `spec-046`: further review follow-ups on the same reduction — code spans and fenced blocks are now lifted out before any other rule and restored last (a page rendering `` `_setup_` `` was marked up as `_setup_` losing its underscores), `*` may open and close inside a word as CommonMark specifies while `_` may not, and the emphasis rules run to a fixpoint so nested spans such as `**bold *nested* text**` no longer leave their outer delimiters in the schema ([spec 046](spec/046-faq-page/spec.md), PR #1044).
+- `spec-046`: third review round — `/faq` and the `/faq.md` mirror it advertises now share one emptiness rule (`resolveStaticPageBody`). A `faq.<locale>.md` whose frontmatter is followed by a blank line loads as `content: '\n\n'`, which is truthy, so the page rendered an empty body — losing its `FAQPage` rich result — while the mirror served the built-in FAQ. `/about`, `/cookies`, `/privacy-policy` and `/terms-of-service` resolve through the same helper. Adds `apps/web/lib/seo/__tests__/static-page-body.spec.ts` and an e2e cross-check that every question `/faq` marks up appears in `/faq.md` ([spec 046](spec/046-faq-page/spec.md), PR #1044).
 
 ## 2026-08-25
 
@@ -46,7 +47,8 @@ why** at a higher level than per-commit diffs.
 
 ## 2026-08-23 — Chore: force LF for container scripts (.gitattributes)
 
-- infra: `docker-entrypoint.sh`, `*.sh` and the Dockerfiles are now `text eol=lf` in `.gitattributes`. A Windows checkout (`core.autocrlf=true`) produced `#!/bin/sh` and the built site image died with `exec /usr/local/bin/docker-entrypoint.sh: no such file or directory` (2026-08-23, local image build while the CI runner pool was stalled). No runtime change for CI-built images. (PR: pending)
+- infra: `docker-entrypoint.sh`, `*.sh` and the Dockerfiles are now `text eol=lf` in `.gitattributes`. A Windows checkout (`core.autocrlf=true`) produced `#!/bin/sh
+` and the built site image died with `exec /usr/local/bin/docker-entrypoint.sh: no such file or directory` (2026-08-23, local image build while the CI runner pool was stalled). No runtime change for CI-built images. (PR: pending)
 
 ## 2026-08-22
 

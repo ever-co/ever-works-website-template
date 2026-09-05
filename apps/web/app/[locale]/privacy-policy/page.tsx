@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { PageContainer } from '@/components/ui/container';
 import { MDX } from '@/components/mdx';
 import { getCachedPageContent } from '@/lib/content';
+import { resolveStaticPageBody } from '@/lib/default-page-content';
 import { getBaseUrl } from '@/lib/utils/url-cleaner';
 import { generateHreflangAlternates, getLocalizedUrl } from '@/lib/seo/hreflang';
 import { Locale, DEFAULT_LOCALE } from '@/lib/constants';
@@ -42,7 +43,12 @@ export default async function PrivacyPolicyPage({ params }: PageProps) {
   const pageData = await getCachedPageContent('privacy-policy', locale);
 
   // Use default content if no MDX file exists
-  const content = pageData?.content || DEFAULT_PRIVACY_POLICY_CONTENT;
+  // Same emptiness rule as this page's `/privacy-policy.md` mirror
+  // (`lib/seo/markdown-mirror.ts#renderStaticPageMarkdown`), which calls the
+  // same helper. A body of nothing but blank lines is truthy, so a bare `||`
+  // left this page blank while the alternate it advertises to crawlers served
+  // the built-in default.
+  const content = resolveStaticPageBody(pageData?.content, DEFAULT_PRIVACY_POLICY_CONTENT);
   const metadata = pageData?.metadata || {};
   const tCommon = await getTranslations({ locale, namespace: 'common' });
   const tFooter = await getTranslations({ locale, namespace: 'footer' });

@@ -12,7 +12,7 @@ import { Locale, DEFAULT_LOCALE } from '@/lib/constants';
 import { BreadcrumbJsonLd } from '@/components/seo/breadcrumb-json-ld';
 import { FaqJsonLd } from '@/components/seo/faq-json-ld';
 import { extractFaqEntries } from '@/lib/seo/faq-parser';
-import { DEFAULT_FAQ_CONTENT } from '@/lib/default-page-content';
+import { DEFAULT_FAQ_CONTENT, resolveStaticPageBody } from '@/lib/default-page-content';
 import { getSiteName } from '@/lib/seo/site-identity';
 
 interface PageProps {
@@ -50,7 +50,15 @@ export default async function FaqPage({ params }: PageProps) {
 
   // Use the built-in FAQ when the data repository ships no `faq.<locale>.md`,
   // so a freshly generated directory has a working FAQ page on day one.
-  const content = pageData?.content || DEFAULT_FAQ_CONTENT;
+  //
+  // Shared with the `/faq.md` mirror this page advertises as its
+  // `text/markdown` alternate: `renderStaticPageMarkdown` calls the same
+  // helper, so the two can never disagree about whether a body counts as
+  // empty. A frontmatter-only `faq.<locale>.md` used to render the built-in
+  // FAQ here while the mirror emitted no body at all; a body of nothing but
+  // blank lines then did the reverse, blanking this page (and its FAQPage
+  // rich result with it) while the mirror still served ten questions.
+  const content = resolveStaticPageBody(pageData?.content, DEFAULT_FAQ_CONTENT);
   const metadata = pageData?.metadata || {};
   const tCommon = await getTranslations({ locale, namespace: 'common' });
   const tFooter = await getTranslations({ locale, namespace: 'footer' });

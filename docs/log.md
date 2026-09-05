@@ -9,7 +9,7 @@ sidebar_position: 99
 
 ## 2026-09-04
 
-- `spec-046`: the per-page `.md` Markdown mirrors were dead on every URL they
+- `spec-047`: the per-page `.md` Markdown mirrors were dead on every URL they
   advertise — the seven route handlers lived in `_`-prefixed folders, which the
   App Router drops from the route table, so the `next.config.ts` rewrite
   destinations did not exist, and the unprefixed sources additionally pointed at
@@ -19,16 +19,22 @@ sidebar_position: 99
   via a new dependency-free `apps/web/lib/i18n/locales.ts` that
   `lib/constants.ts` re-exports, and unknown category/tag slugs now 404 like
   their HTML pages
-  ([spec 046](spec/046-md-mirror-route-reachability/spec.md), PR #1050).
+  ([spec 047](spec/047-md-mirror-route-reachability/spec.md), PR #1050).
 - `apps/web-e2e`: `md-mirror-routes.spec.ts` rewritten from `status < 500` (which
   a 404 satisfied, which is why the breakage above shipped and stayed) to the
   real contract — exactly 200, `text/markdown`, `X-Robots-Tag: noindex`, a body
   that names the canonical page it mirrors — across the static info pages, a
   discovered item / category / tag, a non-default locale, the unknown-slug 404s,
   and the advertised alternate href actually resolving (PR #1050).
-- `questions`: added Q-046a (internal `/md` segment left publicly reachable
-  behind `noindex`) and Q-046b (doubled origin still present on the item and CMS
+- `questions`: added Q-047a (internal `/md` segment left publicly reachable
+  behind `noindex`) and Q-047b (doubled origin still present on the item and CMS
   page `text/markdown` alternates) (PR #1050).
+
+## 2026-09-03
+
+- `spec-046`: EW-131 — the optional `pricing:` block of `.works/works.yml` is now documented field by field and validated on read: new `docs/configuration/works-yml-pricing.md` + complete `docs/configuration/examples/works-pricing.example.yml`, new `apps/web/lib/config/schemas/works-pricing.schema.ts` called from `getConfig()`, `provider` accepts `stripe`/`lemonsqueezy`/`polar`/`solidgate`/`manual` and `PRO` aliases `STANDARD`; a malformed block is logged per field and falls back to the built-in plans instead of throwing. `provider: manual` is carried through provider resolution rather than erased, so a site that declares it never starts an in-site checkout — distinct from omitting `provider`, which keeps the Stripe default ([spec 046](spec/046-works-yml-pricing-config/spec.md), PR #1043).
+- `docs/payment`: `payment.md` "Configure Pricing Plans" and `configuration/payment-config.md` now point at the full `works.yml` pricing reference and document `provider: manual` + the `PRO` alias ([spec 046](spec/046-works-yml-pricing-config/spec.md), PR #1043).
+- `questions`: added Q-046a (should `provider: manual` render its own pricing surface?) and Q-046b (should a malformed `pricing:` block ever be fatal?), both with chosen defaults ([spec 046](spec/046-works-yml-pricing-config/spec.md), PR #1043).
 
 ## 2026-08-25
 

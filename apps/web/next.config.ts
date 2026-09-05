@@ -72,7 +72,7 @@ const nextConfig: NextConfig = {
 		// a `/md` sibling route handler that renders Markdown from the same
 		// data layer the HTML page uses.
 		//
-		// Two rules the destinations have to respect (Spec 046):
+		// Two rules the destinations have to respect (Spec 047):
 		//
 		// 1. The internal segment must NOT start with an underscore. The App
 		//    Router treats `_foo` as a *private folder* and drops it and

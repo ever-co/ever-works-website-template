@@ -5,7 +5,7 @@ import { apiUtils, serverClient } from '@/lib/api/server-api-client';
 import { useConfig } from '@/app/[locale]/config';
 import { PaymentProvider } from '@/lib/constants';
 import { useSelectedCheckoutProvider } from './use-selected-checkout-provider';
-import { usePaymentProvider } from '@/lib/utils/payment-provider';
+import { resolveGatewayProvider, usePaymentProvider } from '@/lib/utils/payment-provider';
 
 // Types
 export interface SubscriptionData {
@@ -77,8 +77,12 @@ export function useSubscription() {
 	// Get user's selected checkout provider from Settings
 	const { getActiveProvider } = useSelectedCheckoutProvider();
 
-	// Determine payment provider: User selection takes precedence over config
-	const paymentProvider = usePaymentProvider(getActiveProvider, config.pricing);
+	// Determine payment provider: User selection takes precedence over config.
+	// These mutations act on subscriptions a gateway already created, so a
+	// works.yml `provider: manual` (spec 046) carries no information here and
+	// keeps the pre-existing Stripe default.
+	const configuredProvider = usePaymentProvider(getActiveProvider, config.pricing);
+	const paymentProvider = resolveGatewayProvider(configuredProvider);
 
 	// Create subscription mutation
 	const createSubscription = useMutation({

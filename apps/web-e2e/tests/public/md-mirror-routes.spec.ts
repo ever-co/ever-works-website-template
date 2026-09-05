@@ -1,7 +1,7 @@
 import { test, expect, type APIRequestContext } from '@playwright/test';
 
 /**
- * Contract guard for the Markdown-mirror SEO surface (Spec 046).
+ * Contract guard for the Markdown-mirror SEO surface (Spec 047).
  *
  * Every public page advertises a Markdown twin at the same path with `.md`
  * appended (`<link rel="alternate" type="text/markdown">`). `next.config.ts`
@@ -271,7 +271,7 @@ test.describe('Markdown mirror routes', () => {
 
 	// An unknown slug must reach the handler and be rejected by it. The JSON
 	// envelope `expectNotFound` requires is what separates "the handler said
-	// no" from "the route does not exist" — the pre-Spec-046 breakage produced
+	// no" from "the route does not exist" — the pre-Spec-047 breakage produced
 	// an HTML 404 for *every* slug and would fail these too.
 	for (const path of [
 		`/items/${MISSING}.md`,

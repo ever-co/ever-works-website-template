@@ -523,9 +523,50 @@ confirm, override, or refine.
 
 ---
 
-## Spec 046 — Markdown mirrors reachable (private-folder routing fix)
+## Spec 046 — Provider-aware pricing configuration in works.yml
 
-### Q-046a Should the internal mirror segment stay reachable as a public URL?
+### Q-046a Should `provider: manual` render a distinct pricing surface?
+
+- **Context.** EW-131 asks `works.yml` to accept `provider: manual` —
+  "show the prices, take payment elsewhere". Spec 046 accepts the value and
+  suppresses the in-site checkout: `handleCheckout()` returns before any
+  gateway branch and logs the reason. Which cards render is unchanged — still
+  the LIVE / DEMO logic of
+  [spec 044](spec/044-public-payment-config/spec.md). That is safe but
+  silent: a manual-checkout operator arguably wants a "Contact us" call to
+  action on the paid cards rather than a button that does nothing.
+- **Options.**
+  - **Suppress the checkout and render the existing cards (current).** One
+    guard in the pricing flow, no new strings, no new localisation work.
+  - Add a manual-checkout mode: a per-plan contact URL in `works.yml` and a
+    dedicated CTA on the card. Needs new i18n keys in all locales and a new
+    branch in `use-pricing-section.ts`.
+- **Default.** **Suppress the checkout, keep the existing cards.** The value
+  is accepted and documented now; the UX affordance can land on its own ticket
+  once someone actually runs manual checkout.
+- **Owner.** Template maintainers.
+- **Status.** `open`.
+
+### Q-046b Should a malformed `pricing:` block ever be fatal?
+
+- **Context.** Spec 046 logs each problem and falls back to the built-in
+  plans. `getConfig()` runs on every render, so throwing would take a whole
+  directory offline over a typo in an optional block.
+- **Options.**
+  - **Warn and fall back (current).** The site stays up; the operator sees
+    `[CONTENT] Invalid "pricing" section …` with one line per field.
+  - Fail the build (not the request) when the data repository is cloned at
+    build time, so the typo is caught before deploy.
+- **Default.** **Warn and fall back.** Revisit if operators report missing
+  the log line; a build-time check is additive and can land later.
+- **Owner.** Template maintainers.
+- **Status.** `open`.
+
+---
+
+## Spec 047 — Markdown mirrors reachable (private-folder routing fix)
+
+### Q-047a Should the internal mirror segment stay reachable as a public URL?
 
 - **Context.** The `.md` mirrors are served by route handlers that used to
   live in `_`-prefixed *private* folders, which the App Router excludes from
@@ -545,7 +586,7 @@ confirm, override, or refine.
 - **Owner.** Template maintainers.
 - **Status.** `open`.
 
-### Q-046b Should the doubled origin in the item / CMS-page `text/markdown` alternates be fixed here?
+### Q-047b Should the doubled origin in the item / CMS-page `text/markdown` alternates be fixed here?
 
 - **Context.** `getLocalizedUrl()` already returns an absolute URL, so
   `` `${appUrl}${getLocalizedUrl(…)}.md` `` emits
@@ -554,12 +595,12 @@ confirm, override, or refine.
   doubling remains on `app/[locale]/items/[slug]/page.tsx` and
   `app/[locale]/pages/[slug]/page.tsx`.
 - **Options.**
-  - **Leave to the owning PR / a follow-up.** Spec 046 is about
+  - **Leave to the owning PR / a follow-up.** Spec 047 is about
     reachability; touching the same four-file blast radius as PR #1046 while
     it is open invites a conflict, and the two remaining pages are the same
     one-line change.
   - Fix all six in this PR.
-- **Default.** **Leave to a follow-up**, tracked here. Spec 046's e2e guard
+- **Default.** **Leave to a follow-up**, tracked here. Spec 047's e2e guard
   deliberately checks alternate-href *resolution* on `/help` and `/pricing`
   only — the two pages whose href is already origin-correct — so it neither
   duplicates nor collides with `md-alternate-link-absolute-url.spec.ts`.

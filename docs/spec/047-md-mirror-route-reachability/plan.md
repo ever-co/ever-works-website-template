@@ -1,10 +1,10 @@
 ---
-id: spec-046-md-mirror-route-reachability-plan
-title: Spec 046 — Plan
-sidebar_label: 046 Plan
+id: spec-047-md-mirror-route-reachability-plan
+title: Spec 047 — Plan
+sidebar_label: 047 Plan
 ---
 
-# Implementation plan — `046-md-mirror-route-reachability`
+# Implementation plan — `047-md-mirror-route-reachability`
 
 ## Constitution check
 

@@ -206,7 +206,7 @@ How it works:
 
 - `lib/seo/markdown-mirror.ts` exports renderers (`renderItemMarkdown`, `renderCategoryMarkdown`, etc.) that take normalized data and return a Markdown string. They are pure functions with no I/O.
 - `next.config.ts` contains `rewrites` that map every `/path.md` URL to an internal `/<locale>/path/md` route handler (one per page type, plus a catch-all under `/<locale>/static-md` for the static info pages). The unprefixed URLs (`/about.md`) rewrite to the default locale's handler explicitly, because `proxy.ts` — which is what adds the locale segment for normal pages — skips every path containing a dot.
-- The internal segment must not start with an underscore: the App Router treats `_foo` as a private folder and removes it from the route table entirely. See [Spec 046](../spec/046-md-mirror-route-reachability/spec.md).
+- The internal segment must not start with an underscore: the App Router treats `_foo` as a private folder and removes it from the route table entirely. See [Spec 047](../spec/047-md-mirror-route-reachability/spec.md).
 - The internal route handler reuses the same cached content layer (`getCachedItem`, `getCachedItems`, `getCachedComparisons`, `getCachedPageContent`) the HTML pages use, then delegates rendering to a helper from `lib/seo/markdown-mirror.ts`.
 - Responses set `Content-Type: text/markdown` and `X-Robots-Tag: noindex` so search engines index the canonical HTML, not the mirror — which is also what keeps the internal `/<locale>/…/md` URLs out of search results.
 - An unknown slug 404s, matching the HTML page it mirrors, rather than rendering an empty document.

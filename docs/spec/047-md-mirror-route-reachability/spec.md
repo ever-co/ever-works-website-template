@@ -1,10 +1,10 @@
 ---
-id: spec-046-md-mirror-route-reachability
-title: Spec 046 — Markdown mirrors reachable (private-folder routing fix)
-sidebar_label: 046 Markdown Mirror Reachability
+id: spec-047-md-mirror-route-reachability
+title: Spec 047 — Markdown mirrors reachable (private-folder routing fix)
+sidebar_label: 047 Markdown Mirror Reachability
 ---
 
-# Feature spec — `046-md-mirror-route-reachability`
+# Feature spec — `047-md-mirror-route-reachability`
 
 ## 1. Summary
 

@@ -1,10 +1,10 @@
 ---
-id: spec-046-md-mirror-route-reachability-tasks
-title: Spec 046 — Tasks
-sidebar_label: 046 Tasks
+id: spec-047-md-mirror-route-reachability-tasks
+title: Spec 047 — Tasks
+sidebar_label: 047 Tasks
 ---
 
-# Tasks — `046-md-mirror-route-reachability`
+# Tasks — `047-md-mirror-route-reachability`
 
 Each task ends in a verification step. `[x]` = done in PR #1050.
 
@@ -77,5 +77,19 @@ Each task ends in a verification step. `[x]` = done in PR #1050.
 ## T9 — Docs
 
 - [x] `spec.md`, `plan.md`, this file, the `docs/spec/README.md` row, the
-      `docs/log.md` entry, `docs/questions.md` Q-046a / Q-046b, and the
+      `docs/log.md` entry, `docs/questions.md` Q-047a / Q-047b, and the
       correction to `docs/features/seo.md`.
+
+## T10 — Renumber 046 → 047 after the merge collision
+
+- [x] `develop` merged PR #1043 as spec **046** (`works-yml-pricing-config`)
+      while this branch was open, so both the directory name and the
+      `Q-046a` / `Q-046b` identifiers collided. Renamed the directory to
+      `047-md-mirror-route-reachability`, renumbered the front-matter ids,
+      the questions, the `docs/log.md` entry, the index row and every
+      cross-reference; merged `develop` into the branch.
+- **Verification.** `docs/spec/` holds one `046-…` and one `047-…` directory;
+      `docs/questions.md` defines `Q-046a` / `Q-046b` once (pricing) and
+      `Q-047a` / `Q-047b` once (mirrors); the T1/T8 mirror probe was re-run on
+      the merged head (production build, cold `.next`) — every mirror family
+      `200 text/markdown` in the default and a prefixed locale.

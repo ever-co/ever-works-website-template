@@ -110,9 +110,17 @@ export default function BillingIssueActionDialog({
 	 * box. `Math.round` stays because it is still needed — 12.34 * 100 is
 	 * 1233.9999999999998 in binary floating point, and only the rounding turns that
 	 * back into the integer 1234 the API expects.
+	 *
+	 * The test is what the value MEANS, not how it was typed: `.50` is accepted like
+	 * `0.50`, and trailing zeros are stripped before the digits are counted, so `1.0`
+	 * is a valid ¥1 and `12.340` a valid $12.34. Only a value the currency genuinely
+	 * cannot hold — `1.5` in yen, `12.345` in dollars — is refused. A leading zero or
+	 * a trailing one is a typing habit, not a different amount, and rejecting either
+	 * would be pedantry on an input an admin uses under pressure.
 	 */
-	const partialMatch = /^\d+(?:\.(\d+))?$/.exec(trimmedPartial);
-	const partialPrecisionOk = partialMatch !== null && (partialMatch[1]?.length ?? 0) <= maxFractionDigits;
+	const partialMatch = /^(?:\d+(?:\.(\d+))?|\.(\d+))$/.exec(trimmedPartial);
+	const partialFractionDigits = (partialMatch?.[1] ?? partialMatch?.[2] ?? '').replace(/0+$/, '').length;
+	const partialPrecisionOk = partialMatch !== null && partialFractionDigits <= maxFractionDigits;
 	const parsedPartial =
 		trimmedPartial && partialPrecisionOk ? Math.round(Number(trimmedPartial) * minorUnitFactor) : undefined;
 	const partialIsInvalid =

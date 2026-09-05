@@ -27,6 +27,8 @@ sidebar_label: 046 Tasks
 - [x] T-013: write this spec/plan/tasks trio, the `docs/spec/README.md` index row, the `docs/log.md` line and the `docs/questions.md` entry (Q-046a).
 - [x] T-014: verify — `tsc --noEmit`, `lint`, `build:web`.
 - [ ] T-015: commit `pages/faq.en.md` to the demo data repository (`ever-works/awesome-time-tracking-data`). Out of this repo's scope; the built-in fallback covers every site until it lands.
+- [x] T-016: add `apps/web/lib/seo/__tests__/faq-parser.spec.ts` (`node:test`), covering emphasis handling, literal `snake_case` / `5*3`, HTML and comment removal, tag-reassembly resistance, heading extraction, frontmatter validation and the `faqs: []` opt-out.
+- [x] T-017: address review findings — keep literal `*` / `_` out of the emphasis stripper, replace the single-pass HTML regex with a scanner run to a fixpoint (CodeQL `js/incomplete-multi-character-sanitization`), and give `renderStaticPageMarkdown` the same empty-body fallback the HTML pages use so `/faq` and `/faq.md` cannot disagree.
 
 ## Acceptance criteria → task map
 
@@ -41,3 +43,5 @@ sidebar_label: 046 Tasks
 | AC-7 | T-006                |
 | AC-8 | T-005                |
 | AC-9 | T-009                |
+| AC-10 | T-002, T-016, T-017 |
+| AC-11 | T-006, T-016, T-017 |

@@ -89,6 +89,8 @@ Three gaps motivated the work:
 | AC-7 | `/faq.md` serves the same content as Markdown with a `text/markdown` content type, and the HTML page advertises it via `<link rel="alternate">`.            |
 | AC-8 | The page sets a canonical URL and hreflang alternates for `/faq`, and its `<title>` clears the 10-character SEO floor asserted by the e2e suite.            |
 | AC-9 | Every one of the 21 locale message files carries the new keys; no locale falls back to a missing-key error.                                                 |
+| AC-10 | The structured data says what the page says: a question or answer reaches the schema with its literal text intact (`snake_case`, `5*3`), and no HTML fragment survives the reduction in a form that could re-form a tag. |
+| AC-11 | `/faq` and the `/faq.md` mirror it advertises never disagree about the body, including when the data repository ships a `faq.<locale>.md` with frontmatter but no body. |
 
 ## 5. Content contract
 

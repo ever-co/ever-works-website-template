@@ -55,42 +55,144 @@ const MAX_ENTRIES = 50;
 /** Longest string we accept as a question — anything longer is prose. */
 const MAX_QUESTION_LENGTH = 300;
 
+/** A complete tag (`<b>`, `</b>`, `<img …>`, `<!doctype html>`) at a position. */
+const TAG_AT = /<[/!?]?[a-zA-Z][^<>]*>/y;
+
+/** Just the opener of a tag, used to recognise a malformed one (`<scr<b>`). */
+const TAG_OPENER_AT = /<[/!?]?[a-zA-Z]/y;
+
+/**
+ * One pass of raw-HTML removal over a Markdown fragment.
+ *
+ * A `<` that opens neither a comment nor a tag is ordinary prose ("orders
+ * under < 10 items", "<3") and is kept, so the schema reads the way the page
+ * does. A `<` that opens something tag-shaped but never closes is a malformed
+ * tag and is dropped, because keeping it is what would let two fragments
+ * recombine into a working tag.
+ */
+function stripHtmlOnce(input: string): string {
+	let out = '';
+	let index = 0;
+
+	while (index < input.length) {
+		const open = input.indexOf('<', index);
+		if (open === -1) {
+			out += input.slice(index);
+			break;
+		}
+
+		out += input.slice(index, open);
+
+		if (input.startsWith('<!--', open)) {
+			const end = input.indexOf('-->', open + 4);
+			// An unterminated comment swallows the rest of the input, which is
+			// what an HTML parser does with it too.
+			index = end === -1 ? input.length : end + 3;
+			continue;
+		}
+
+		TAG_AT.lastIndex = open;
+		const tag = TAG_AT.exec(input);
+		if (tag) {
+			index = open + tag[0].length;
+			continue;
+		}
+
+		TAG_OPENER_AT.lastIndex = open;
+		if (!TAG_OPENER_AT.test(input)) out += '<';
+		index = open + 1;
+	}
+
+	return out;
+}
+
+/**
+ * Remove raw HTML from a Markdown fragment.
+ *
+ * Deliberately a scanner run to a fixpoint rather than a single
+ * `.replace(/<[^>]*>/g, '')`: one global pass is an incomplete sanitiser,
+ * because deleting the inner tag of `<scr<script>ipt>` splices the remainder
+ * back together into a fresh `<script>` (CodeQL
+ * `js/incomplete-multi-character-sanitization`). Repeating until a pass
+ * changes nothing leaves no construct that could be reassembled; every pass
+ * that changes anything strictly shortens the string, so the loop terminates.
+ */
+function stripHtml(input: string): string {
+	let current = input;
+	for (;;) {
+		const next = stripHtmlOnce(current);
+		if (next === current) return current;
+		current = next;
+	}
+}
+
+/**
+ * Emphasis / strong / strikethrough delimiters, removed only where they
+ * actually wrap a span.
+ *
+ * Deleting every `*` and `_` unconditionally corrupts ordinary prose: the
+ * rendered page shows `snake_case` and `5*3`, and the structured data has to
+ * say the same thing rather than `snakecase` and `53`. The single-character
+ * rules additionally require a non-word character outside the delimiter,
+ * which is also what CommonMark uses to reject intra-word `_` emphasis.
+ */
+const EMPHASIS_RULES: ReadonlyArray<readonly [RegExp, string]> = [
+	[/\*\*\*(\S(?:[^*]*?\S)?)\*\*\*/g, '$1'],
+	[/___(\S(?:[^_]*?\S)?)___/g, '$1'],
+	[/\*\*(\S(?:[^*]*?\S)?)\*\*/g, '$1'],
+	[/__(\S(?:[^_]*?\S)?)__/g, '$1'],
+	[/~~(\S(?:[^~]*?\S)?)~~/g, '$1'],
+	[/(^|[^\w*])\*(\S(?:[^*\n]*?\S)?)\*(?!\w)/gm, '$1$2'],
+	[/(^|[^\w_])_(\S(?:[^_\n]*?\S)?)_(?!\w)/gm, '$1$2']
+];
+
 /**
  * Strip Markdown syntax down to readable plain text.
  *
  * `acceptedAnswer.text` may contain a limited HTML subset, but plain text is
  * always valid and avoids having to sanitise author-controlled HTML that ends
  * up inside a `<script type="application/ld+json">` block.
+ *
+ * Line-level constructs (blockquotes, headings, rules, list markers) are
+ * removed before the inline ones, so a `***` thematic break is recognised as
+ * a rule rather than being half-eaten as emphasis.
  */
 export function stripMarkdown(input: string): string {
+	let text = input
+		// Fenced code blocks: keep the code, drop the fences.
+		.replace(/^```[^\n]*\n([\s\S]*?)^```\s*$/gm, '$1')
+		// Images: drop entirely (alt text rarely reads as part of an answer).
+		.replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+		// Links: keep the label, drop the target.
+		.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+		// Reference-style links: keep the label.
+		.replace(/\[([^\]]*)\]\[[^\]]*\]/g, '$1');
+
+	// Raw HTML tags (including any stray `</script>`).
+	text = stripHtml(text);
+
+	text = text
+		// Inline code.
+		.replace(/`([^`]*)`/g, '$1')
+		// Blockquote markers at line start.
+		.replace(/^\s{0,3}>\s?/gm, '')
+		// Leading heading hashes. Real headings are consumed by the block
+		// splitter, so what reaches here is `#` inside retained fenced-code
+		// text — which should read as words, not as stray hashes.
+		.replace(/^\s{0,3}#{1,6}\s+/gm, '')
+		// Horizontal rules.
+		.replace(/^\s*([-*_])\s*(\1\s*){2,}$/gm, '')
+		// Unordered list bullets at line start.
+		.replace(/^\s*[-*+]\s+/gm, '')
+		// Ordered list markers at line start.
+		.replace(/^\s*\d+[.)]\s+/gm, '');
+
+	for (const [pattern, replacement] of EMPHASIS_RULES) {
+		text = text.replace(pattern, replacement);
+	}
+
 	return (
-		input
-			// Fenced code blocks: keep the code, drop the fences.
-			.replace(/^```[^\n]*\n([\s\S]*?)^```\s*$/gm, '$1')
-			// Images: drop entirely (alt text rarely reads as part of an answer).
-			.replace(/!\[[^\]]*\]\([^)]*\)/g, '')
-			// Links: keep the label, drop the target.
-			.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
-			// Reference-style links: keep the label.
-			.replace(/\[([^\]]*)\]\[[^\]]*\]/g, '$1')
-			// Raw HTML tags (including any stray `</script>`).
-			.replace(/<[^>]*>/g, '')
-			// Inline code.
-			.replace(/`([^`]*)`/g, '$1')
-			// Bold / italic / strikethrough markers.
-			.replace(/(\*\*\*|\*\*|\*|___|__|_|~~)/g, '')
-			// Blockquote markers at line start.
-			.replace(/^\s{0,3}>\s?/gm, '')
-			// Leading heading hashes. Real headings are consumed by the block
-			// splitter, so what reaches here is `#` inside retained fenced-code
-			// text — which should read as words, not as stray hashes.
-			.replace(/^\s{0,3}#{1,6}\s+/gm, '')
-			// Unordered list bullets at line start.
-			.replace(/^\s*[-*+]\s+/gm, '')
-			// Ordered list markers at line start.
-			.replace(/^\s*\d+[.)]\s+/gm, '')
-			// Horizontal rules.
-			.replace(/^\s*([-*_])\s*(\1\s*){2,}$/gm, '')
+		text
 			// Table pipes — the cells still read as text.
 			.replace(/\|/g, ' ')
 			// Collapse all whitespace runs into single spaces.

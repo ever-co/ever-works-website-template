@@ -59,6 +59,11 @@ written FAQ needs no extra authoring:
 - Answers are converted to plain text (links keep their label, images and raw
   HTML are dropped). Very long answers are truncated in the structured data
   only; the visible page always shows the full text.
+- The plain text says what the page says. Formatting markers are removed only
+  where they actually delimit a span, so an answer that mentions `snake_case`,
+  `5*3` or `a < b` is marked up with those characters intact — search engines
+  treat a marked-up answer that disagrees with the visible one as a
+  structured-data violation.
 
 If your page's prose does not map cleanly onto headings, declare the pairs
 explicitly in frontmatter — this takes priority over heading detection:
@@ -87,6 +92,10 @@ If your data repository has no `faq` page, `/faq` renders a **built-in,
 directory-agnostic FAQ** (what the directory is, how to search, how to submit,
 review times, pricing, corrections, contact) so a freshly generated site is
 never blank. Replace it by committing your own file.
+
+A `faq.<locale>.md` that carries only frontmatter counts as "no body", so `/faq`
+and the `/faq.md` mirror both fall back to the built-in FAQ rather than one of
+them going blank. The same rule now applies to the other static info pages.
 
 The page is wired into discovery the same way its siblings are:
 

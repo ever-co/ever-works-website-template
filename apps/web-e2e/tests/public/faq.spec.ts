@@ -82,6 +82,12 @@ test.describe('Public: FAQ', () => {
 		expect((resp.headers()['content-type'] ?? '').toLowerCase()).toMatch(/text\/(markdown|plain)/);
 		const body = await resp.text();
 		expect(body.length, '/faq.md body should be non-empty').toBeGreaterThan(0);
+
+		// The mirror must carry the same substance as the HTML page. A
+		// `faq.<locale>.md` with frontmatter but no body used to render the
+		// built-in FAQ at /faq while /faq.md returned a heading and nothing
+		// else, so the alternate advertised to crawlers said less than the page.
+		expect(body, '/faq.md should carry question headings, not just a title').toMatch(/^##\s+\S/m);
 	});
 
 	test('faq is reachable from the footer', async ({ page }) => {

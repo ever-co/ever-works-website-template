@@ -266,7 +266,14 @@ export function renderStaticPageMarkdown(
 	const description = (pageData?.metadata?.description as string) || '';
 	const lastUpdated = (pageData?.metadata?.lastUpdated as string) || '';
 
-	const body = (pageData?.content ?? options.defaultContent ?? '').trim();
+	// A page file that carries frontmatter but no body loads as `content: ''`,
+	// which is "no body in the data repository" and not "an intentionally empty
+	// body". `||` rather than `??` therefore falls back to the default, keeping
+	// this mirror in step with the HTML pages (`/about`, `/cookies`, `/faq`, …),
+	// which all render their own default on falsy content. Without it a
+	// frontmatter-only `faq.en.md` shows the built-in FAQ at `/faq` while the
+	// `/faq.md` alternate it advertises to crawlers comes back with no body.
+	const body = (pageData?.content?.trim() || options.defaultContent || '').trim();
 
 	const lines: string[] = [];
 	lines.push(`# ${title}`);

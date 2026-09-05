@@ -69,12 +69,14 @@ flowchart LR
 | `apps/web/components/seo/faq-json-ld.tsx`| Server component emitting the `FAQPage` script block.                       |
 | `apps/web/lib/default-page-content.ts`   | `DEFAULT_FAQ_CONTENT`, shared by the page and the `.md` mirror.             |
 | `apps/web-e2e/tests/public/faq.spec.ts`  | Dedicated Playwright coverage.                                              |
+| `apps/web/lib/seo/__tests__/faq-parser.spec.ts` | `node:test` unit coverage for the parser (fidelity + no tag reassembly). |
 
 ### Changed (all additive)
 
 | File                                         | Change                                                            |
 | -------------------------------------------- | ----------------------------------------------------------------- |
 | `apps/web/lib/seo/schema.ts`                  | Add `generateFaqPageSchema` + `FaqEntry` / `FaqPageSchemaInput`.   |
+| `apps/web/lib/seo/markdown-mirror.ts`         | `renderStaticPageMarkdown` treats an empty body as absent, so every `.md` mirror falls back the way its HTML page does. |
 | `apps/web/app/[locale]/_static-md/[slug]/route.ts` | `faq` added to `ALLOWED_STATIC_SLUGS`, `TITLES`, `DEFAULT_BODIES`. |
 | `apps/web/next.config.ts`                     | `faq` added to both `staticSlug` rewrite groups.                   |
 | `apps/web/app/sitemap.ts`                     | `/faq` added to `STATIC_ROUTES` (also feeds the per-locale block). |
@@ -114,6 +116,28 @@ catch-all, and every existing route list keep their prior entries.
   on every page view inside the performance budget (AGENTS.md §5).
 - **Return `null` / empty rather than an empty `FAQPage`.** An `FAQPage` with an
   empty `mainEntity` is invalid structured data and worse than none.
+- **The reduction to plain text must not change what the page says.** Google
+  treats a marked-up answer that disagrees with the visible one as a
+  structured-data violation, so `stripMarkdown` removes `*` / `_` / `~` only
+  where they actually delimit a span. A blanket removal of every marker
+  character published `snakecase` and `53` for pages that render `snake_case`
+  and `5*3`.
+- **HTML removal is a scanner run to a fixpoint, not one `String.replace`.** A
+  single global `<[^>]*>` pass is an incomplete sanitiser: deleting the inner
+  tag of `<scr<script>ipt>` splices the remainder into a fresh `<script>`
+  (CodeQL `js/incomplete-multi-character-sanitization`). Repeating until a pass
+  changes nothing leaves nothing that can be reassembled, and each changing
+  pass strictly shortens the string, so it terminates. A `<` that opens neither
+  a comment nor a tag is prose ("orders under < 10 items") and is kept; one
+  that opens something tag-shaped but never closes is dropped, because keeping
+  it is exactly what would let two fragments recombine.
+- **The `.md` mirror falls back the same way the HTML page does.** A
+  `faq.<locale>.md` carrying frontmatter but no body loads as `content: ''`,
+  which means "the data repository ships no body", not "an intentionally empty
+  body". `renderStaticPageMarkdown` therefore uses `||`, not `??`, so `/faq`
+  and the `/faq.md` it advertises to crawlers never disagree. The same applies
+  to `/about`, `/cookies`, `/privacy-policy` and `/terms-of-service`, whose
+  HTML pages already fell back on falsy content while their mirrors did not.
 
 ## 5. Constitution check
 
@@ -134,6 +158,9 @@ catch-all, and every existing route list keep their prior entries.
 - `npx tsc --noEmit` in `apps/web` — clean.
 - `pnpm run --filter @ever-works/web lint` — no new errors or warnings.
 - `pnpm run build:web` — the route compiles and prerenders.
+- `npx tsx --test apps/web/lib/seo/__tests__/faq-parser.spec.ts` — 18 unit
+  assertions over the parser, following the `node:test` convention already used
+  by `apps/web/lib/payment/__tests__`.
 - Playwright: `tests/public/faq.spec.ts` plus the four amended matrices. Note
   the e2e workflow runs on `stage` / `main` only (see `.github/workflows/e2e.yml`),
   so these are release-gate coverage rather than PR-gate coverage.

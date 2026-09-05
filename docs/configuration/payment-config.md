@@ -109,6 +109,37 @@ pricing: {
 | `NEXT_PUBLIC_PREMIUM_TRIAL_AMOUNT_ID` | `trial.premiumTrialAmountId` | Price ID for premium trial |
 | `NEXT_PUBLIC_AUTHORIZED_TRIAL_AMOUNT` | `trial.authorized` | Enable trial amounts (`true`/`false`) |
 
+## Plans in `works.yml`
+
+The schema above configures the payment **integration** from environment
+variables. The **plans a visitor sees** — names, prices, features, provider
+IDs — come from the data repository instead, in the optional `pricing:` block
+of `.works/works.yml`.
+
+```yaml
+pricing:
+  provider: stripe # stripe | lemonsqueezy | polar | solidgate | manual
+  currency: USD
+  plans:
+    FREE: { id: free, name: Free Plan, price: 0 }
+    STANDARD: { id: standard, name: Standard Plan, price: 19 }
+    PREMIUM: { id: premium, name: Premium Plan, price: 49 }
+```
+
+Omit the block and the built-in plans in `lib/types.ts`
+(`defaultPricingConfig`) are used, exactly as before. When present, it is
+validated by `lib/config/schemas/works-pricing.schema.ts`; a malformed block
+is logged field by field and then ignored in favour of those defaults.
+
+`provider: manual` declares that this site has no gateway — prices are
+displayed and no in-site checkout is started, so payment is collected
+elsewhere. Omitting `provider` is not the same thing: that falls back to the
+Stripe default.
+
+Full field reference:
+[works.yml Pricing Configuration](./works-yml-pricing.md). Copy-ready example:
+`docs/configuration/examples/works-pricing.example.yml`.
+
 ## Provider Setup
 
 ### Stripe
@@ -246,6 +277,7 @@ const provider = getOrCreateProvider('stripe');
 
 ## Related Pages
 
+- [works.yml Pricing Configuration](./works-yml-pricing.md) -- the `pricing:` block in the data repository
 - [Payment Types](../types/payment-types.md) -- type definitions for payment operations
 - [Subscription Types](../types/subscription-types.md) -- subscription lifecycle types
 - [Environment Reference](./environment-reference.md) -- full environment variable listing

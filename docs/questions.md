@@ -523,6 +523,47 @@ confirm, override, or refine.
 
 ---
 
+## Spec 046 — Provider-aware pricing configuration in works.yml
+
+### Q-046a Should `provider: manual` render a distinct pricing surface?
+
+- **Context.** EW-131 asks `works.yml` to accept `provider: manual` —
+  "show the prices, take payment elsewhere". Spec 046 accepts the value and
+  suppresses the in-site checkout: `handleCheckout()` returns before any
+  gateway branch and logs the reason. Which cards render is unchanged — still
+  the LIVE / DEMO logic of
+  [spec 044](spec/044-public-payment-config/spec.md). That is safe but
+  silent: a manual-checkout operator arguably wants a "Contact us" call to
+  action on the paid cards rather than a button that does nothing.
+- **Options.**
+  - **Suppress the checkout and render the existing cards (current).** One
+    guard in the pricing flow, no new strings, no new localisation work.
+  - Add a manual-checkout mode: a per-plan contact URL in `works.yml` and a
+    dedicated CTA on the card. Needs new i18n keys in all locales and a new
+    branch in `use-pricing-section.ts`.
+- **Default.** **Suppress the checkout, keep the existing cards.** The value
+  is accepted and documented now; the UX affordance can land on its own ticket
+  once someone actually runs manual checkout.
+- **Owner.** Template maintainers.
+- **Status.** `open`.
+
+### Q-046b Should a malformed `pricing:` block ever be fatal?
+
+- **Context.** Spec 046 logs each problem and falls back to the built-in
+  plans. `getConfig()` runs on every render, so throwing would take a whole
+  directory offline over a typo in an optional block.
+- **Options.**
+  - **Warn and fall back (current).** The site stays up; the operator sees
+    `[CONTENT] Invalid "pricing" section …` with one line per field.
+  - Fail the build (not the request) when the data repository is cloned at
+    build time, so the typo is caught before deploy.
+- **Default.** **Warn and fall back.** Revisit if operators report missing
+  the log line; a build-time check is additive and can land later.
+- **Owner.** Template maintainers.
+- **Status.** `open`.
+
+---
+
 ## How to add a question
 
 1. Pick the next available `Q-NNN…` id under the relevant spec.

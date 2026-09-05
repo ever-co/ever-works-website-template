@@ -117,6 +117,16 @@ Filters (`from`, `to`, `planId`, `status`, `provider`, `search`) are parsed by
 `lib/services/payment-report-filters.ts`, imported by both routes. It lives outside
 the route files because a Next.js `route.ts` may only export route handlers.
 
+The export reads ONE snapshot and derives everything from it. The rows written to
+the file are also the input to the file's summary (`summarizePaymentRecords`), and
+the over-cap refusal is decided by that same read — the route asks for
+`MAX_EXPORT_ROWS + 1` rows, and the extra row, never exported, is what proves the
+overflow. Counting in a separate statement first left a window in which a payment
+inserted between the COUNT and the read pushed the set past the cap: the caller
+then received a file truncated at exactly the limit whose summary totalled every
+matching row, including the ones missing from the file, with nothing in the file
+to reveal the discrepancy.
+
 `page` and `limit` go through the strict pre-check in
 `lib/utils/integer-query-param.ts` before the repo's shared
 `validatePaginationParams`, exactly as the billing-issues list route does. The

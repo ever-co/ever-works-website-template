@@ -520,6 +520,26 @@ async function handleSubscriptionPaymentSucceeded(data: any) {
 }
 
 /**
+ * Read one property off an unverified webhook payload.
+ *
+ * The payload arrives as JSON over the wire, so its shape is a claim, not a fact —
+ * `unknown` plus these two guards keeps the Spec 046 extraction below honest
+ * without an `any` (AGENTS.md §4) and without pulling a Stripe payload type into
+ * a file that also serves the platform relay.
+ */
+function readField(source: unknown, key: string): unknown {
+	return source && typeof source === 'object' ? (source as Record<string, unknown>)[key] : undefined;
+}
+
+/** A Stripe reference field is either a bare id or an object Stripe expanded. */
+function readReferenceId(value: unknown): string | null {
+	if (typeof value === 'string' && value) return value;
+
+	const id = readField(value, 'id');
+	return typeof id === 'string' && id ? id : null;
+}
+
+/**
  * Read the provider's own subscription id off a failed-invoice payload (Spec 046).
  *
  * Stripe moved the reference from `invoice.subscription` to
@@ -527,14 +547,13 @@ async function handleSubscriptionPaymentSucceeded(data: any) {
  * both shapes reach this app depending on the account's pinned version, so both
  * are accepted. Each may be a bare id or an expanded object.
  */
-function extractProviderSubscriptionId(data: any): string | null {
-	const candidates = [data?.subscription, data?.parent?.subscription_details?.subscription];
+function extractProviderSubscriptionId(data: unknown): string | null {
+	const parentDetails = readField(readField(data, 'parent'), 'subscription_details');
+	const candidates = [readField(data, 'subscription'), readField(parentDetails, 'subscription')];
 
 	for (const candidate of candidates) {
-		if (typeof candidate === 'string' && candidate) return candidate;
-		if (candidate && typeof candidate === 'object' && typeof candidate.id === 'string' && candidate.id) {
-			return candidate.id;
-		}
+		const id = readReferenceId(candidate);
+		if (id) return id;
 	}
 
 	return null;
@@ -551,12 +570,12 @@ function extractProviderSubscriptionId(data: any): string | null {
  * id is the honest fallback — it records something traceable, and the refund
  * dialog lets an admin paste the real reference before confirming.
  */
-function extractProviderPaymentId(data: any): string | null {
-	const intent = data?.payment_intent;
-	if (typeof intent === 'string' && intent) return intent;
-	if (intent && typeof intent === 'object' && typeof intent.id === 'string' && intent.id) return intent.id;
+function extractProviderPaymentId(data: unknown): string | null {
+	const intent = readReferenceId(readField(data, 'payment_intent'));
+	if (intent) return intent;
 
-	return typeof data?.id === 'string' && data.id ? data.id : null;
+	const invoiceId = readField(data, 'id');
+	return typeof invoiceId === 'string' && invoiceId ? invoiceId : null;
 }
 
 async function handleSubscriptionPaymentFailed(data: any) {

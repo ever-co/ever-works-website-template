@@ -33921,6 +33921,8 @@
             "name": "id",
             "in": "path",
             "required": true,
+            "description": "Id of the billing issue whose payment is being refunded.",
+            "example": "b1c2d3e4-5678-90ab-cdef-1234567890ab",
             "schema": {
               "type": "string"
             }
@@ -33936,6 +33938,10 @@
                   "amount": {
                     "type": "integer",
                     "description": "Partial refund amount in the smallest currency unit. Omit for a full refund."
+                  },
+                  "providerPaymentId": {
+                    "type": "string",
+                    "description": "Provider charge / payment reference to refund. Overrides the reference stored on the issue and is persisted when the refund succeeds — detection can only fill it from the invoice id the site stores, so an admin holding the real charge id can supply it here."
                   },
                   "note": {
                     "type": "string"

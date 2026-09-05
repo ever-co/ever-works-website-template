@@ -603,6 +603,14 @@ export async function upsertBillingIssueForSubscription(input: {
 	// refund actually needs, so adopt it. Scoped to issues that are still OPEN so a
 	// closed or refunded issue is never touched, and to rows whose reference differs,
 	// so this is a no-op on a repeat delivery.
+	//
+	// The NULL arm is not defensive padding — it is the main case. The re-scan fills
+	// `provider_payment_id` from `subscriptions.invoice_id`, which is nullable, so an
+	// issue detected before any invoice was recorded stores NULL. In SQL,
+	// `NULL <> 'pi_123'` is NULL, not TRUE, so a bare `ne(...)` matches no row and the
+	// webhook's payment intent is silently dropped — leaving exactly the issues that
+	// have no reference as the ones that can never acquire one, with the refund
+	// control disabled forever.
 	if (input.providerPaymentId) {
 		const [updated] = await db
 			.update(billingIssues)
@@ -612,7 +620,10 @@ export async function upsertBillingIssueForSubscription(input: {
 					eq(billingIssues.tenantId, input.tenantId),
 					eq(billingIssues.sourceKey, buildBillingIssueSourceKey(input.subscriptionId, input.type)),
 					inArray(billingIssues.status, OPEN_BILLING_ISSUE_STATUSES),
-					ne(billingIssues.providerPaymentId, input.providerPaymentId)
+					or(
+						isNull(billingIssues.providerPaymentId),
+						ne(billingIssues.providerPaymentId, input.providerPaymentId)
+					)
 				)
 			)
 			.returning();

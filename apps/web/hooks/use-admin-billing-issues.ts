@@ -126,7 +126,7 @@ export function useAdminBillingIssues(options: UseAdminBillingIssuesOptions = {}
 		[page, limit, search, status, type, provider]
 	);
 
-	const { data, isLoading, refetch } = useQuery({
+	const { data, isLoading, isError, error, refetch } = useQuery({
 		queryKey: billingIssuesQueryKeys.list(queryParams),
 		queryFn: () => fetchIssues(queryParams),
 		staleTime: 60 * 1000,
@@ -238,6 +238,13 @@ export function useAdminBillingIssues(options: UseAdminBillingIssuesOptions = {}
 		issues: data?.issues ?? [],
 		stats: statsData ?? null,
 		isLoading,
+		// Surfaced so the page can say the QUEUE failed to load. `data?.issues ?? []`
+		// turns a failed read into an empty array, and the page would then render
+		// "No billing issues" — telling an admin that nothing needs their attention
+		// at the exact moment the triage queue is unreadable. Mirrors what
+		// `use-admin-payment-reports.ts` already does for the report.
+		isError,
+		errorMessage: error instanceof Error ? error.message : null,
 		isLoadingStats,
 		isSyncing: syncMutation.isPending,
 		pendingId,

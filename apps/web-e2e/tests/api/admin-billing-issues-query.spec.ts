@@ -202,36 +202,42 @@ test.describe('API: /api/admin/billing-issues (admin)', () => {
 
 	test('GET /api/admin/billing-issues returns the list envelope for an admin', async ({ request }) => {
 		const response = await request.get('/api/admin/billing-issues?page=1&limit=10');
-		// 503 is the documented answer when the database is unavailable; every other
-		// admin assertion in this file guards the same way.
-		if (response.status() !== 503) {
-			expect(response.status(), 'admin list should not 5xx').toBeLessThan(500);
-		}
+		// 503 is the documented answer when the database is unavailable, and it is the
+		// only status this test tolerates. `toBeLessThan(500)` used to stand in for
+		// the whole contract, which let a 401 or a 403 pass — i.e. a broken admin
+		// session, or a route that stopped answering at all, looked green while the
+		// envelope below was never checked. `global-setup.ts` THROWS if it cannot
+		// create the admin storage state, so reaching here with a session that is not
+		// an admin's is itself the bug.
+		if (response.status() === 503) return;
 
-		if (response.status() === 200) {
-			const body = await response.json();
-			expect(body.success).toBe(true);
-			expect(Array.isArray(body.data.issues)).toBe(true);
-			expect(body.data.pagination).toMatchObject({ page: 1, limit: 10 });
-		}
+		expect(response.status(), 'an admin must be served the list').toBe(200);
+
+		const body = await response.json();
+		expect(body.success).toBe(true);
+		expect(Array.isArray(body.data.issues)).toBe(true);
+		expect(body.data.pagination).toMatchObject({ page: 1, limit: 10 });
 	});
 
 	test('GET /api/admin/billing-issues/stats returns counters for an admin', async ({ request }) => {
 		const response = await request.get('/api/admin/billing-issues/stats');
-		expect(response.status()).toBeLessThan(500);
+		// `toBeLessThan(500)` was also wrong in the other direction here: 503 is NOT
+		// less than 500, so the documented database-unavailable answer FAILED this
+		// test rather than skipping it.
+		if (response.status() === 503) return;
 
-		if (response.status() === 200) {
-			const body = await response.json();
-			expect(body.success).toBe(true);
-			expect(typeof body.data.total).toBe('number');
-			expect(typeof body.data.openCount).toBe('number');
-			// Per currency, not a scalar: adding 100 JPY to 100 USD would produce a
-			// number with no meaning and no honest label.
-			expect(Array.isArray(body.data.amountAtRisk)).toBe(true);
-			for (const row of body.data.amountAtRisk) {
-				expect(typeof row.currency).toBe('string');
-				expect(typeof row.amount).toBe('number');
-			}
+		expect(response.status(), 'an admin must be served the counters').toBe(200);
+
+		const body = await response.json();
+		expect(body.success).toBe(true);
+		expect(typeof body.data.total).toBe('number');
+		expect(typeof body.data.openCount).toBe('number');
+		// Per currency, not a scalar: adding 100 JPY to 100 USD would produce a
+		// number with no meaning and no honest label.
+		expect(Array.isArray(body.data.amountAtRisk)).toBe(true);
+		for (const row of body.data.amountAtRisk) {
+			expect(typeof row.currency).toBe('string');
+			expect(typeof row.amount).toBe('number');
 		}
 	});
 
@@ -281,6 +287,50 @@ test.describe('API: /api/admin/billing-issues (admin)', () => {
 			if (response.status() !== 503) {
 				expect(response.status(), `amount=${amount} should be rejected`).toBe(400);
 			}
+		}
+	});
+
+	test('a supplied but non-numeric refund amount is a 400, never a silent FULL refund', async ({ request }) => {
+		/*
+		 * The dangerous half of a partial-refund payload is the `amount` field itself.
+		 *
+		 * `{"amount": null}` and `{"amount": ""}` are what a truncated or
+		 * mis-serialised body arrives as, and the route used to skip its validation
+		 * block for both — leaving `amount` undefined, which means "refund the WHOLE
+		 * charge". A typo in a partial-refund request moved the entire payment.
+		 *
+		 * `true` and `["5"]` are the other half: `Number()` coerces them to 1 and 5,
+		 * so a malformed field became a silent partial refund of an amount nobody
+		 * asked for. `"100"` is included because the sibling create route already
+		 * requires a real number, and the route that actually calls a provider must
+		 * not be the looser of the two.
+		 *
+		 * 404 is the tell here, not 200: these run against an issue id that does not
+		 * exist, so "rejected at validation" is a 400 and "accepted, then looked up"
+		 * is a 404. Only an ABSENT `amount` key may reach the lookup.
+		 */
+		for (const amount of [null, '', true, ['5'], '100', {}]) {
+			const response = await request.post('/api/admin/billing-issues/does-not-exist/refund', {
+				headers: { 'Content-Type': 'application/json' },
+				data: JSON.stringify({ amount })
+			});
+
+			if (response.status() !== 503) {
+				expect(response.status(), `amount=${JSON.stringify(amount)} must be rejected`).toBe(400);
+			}
+		}
+	});
+
+	test('an omitted amount key still means a full refund, so the issue is looked up', async ({ request }) => {
+		// The counterpart to the test above: tightening `amount` must not break the
+		// documented full-refund call, which sends no `amount` at all.
+		const response = await request.post('/api/admin/billing-issues/does-not-exist/refund', {
+			headers: { 'Content-Type': 'application/json' },
+			data: JSON.stringify({ note: 'full refund' })
+		});
+
+		if (response.status() !== 503) {
+			expect(response.status(), 'an omitted amount must reach the issue lookup').toBe(404);
 		}
 	});
 

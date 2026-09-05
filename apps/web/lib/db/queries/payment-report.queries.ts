@@ -236,6 +236,84 @@ export async function listAllPaymentRecords(
 	return await selectRecords(where, maxRows, 0);
 }
 
+/**
+ * The same revenue roll-ups as `summarizePayments`, computed from records already
+ * in hand instead of from four more aggregate queries.
+ *
+ * This exists for the export path, where the rows and their summary MUST describe
+ * the same set. Counting in SQL after reading the rows leaves a window in which a
+ * payment written between the two statements lands in the summary but not in the
+ * file — a stakeholder then receives totals that do not add up to the rows printed
+ * beneath them, with nothing on the page to reveal it.
+ *
+ * The grouping is deliberately identical to the SQL above, coalesce for coalesce:
+ * `coalesce(currency, 'usd')` for the key, `coalesce(amount_paid, amount, 0)` for
+ * the money. `amount_paid = 0` stays a real answer — only a genuine NULL falls back
+ * to the scheduled `amount` — so a pending subscription is not booked as revenue
+ * here either. Group order follows first appearance in `records`, which is the
+ * report's own newest-first order, so an export is byte-stable for a stable input.
+ */
+export function summarizePaymentRecords(records: PaymentReportRecord[]): PaymentReportSummary {
+	interface Bucket {
+		value: string;
+		currency: string;
+		transactions: number;
+		amount: number;
+	}
+
+	/** Accumulate one `(value, currency)` group, preserving first-seen order. */
+	const accumulate = (into: Map<string, Bucket>, value: string, currency: string, amount: number): void => {
+		const id = `${value} ${currency}`;
+		const row = into.get(id) ?? { value, currency, transactions: 0, amount: 0 };
+		row.transactions += 1;
+		row.amount += amount;
+		into.set(id, row);
+	};
+
+	const currencies = new Map<string, Bucket>();
+	const plans = new Map<string, Bucket>();
+	const providers = new Map<string, Bucket>();
+	const statuses = new Map<string, Bucket>();
+
+	for (const record of records) {
+		const currency = record.currency ?? 'usd';
+		// `??`, not `||`: a collected amount of 0 is a real answer, and `||` would
+		// fall through to the scheduled `amount` and book an unpaid row as revenue.
+		const amount = record.amountPaid ?? record.amount ?? 0;
+
+		accumulate(currencies, currency, currency, amount);
+		accumulate(plans, record.planId, currency, amount);
+		accumulate(providers, record.paymentProvider, currency, amount);
+		accumulate(statuses, record.status, currency, amount);
+	}
+
+	return {
+		transactions: records.length,
+		totalsByCurrency: Array.from(currencies.values(), (row) => ({
+			currency: row.currency,
+			transactions: row.transactions,
+			amount: row.amount
+		})),
+		byPlan: Array.from(plans.values(), (row) => ({
+			planId: row.value,
+			currency: row.currency,
+			transactions: row.transactions,
+			amount: row.amount
+		})),
+		byProvider: Array.from(providers.values(), (row) => ({
+			provider: row.value,
+			currency: row.currency,
+			transactions: row.transactions,
+			amount: row.amount
+		})),
+		byStatus: Array.from(statuses.values(), (row) => ({
+			status: row.value,
+			currency: row.currency,
+			transactions: row.transactions,
+			amount: row.amount
+		}))
+	};
+}
 /** Revenue roll-ups for the same filter set the list uses. */
 export async function summarizePayments(filters: PaymentReportFilters = {}): Promise<PaymentReportSummary> {
 	const where = await buildWhere(filters);

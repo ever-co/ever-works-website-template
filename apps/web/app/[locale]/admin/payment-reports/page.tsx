@@ -81,6 +81,20 @@ export default function AdminPaymentReportsPage() {
 		return Array.from(new Set([...Object.values(PaymentPlan), ...fromData]));
 	}, [summary]);
 
+	/**
+	 * Distinct plans and providers, not roll-up rows.
+	 *
+	 * Currency is part of the grouping key in `byPlan` / `byProvider` (see
+	 * `PaymentReportSummary`), so one plan sold in USD and EUR is TWO rows. Counting
+	 * rows would have told an admin the site has two plans when it has one — and the
+	 * more currencies a site takes, the further off the card gets.
+	 */
+	const distinctPlanCount = useMemo(() => new Set((summary?.byPlan ?? []).map((row) => row.planId)).size, [summary]);
+	const distinctProviderCount = useMemo(
+		() => new Set((summary?.byProvider ?? []).map((row) => row.provider)).size,
+		[summary]
+	);
+
 	const clearFilters = () => {
 		setFrom('');
 		setTo('');
@@ -153,8 +167,8 @@ export default function AdminPaymentReportsPage() {
 				{[
 					{ label: t('TOTAL_REVENUE'), value: totalRevenue, Icon: TrendingUp },
 					{ label: t('TRANSACTIONS'), value: String(summary?.transactions ?? 0), Icon: Receipt },
-					{ label: t('PLANS'), value: String(summary?.byPlan?.length ?? 0), Icon: Users },
-					{ label: t('PROVIDERS'), value: String(summary?.byProvider?.length ?? 0), Icon: BarChart3 }
+					{ label: t('PLANS'), value: String(distinctPlanCount), Icon: Users },
+					{ label: t('PROVIDERS'), value: String(distinctProviderCount), Icon: BarChart3 }
 				].map((card) => (
 					<div
 						key={card.label}

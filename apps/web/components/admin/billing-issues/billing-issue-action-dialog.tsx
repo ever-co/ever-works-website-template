@@ -93,10 +93,32 @@ export default function BillingIssueActionDialog({
 	// factor is per-currency — for JPY the two are the same, and multiplying by 100
 	// there would submit a refund a hundred times too large.
 	const minorUnitFactor = currencyMinorUnitFactor(issue.currency || 'usd');
-	const parsedPartial = partialAmount.trim() ? Math.round(Number(partialAmount.trim()) * minorUnitFactor) : undefined;
+	const maxFractionDigits = minorUnitFactor === 1 ? 0 : 2;
+	const trimmedPartial = partialAmount.trim();
+
+	/*
+	 * The typed amount must be a decimal the charge's currency can actually express.
+	 *
+	 * `Math.round(Number(input) * factor)` on its own silently CHANGED the number:
+	 * "1.5" in a zero-decimal currency became 2 minor units, and "12.345" became
+	 * 1235. A dialog whose next button moves real money must never submit a
+	 * different amount from the one on screen — so excess precision is rejected
+	 * rather than rounded away, and the entry is flagged like any other invalid one.
+	 *
+	 * The pattern also pins the shape: `Number()` happily accepts "1e3", "0x10" and
+	 * "Infinity", none of which is an amount a person meant to type into a refund
+	 * box. `Math.round` stays because it is still needed — 12.34 * 100 is
+	 * 1233.9999999999998 in binary floating point, and only the rounding turns that
+	 * back into the integer 1234 the API expects.
+	 */
+	const partialMatch = /^\d+(?:\.(\d+))?$/.exec(trimmedPartial);
+	const partialPrecisionOk = partialMatch !== null && (partialMatch[1]?.length ?? 0) <= maxFractionDigits;
+	const parsedPartial =
+		trimmedPartial && partialPrecisionOk ? Math.round(Number(trimmedPartial) * minorUnitFactor) : undefined;
 	const partialIsInvalid =
-		partialAmount.trim() !== '' &&
-		(!Number.isFinite(parsedPartial) ||
+		trimmedPartial !== '' &&
+		(!partialPrecisionOk ||
+			!Number.isFinite(parsedPartial) ||
 			(parsedPartial ?? 0) <= 0 ||
 			Boolean(issue.amount && (parsedPartial ?? 0) > issue.amount));
 
@@ -331,7 +353,13 @@ export default function BillingIssueActionDialog({
 							/>
 							{partialIsInvalid && (
 								<p className="text-[11px] text-red-600 dark:text-red-400">
-									{t('PARTIAL_AMOUNT_INVALID')}
+									{/*
+									 * Name the actual problem. "greater than 0 and no larger than
+									 * the charged amount" does not describe "1.5 in a currency with
+									 * no subunit", and an admin reading it would keep re-typing a
+									 * value that can never be accepted.
+									 */}
+									{partialPrecisionOk ? t('PARTIAL_AMOUNT_INVALID') : t('PARTIAL_AMOUNT_PRECISION')}
 								</p>
 							)}
 						</div>

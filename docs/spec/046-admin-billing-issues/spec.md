@@ -174,6 +174,14 @@ caller gets 200 with a page size it never asked for; `lib/utils/integer-query-pa
 rejects any value that is not a whole-integer token before the shared validator
 applies the repo's range rules.
 
+**An `amount` that was supplied is never coerced.** Only an ABSENT `amount` key
+means "refund the whole charge". `{"amount": null}` and `{"amount": ""}` — the
+same truncated / mis-serialised shapes as above, one level in — are 400s, not
+full refunds, and the value is required to be a JSON number rather than anything
+`Number()` will accept, so `true` cannot become a 1-unit partial refund and
+`["5"]` cannot become a 5-unit one. This matches the rule
+`POST /api/admin/billing-issues` already applies to the manual-create amount.
+
 **Refund target.** `POST .../refund` accepts an optional `providerPaymentId` that
 overrides the reference stored on the issue and is persisted when the refund
 succeeds. Detection can only fill that column from what the site stores
@@ -181,7 +189,11 @@ succeeds. Detection can only fill that column from what the site stores
 rather than an invoice id, so the dialog exposes the reference as an editable
 field and an admin holding the real charge id from the provider dashboard can
 supply it instead of hitting a dead end. The failed-payment webhook prefers the
-invoice's `payment_intent` when Stripe expanded one.
+invoice's `payment_intent` when Stripe expanded one. When the webhook adopts that reference
+onto an issue detection already opened, the match must treat a stored NULL as
+adoptable: `provider_payment_id <> 'pi_…'` is NULL, not TRUE, against a NULL
+column, so a plain inequality would silently skip exactly the issues that have no
+refund target — leaving them permanently unrefundable.
 
 ## 10. Plugin / Adapter Impact
 

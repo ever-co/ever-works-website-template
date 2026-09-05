@@ -2,7 +2,7 @@
 
 Complete listing of all E2E tests added across 5 PRs.
 
-**Total: 192 new test cases across 47 new spec files** (excluding
+**Total: 195 new test cases across 47 new spec files** (excluding
 continual-improvement smoke specs listed below — those are tracked
 separately and add ~346 additional tests across 49 spec files).
 
@@ -346,7 +346,7 @@ valid states (e.g. `/sponsor` may redirect or 404 depending on env).
 156. GET /api/current-user returns user data when authenticated
 157. GET /api/current-user returns 401 when unauthenticated
 
-## PR #1049 — Admin billing issues & payment reports (28 new tests)
+## PR #1049 — Admin billing issues & payment reports (30 new tests)
 
 Specs 046 / 047 (Jira EW-116, EW-117). Two admin surfaces over the payment
 records the site already stores. The API specs carry most of the weight here
@@ -380,14 +380,16 @@ full of customer data — the gate, not the happy path, is the invariant.
 177. fractional pagination is rejected instead of reaching the database
 178. a whitespace-only POST body is a 400, not a silent re-scan that writes rows
 179. a manual create with an out-of-tenant user, or an invalid amount, is a 400
+180. a supplied but non-numeric `amount` is a 400, never a silent full refund
+181. an omitted `amount` key still means a full refund
 
 ### API: Admin Payment Reports (`tests/api/admin-payment-reports-query.spec.ts`)
-180. the export never leaks a file to an anonymous caller
-181. list and export reject the same malformed date range (one shared validator)
-182. `?format=pdf` is a 400 naming the supported formats; CSV carries a header row and XLSX is a real ZIP
-183. a calendar-invalid date (`2026-02-30`) is rejected on both routes, not silently rolled over
-184. fractional pagination is rejected instead of reaching the database
-185. every roll-up row carries its own currency, so no amount can be mislabelled
+182. the export never leaks a file to an anonymous caller
+183. list and export reject the same malformed date range (one shared validator)
+184. `?format=pdf` is a 400 naming the supported formats; CSV carries a header row and XLSX is a real ZIP
+185. a calendar-invalid date (`2026-02-30`) is rejected on both routes, not silently rolled over
+186. fractional pagination is rejected instead of reaching the database
+187. every roll-up row carries its own currency, so no amount can be mislabelled
 
 > The counts above name the load-bearing assertions. Both API specs also sweep
 > their full query-param surface (~50 and ~45 URLs) for "never 5xx, never bypass
@@ -438,9 +440,9 @@ full of customer data — the gate, not the happy path, is the invariant.
 | API Contracts | 4 | #630 |
 | Admin Billing Issues | 7 | #1049 |
 | Admin Payment Reports | 7 | #1049 |
-| API: Admin Billing Issues | 8 | #1049 |
+| API: Admin Billing Issues | 10 | #1049 |
 | API: Admin Payment Reports | 6 | #1049 |
-| **Total** | **193** | |
+| **Total** | **195** | |
 
 ---
 

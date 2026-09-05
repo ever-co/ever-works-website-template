@@ -19,6 +19,8 @@ export const runtime = 'nodejs';
  *       - name: "id"
  *         in: "path"
  *         required: true
+ *         description: "Id of the billing issue whose payment is being refunded."
+ *         example: "b1c2d3e4-5678-90ab-cdef-1234567890ab"
  *         schema: { type: string }
  *     requestBody:
  *       required: false
@@ -88,16 +90,38 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 			body = parsed as Record<string, unknown>;
 		}
 
+		// Only an ABSENT `amount` key means "refund the whole charge". Anything the
+		// caller actually supplied has to be a positive integer number of smallest
+		// currency units, and nothing is coerced on the way in.
+		//
+		// The two shapes this closes both moved money:
+		//
+		//   - `{"amount": null}` and `{"amount": ""}` — what a truncated or
+		//     mis-serialised partial-refund payload arrives as — used to skip the
+		//     block entirely, leaving `amount` undefined and issuing a FULL refund.
+		//     That contradicts the rule stated above: only an empty body may do that.
+		//   - `Number(body.amount)` coerced non-numbers, so `true` became 1 and
+		//     `["5"]` became 5 — a malformed field turning into a silent partial
+		//     refund of an arbitrary amount.
+		//
+		// `POST /api/admin/billing-issues` already requires `typeof === 'number'` for
+		// the manual-create amount; this is the same rule on the route that actually
+		// calls the provider.
 		let amount: number | undefined;
-		if (body.amount !== undefined && body.amount !== null && body.amount !== '') {
-			const parsed = typeof body.amount === 'number' ? body.amount : Number(body.amount);
-			if (!Number.isFinite(parsed) || !Number.isInteger(parsed) || parsed <= 0) {
+		if ('amount' in body) {
+			const supplied = body.amount;
+			if (
+				typeof supplied !== 'number' ||
+				!Number.isFinite(supplied) ||
+				!Number.isInteger(supplied) ||
+				supplied <= 0
+			) {
 				return NextResponse.json(
 					{ success: false, error: 'Refund amount must be a positive integer in the smallest currency unit' },
 					{ status: 400 }
 				);
 			}
-			amount = parsed;
+			amount = supplied;
 		}
 
 		const note = typeof body.note === 'string' ? body.note.trim() : undefined;

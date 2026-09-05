@@ -118,6 +118,8 @@ export default function AdminBillingIssuesPage() {
 		issues,
 		stats,
 		isLoading,
+		isError,
+		errorMessage,
 		isLoadingStats,
 		isSyncing,
 		pendingId,
@@ -381,6 +383,31 @@ export default function AdminBillingIssuesPage() {
 								<div className="h-3 w-full bg-gray-200 dark:bg-white/8 rounded animate-pulse" />
 							</div>
 						))}
+					</div>
+				) : isError ? (
+					/*
+					 * A failed read is NOT an empty queue. `issues` is `data?.issues ?? []`,
+					 * so falling through to the empty state would render "No billing issues"
+					 * — an all-clear on the page an admin opens to find out whether anyone's
+					 * payment is broken. The one state this surface must never invent is
+					 * "nothing is wrong".
+					 */
+					<div
+						role="alert"
+						data-testid="billing-issue-error"
+						className="flex flex-col items-center justify-center px-6 py-20 text-center"
+					>
+						<div className="w-14 h-14 rounded-2xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center mb-4 ring-1 ring-red-200 dark:ring-red-500/20">
+							<AlertTriangle className="w-6 h-6 text-red-500 dark:text-red-400" />
+						</div>
+						<h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1.5">
+							{t('LOAD_FAILED')}
+						</h3>
+						{errorMessage && (
+							<p className="text-sm text-gray-500 dark:text-gray-400 max-w-md leading-relaxed break-words">
+								{errorMessage}
+							</p>
+						)}
 					</div>
 				) : issues.length === 0 ? (
 					<div className="flex flex-col items-center justify-center px-6 py-20 text-center">

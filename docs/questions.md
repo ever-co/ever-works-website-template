@@ -523,6 +523,45 @@ confirm, override, or refine.
 
 ---
 
+## Spec 046 — Admin billing issues
+
+### Q-046-1 Should a refund carry a provider-side idempotency key?
+
+- **Context.** `refundBillingIssue()` takes an atomic claim on the issue row
+  (`billing_issues.refund_claimed_at`, a single conditional UPDATE) before it
+  calls `PaymentProviderInterface.refundPayment`, and deliberately does NOT hand
+  the claim back when the provider call throws — a lost response and a clean
+  rejection are indistinguishable, so releasing it would let a retry submit a
+  second refund for a charge that may already be refunded. The claim instead
+  expires after `REFUND_CLAIM_TTL_MS` (5 minutes) so a crashed request cannot
+  strand the issue forever. That expiry is the one remaining theoretical window:
+  a provider call still in flight when the TTL elapses could be joined by a
+  second claim, and the row-level `onlyWithClaim` guard on the write can stop the
+  second request from *recording* over the first, but not from *placing* the call.
+- **Options.**
+  - **Leave it (current).** The window requires a single provider HTTP request to
+    still be open five minutes after it started — longer than every adapter's own
+    SDK timeout and than the serverless function budget the template targets — and
+    it needs a second admin to press refund inside exactly that window. The cost
+    of the alternative reading (never reclaim) is an issue permanently locked by
+    any crashed request.
+  - **Add an idempotency key to the provider seam.** Widen
+    `PaymentProviderInterface.refundPayment(paymentId, amount?)` with an optional
+    idempotency key derived from the billing issue, and thread it through the
+    Stripe, Polar, Solidgate and LemonSqueezy adapters plus `payment-service.ts`.
+    Stripe and Polar both honour one; this closes the window completely rather
+    than narrowing it.
+  - Lengthen `REFUND_CLAIM_TTL_MS`. Cheapest, and strictly worse on the other
+    axis: it narrows the duplicate window only by widening the stranded window.
+- **Default.** **Leave it, and fix it properly in the payment-provider spec.**
+  Spec 046 states it adds no new payment abstraction, and an idempotency
+  parameter is a change to the shared provider interface and all four adapters —
+  it belongs with the seam it changes, not inside an admin feature.
+- **Owner.** Template maintainers.
+- **Status.** `open`.
+
+---
+
 ## Spec 047 — Admin payment reports and export
 
 ### Q-047-1 Should the payment report also export PDF?

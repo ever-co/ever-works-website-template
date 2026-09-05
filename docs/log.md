@@ -9,9 +9,9 @@ sidebar_position: 99
 
 ## 2026-09-03
 
-- `spec-046`: added the visitor-facing FAQ page at `/faq` — content from the data repository (`pages/faq.<locale>.md`) with a built-in fallback FAQ, `FAQPage` JSON-LD generated from that content, footer + More-menu entries, sitemap / robots / `llms.txt` / `/faq.md` mirror wiring, i18n keys in all 21 locales, and Playwright coverage ([spec 046](spec/046-faq-page/spec.md), EW-47, PR #1041).
-- `docs/features`: `seo.md` documented a `FAQPage` generator that did not exist; `lib/seo/schema.ts` now has one, and the page describes how the content contract drives it ([spec 046](spec/046-faq-page/spec.md), PR #1041).
-- `questions`: added Q-046a — should the FAQ render as an accordion rather than plain prose ([spec 046](spec/046-faq-page/spec.md), PR #1041).
+- `spec-046`: added the visitor-facing FAQ page at `/faq` — content from the data repository (`pages/faq.<locale>.md`) with a built-in fallback FAQ, `FAQPage` JSON-LD generated from that content, footer + More-menu entries, sitemap / robots / `llms.txt` / `/faq.md` mirror wiring, i18n keys in all 21 locales, and Playwright coverage ([spec 046](spec/046-faq-page/spec.md), EW-47, PR #1044).
+- `docs/features`: `seo.md` documented a `FAQPage` generator that did not exist; `lib/seo/schema.ts` now has one, and the page describes how the content contract drives it ([spec 046](spec/046-faq-page/spec.md), PR #1044).
+- `questions`: added Q-046a — should the FAQ render as an accordion rather than plain prose ([spec 046](spec/046-faq-page/spec.md), PR #1044).
 
 ## 2026-08-25
 

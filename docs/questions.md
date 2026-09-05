@@ -523,6 +523,33 @@ confirm, override, or refine.
 
 ---
 
+## Spec 046 — Visitor-facing FAQ page
+
+### Q-046a Should the FAQ render as an accordion rather than plain prose?
+
+- **Context.** Spec 046 renders `pages/faq.<locale>.md` through the shared
+  `MDX` component, exactly like `/about`, `/cookies` and the legal pages, so a
+  long FAQ is a long scrolling page. Directory Kit (the reference the Jira
+  ticket names) uses collapsible question rows. An accordion would shorten the
+  page and make scanning easier, but it needs a client component, and the
+  answers must stay in the server-rendered HTML for the `FAQPage` rich result
+  and the `.md` mirror to keep working.
+- **Options.**
+  - **Plain prose (current).** Zero client JS, identical to every other static
+    info page, and the operator controls the look through the data repo's
+    Markdown. Content and structured data come from exactly one source.
+  - A client accordion that hydrates over the same server-rendered headings
+    and answers (`<details>`/`<summary>` would even do it without JS). Nicer
+    for long FAQs; a second rendering path to keep consistent with the parser's
+    heading rules, and a first client component on an otherwise static page.
+- **Default.** **Plain prose.** Revisit if a Work ships an FAQ long enough that
+  scanning it becomes the complaint. `<details>`-based progressive enhancement
+  is the cheapest upgrade path and would not break the parser or the mirror.
+- **Owner.** Template maintainers.
+- **Status.** `open`.
+
+---
+
 ## How to add a question
 
 1. Pick the next available `Q-NNN…` id under the relevant spec.

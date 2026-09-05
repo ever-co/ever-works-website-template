@@ -57,12 +57,29 @@ Generates:
 
 Used for site-wide brand identity on the homepage and about pages.
 
+### FAQPage Schema
+
+`generateFaqPageSchema()` builds the `FAQPage` block rendered on `/faq` by
+`components/seo/faq-json-ld.tsx`. Its question/answer pairs are extracted from
+the page's own content by `lib/seo/faq-parser.ts`, so the rich result always
+matches what a visitor reads:
+
+- Every `##`--`######` heading in `pages/faq.<locale>.md` becomes a `Question`,
+  and the prose beneath it becomes the `acceptedAnswer`. `#` (H1) is the
+  document title and is ignored, and a heading immediately followed by another
+  heading is treated as a section grouping rather than a question.
+- A `faqs: [{ question, answer }]` array in the file's frontmatter overrides
+  the heading extraction when a page needs explicit control.
+- Nothing is emitted when no question/answer pair can be extracted -- an
+  `FAQPage` with an empty `mainEntity` is invalid structured data.
+
+See [Spec 046](../spec/046-faq-page/spec.md) for the full content contract.
+
 ### Other Schema Types
 
 The module provides generators for:
 - **WebSite** -- Site-level metadata with search action
 - **BreadcrumbList** -- Navigation breadcrumbs
-- **FAQPage** -- FAQ sections with question/answer pairs
 - **ItemList** -- Category and collection listing pages
 
 ## Hreflang Tags

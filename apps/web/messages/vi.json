@@ -25,6 +25,7 @@
 		"OPEN_USER_MENU": "Mở menu người dùng"
 	},
 	"common": {
+		"FAQ": "Câu hỏi thường gặp",
 		"DISCOVER": "Khám phá",
 		"HOME": "Trang chủ",
 		"ABOUT": "Giới thiệu",
@@ -496,6 +497,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "Câu hỏi thường gặp",
 		"ALL_RIGHTS_RESERVED": "Đã đăng ký bản quyền",
 		"BUILT_WITH": "Được xây dựng với",
 		"CONNECT_WITH_US": "Kết nối với chúng tôi",
@@ -3585,6 +3587,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "Trợ giúp",
+		"FAQ_META_DESCRIPTION": "Giải đáp những câu hỏi khách truy cập hay đặt ra nhất về thư mục này: cách duyệt, cách gửi mục và cách liên hệ",
+		"FAQ_INTRO": "Giải đáp những câu hỏi chúng tôi nhận được nhiều nhất. Nếu bạn không tìm thấy điều cần biết, hãy liên hệ với chúng tôi.",
+		"HELP_DESCRIPTION": "Xem hướng dẫn và chủ đề hỗ trợ",
 		"LEGAL_BADGE": "Hợp pháp",
 		"LAST_UPDATED": "Cập nhật lần cuối:",
 		"RELATED_INFORMATION": "Thông tin liên quan",

@@ -25,6 +25,7 @@
 		"OPEN_USER_MENU": "Open user menu"
 	},
 	"common": {
+		"FAQ": "שאלות נפוצות",
 		"DISCOVER": "גלה",
 		"HOME": "דף הבית",
 		"ABOUT": "אודות",
@@ -469,6 +470,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "שאלות נפוצות",
 		"ALL_RIGHTS_RESERVED": "כל הזכויות שמורות",
 		"BUILT_WITH": "נבנה עם",
 		"CONNECT_WITH_US": "צור קשר איתנו",
@@ -3467,6 +3469,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "עזרה",
+		"FAQ_META_DESCRIPTION": "תשובות לשאלות שמבקרים שואלים הכי הרבה על המדריך הזה: עיון, הגשת רישום ויצירת קשר",
+		"FAQ_INTRO": "תשובות לשאלות שאנחנו נשאלים הכי הרבה. אם לא מצאתם את מה שחיפשתם, אפשר ליצור איתנו קשר.",
+		"HELP_DESCRIPTION": "עיון במדריכים ובנושאי תמיכה",
 		"LEGAL_BADGE": "משפטי",
 		"LAST_UPDATED": "עודכן לאחרונה:",
 		"RELATED_INFORMATION": "מידע קשור",

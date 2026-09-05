@@ -25,6 +25,7 @@
 		"OPEN_USER_MENU": "사용자 메뉴 열기"
 	},
 	"common": {
+		"FAQ": "자주 묻는 질문",
 		"DISCOVER": "탐색",
 		"HOME": "홈",
 		"ABOUT": "소개",
@@ -496,6 +497,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "자주 묻는 질문",
 		"ALL_RIGHTS_RESERVED": "모든 권리 보유",
 		"BUILT_WITH": "구축 도구",
 		"CONNECT_WITH_US": "연락하기",
@@ -3647,6 +3649,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "도움말",
+		"FAQ_META_DESCRIPTION": "방문자가 이 디렉터리에 대해 가장 자주 묻는 질문에 대한 답변: 둘러보기, 등록 신청, 문의 방법",
+		"FAQ_INTRO": "가장 자주 받는 질문에 대한 답변입니다. 찾으시는 내용이 없다면 문의해 주세요.",
+		"HELP_DESCRIPTION": "가이드와 지원 주제 살펴보기",
 		"LEGAL_BADGE": "법적",
 		"LAST_UPDATED": "마지막 업데이트:",
 		"RELATED_INFORMATION": "관련 정보",

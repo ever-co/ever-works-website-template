@@ -5,7 +5,6 @@ import { PageContainer } from '@/components/ui/container';
 import { Breadcrumb, type BreadcrumbItem } from '@/components/ui/breadcrumb';
 import { MDX } from '@/components/mdx';
 import { getCachedPageContent } from '@/lib/content';
-import { getBaseUrl } from '@/lib/utils/url-cleaner';
 import { formatDisplayName } from '@/components/filters/utils/text-utils';
 import { getSiteName } from '@/lib/seo/site-identity';
 import { generatePageHreflangAlternates, getLocalizedUrl } from '@/lib/seo/hreflang';
@@ -20,8 +19,6 @@ interface PageProps {
 // dynamicParams allows on-demand generation for any slug
 export const revalidate = 600;
 export const dynamicParams = true;
-
-const _baseUrl = getBaseUrl();
 
 /**
  * Extracts page title from metadata or generates it from slug
@@ -67,7 +64,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 			canonical: getLocalizedUrl(`/pages/${slug}`, locale as Locale),
 			languages: generatePageHreflangAlternates(slug),
 			types: {
-				'text/markdown': `${_baseUrl}${getLocalizedUrl(`/pages/${slug}`, locale as Locale)}.md`
+				'text/markdown': `${getLocalizedUrl(`/pages/${slug}`, locale as Locale)}.md`
 			}
 		}
 	};

@@ -10,13 +10,15 @@ sidebar_position: 99
 ## 2026-09-04
 
 - `apps/web/app/[locale]` `apps/web-e2e`: fixed the doubled origin in the
-  `text/markdown` alternate link on `about`, `cookies`, `privacy-policy`
-  and `terms-of-service`. Those four prefixed `getLocalizedUrl()` — which
-  already returns an absolute URL — with `appUrl` a second time, so
-  crawlers were served `href="http://host/http:/host/http:/host/about.md"`
-  (Next.js resolved the unparseable doubled string against `metadataBase`,
-  burying it in the path). `help` and `pricing` were already correct. Added
-  `public/md-alternate-link-absolute-url.spec.ts` asserting the advertised
+  `text/markdown` alternate link on `about`, `cookies`, `privacy-policy`,
+  `terms-of-service`, `items/[slug]` and `pages/[slug]`. Those six prefixed
+  `getLocalizedUrl()` — which already returns an absolute URL — with the
+  app URL a second time. The unparseable doubled string was then resolved
+  by Next.js against `metadataBase`, so the origin shipped to crawlers
+  normalised into the pathname; observed on a dev server as
+  `href="http://localhost:3000/http:/localhost:3000http:/localhost:3000/about.md"`.
+  `help` and `pricing` were already correct. Added
+  `public/md-alternate-link-absolute-url.spec.ts` asserting every advertised
   href parses as one absolute URL whose pathname is the plain `<page>.md`
   mirror path, across the default and `/fr` locale prefixes (PR #1046).
 

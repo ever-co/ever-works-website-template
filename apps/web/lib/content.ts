@@ -7,9 +7,10 @@ import * as fsp from 'node:fs/promises';
 import * as path from 'node:path';
 import { parse } from 'date-fns';
 import { dirExists, fsExists, getContentPath } from './lib';
-import { getContentConfigPaths, mergeConfigObjects } from './content-config-file';
+import { getContentConfigPaths, mergeConfigObjects, PRIMARY_CONTENT_CONFIG_FILENAME } from './content-config-file';
+import { parseWorksPricingConfig } from './config/schemas/works-pricing.schema';
 import { unstable_cache } from 'next/cache';
-import { PaymentInterval, PaymentProvider } from './constants';
+import { PaymentInterval, type PricingProvider } from './constants';
 import { CACHE_TAGS, CACHE_TTL as CONTENT_CACHE_TTL, DATA_CACHE_MAX_ITEMS } from './cache-config';
 import { Collection } from '@/types/collection';
 import type { ComparisonData, ComparisonDetail, ComparisonDimension } from '@/types/comparison';
@@ -338,7 +339,11 @@ export interface PricingPlans {
 }
 
 export interface PricingPlanConfig {
-	provider?: PaymentProvider;
+	/**
+	 * Default checkout gateway, or `manual` when `works.yml` declares that
+	 * payment is handled outside the template (spec 046, EW-131).
+	 */
+	provider?: PricingProvider;
 	plans: PricingPlans;
 	currency?: string;
 	lemonCheckoutUrl?: string;
@@ -586,13 +591,50 @@ async function getConfig() {
 			}
 		}
 
-		return (mergedConfig ?? {}) as Config;
+		return applyPricingValidation(mergedConfig ?? {}) as Config;
 	} catch (err) {
 		if (err instanceof Error && 'code' in err && err.code === 'ENOENT') {
 			return {};
 		}
 		throw err;
 	}
+}
+
+/**
+ * Validates the optional `pricing:` block of `works.yml` (spec 046, EW-131).
+ *
+ * A config with no `pricing` key is returned untouched, so every existing
+ * data repository keeps the built-in default plans. A malformed block is
+ * reported field by field and then dropped, which leaves `config.pricing`
+ * undefined — the same state as "no pricing configured", so `ConfigProvider`
+ * falls back to `getDefaultPricingConfigWithCurrency()` instead of rendering
+ * broken plan cards. Deliberately non-fatal: bad pricing metadata must not
+ * take a whole directory offline.
+ */
+function applyPricingValidation(config: Record<string, unknown>): Record<string, unknown> {
+	if (config.pricing === undefined || config.pricing === null) {
+		return config;
+	}
+
+	const { pricing, errors, warnings } = parseWorksPricingConfig(config.pricing);
+
+	for (const warning of warnings) {
+		console.warn(`[CONTENT] ${warning}`);
+	}
+
+	if (!pricing) {
+		console.error(
+			`[CONTENT] Invalid "pricing" section in ${PRIMARY_CONTENT_CONFIG_FILENAME}; ` +
+				`falling back to the built-in pricing plans:\n  - ${errors.join('\n  - ')}`
+		);
+
+		const sanitized = { ...config };
+		delete sanitized.pricing;
+
+		return sanitized;
+	}
+
+	return { ...config, pricing };
 }
 
 export const getCachedConfig = unstable_cache(

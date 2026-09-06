@@ -1,10 +1,10 @@
 ---
-id: spec-046-legal-pages-frontmatter-seo
-title: Spec 046 — Legal page SEO metadata from Markdown frontmatter
+id: spec-048-legal-pages-frontmatter-seo
+title: Spec 048 — Legal page SEO metadata from Markdown frontmatter
 sidebar_label: 046 Legal Pages Frontmatter SEO
 ---
 
-# Feature spec — `046-legal-pages-frontmatter-seo`
+# Feature spec — `048-legal-pages-frontmatter-seo`
 
 ## 1. Summary
 

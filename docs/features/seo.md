@@ -21,35 +21,36 @@ Used on item detail pages:
 import { generateProductSchema } from '@/lib/seo/schema';
 
 const schema = generateProductSchema({
-  name: 'Product Name',
-  description: 'Product description',
-  image: 'https://example.com/image.jpg',
-  url: 'https://example.com/product',
-  category: 'Software',
-  sourceUrl: 'https://product-website.com',
-  brandName: 'Brand Name',
+	name: 'Product Name',
+	description: 'Product description',
+	image: 'https://example.com/image.jpg',
+	url: 'https://example.com/product',
+	category: 'Software',
+	sourceUrl: 'https://product-website.com',
+	brandName: 'Brand Name'
 });
 ```
 
 Generates:
+
 ```json
 {
-  "@context": "https://schema.org",
-  "@type": "Product",
-  "name": "Product Name",
-  "description": "Product description",
-  "image": "https://example.com/image.jpg",
-  "url": "https://example.com/product",
-  "category": "Software",
-  "brand": {
-    "@type": "Brand",
-    "name": "Brand Name"
-  },
-  "offers": {
-    "@type": "Offer",
-    "url": "https://product-website.com",
-    "availability": "https://schema.org/InStock"
-  }
+	"@context": "https://schema.org",
+	"@type": "Product",
+	"name": "Product Name",
+	"description": "Product description",
+	"image": "https://example.com/image.jpg",
+	"url": "https://example.com/product",
+	"category": "Software",
+	"brand": {
+		"@type": "Brand",
+		"name": "Brand Name"
+	},
+	"offers": {
+		"@type": "Offer",
+		"url": "https://product-website.com",
+		"availability": "https://schema.org/InStock"
+	}
 }
 ```
 
@@ -60,6 +61,7 @@ Used for site-wide brand identity on the homepage and about pages.
 ### Other Schema Types
 
 The module provides generators for:
+
 - **WebSite** -- Site-level metadata with search action
 - **BreadcrumbList** -- Navigation breadcrumbs
 - **FAQPage** -- FAQ sections with question/answer pairs
@@ -81,6 +83,7 @@ it | ja | ko | nl | pl | tr | vi | th | hi | id | bg
 ### URL Generation
 
 The hreflang utility follows the "as-needed" locale prefix pattern:
+
 - Default locale (`en`) uses the root path: `https://example.com/page`
 - Other locales use prefixed paths: `https://example.com/fr/page`
 
@@ -114,23 +117,24 @@ lastUpdated: '2026-01-15'
 ---
 
 ## Acceptance of Terms
+
 ...
 ```
 
 `lib/seo/static-page-metadata.ts` exposes `buildStaticPageMetadata()`, which
 resolves each field **frontmatter → i18n fallback**:
 
-| Rendered as                                | Source                                                            |
-| ------------------------------------------ | ----------------------------------------------------------------- |
-| `<title>`                                  | frontmatter `title` → i18n label, suffixed with the site name      |
-| `<meta name="description">`, `og:description`, `twitter:description` | frontmatter `description` → i18n `*_META_DESCRIPTION` |
-| `<h1>` and the `.md` mirror heading        | frontmatter `title` → i18n label                                   |
-| `og:title`, `og:url`, `og:site_name`, `twitter:card` | resolved title / canonical URL / site name (Spec 042)    |
+| Rendered as                                                          | Source                                                        |
+| -------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `<title>`                                                            | frontmatter `title` → i18n label, suffixed with the site name |
+| `<meta name="description">`, `og:description`, `twitter:description` | frontmatter `description` → i18n `*_META_DESCRIPTION`         |
+| `<h1>` and the `.md` mirror heading                                  | frontmatter `title` → i18n label                              |
+| `og:title`, `og:url`, `og:site_name`, `twitter:card`                 | resolved title / canonical URL / site name (Spec 042)         |
 
 A Work whose data repository has no `pages/` directory keeps the template's
 translated title and description — the frontmatter is an override, never a
 requirement. `/terms-of-service` and `/privacy-policy` use this helper today
-(see [Spec 046](../spec/046-legal-pages-frontmatter-seo/spec.md)); the generic
+(see [Spec 046](../spec/048-legal-pages-frontmatter-seo/spec.md)); the generic
 `/pages/[slug]` route has always read the frontmatter directly.
 
 The data-repository file layout these pages read — the `pages/` directory, the
@@ -144,24 +148,24 @@ The template generates OpenGraph and Twitter Card metadata through Next.js Metad
 
 ```typescript
 export async function generateMetadata({ params }): Promise<Metadata> {
-  return {
-    title: 'Page Title',
-    description: 'Page description',
-    openGraph: {
-      title: 'Page Title',
-      description: 'Page description',
-      images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
-      type: 'website',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: 'Page Title',
-      description: 'Page description',
-    },
-    alternates: {
-      languages: generateHreflangTags('/current-path'),
-    },
-  };
+	return {
+		title: 'Page Title',
+		description: 'Page description',
+		openGraph: {
+			title: 'Page Title',
+			description: 'Page description',
+			images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
+			type: 'website'
+		},
+		twitter: {
+			card: 'summary_large_image',
+			title: 'Page Title',
+			description: 'Page description'
+		},
+		alternates: {
+			languages: generateHreflangTags('/current-path')
+		}
+	};
 }
 ```
 
@@ -208,7 +212,7 @@ The template ships three feed formats out of the box, each at a stable URL:
 All three are generated by pure helpers in `lib/seo/feeds.ts` (`buildFeedEntries`, `generateRss`, `generateAtom`, `generateJsonFeed`) sharing the same `FeedConfig`. Items are sorted by `updated_at` descending and capped at 50 by default. Feed autodiscovery is wired into the locale layout's `generateMetadata` so every page's `<head>` contains:
 
 ```html
-<link rel="alternate" type="application/rss+xml"  href="<site>/rss.xml" />
+<link rel="alternate" type="application/rss+xml" href="<site>/rss.xml" />
 <link rel="alternate" type="application/atom+xml" href="<site>/atom.xml" />
 <link rel="alternate" type="application/feed+json" href="<site>/feed.json" />
 ```

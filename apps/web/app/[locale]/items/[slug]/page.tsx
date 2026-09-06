@@ -115,7 +115,7 @@ export async function generateMetadata({
 				canonical: getLocalizedUrl(`/items/${slug}`, locale as Locale),
 				languages: generateItemHreflangAlternates(slug),
 				types: {
-					'text/markdown': `${appUrl}${getLocalizedUrl(`/items/${slug}`, locale as Locale)}.md`
+					'text/markdown': `${getLocalizedUrl(`/items/${slug}`, locale as Locale)}.md`
 				}
 			}
 		};

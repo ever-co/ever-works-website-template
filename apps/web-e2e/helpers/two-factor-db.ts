@@ -2,7 +2,7 @@ import postgres from 'postgres';
 import { hashTwoFactorCode, twoFactorCodeSecret } from '../../web/lib/auth/two-factor-code';
 
 /**
- * Test-only access to the `twoFactorCodes` table (spec 047).
+ * Test-only access to the `twoFactorCodes` table (spec 053).
  *
  * The application stores **only a keyed HMAC-SHA256** of each one-time code,
  * so there is no column to read the plaintext out of —

@@ -5,7 +5,7 @@ import {
 } from '../../../web/lib/mail/templates/two-factor-code';
 
 /**
- * Unit coverage for the one-time-code email (spec 047 — EW-138).
+ * Unit coverage for the one-time-code email (spec 053 — EW-138).
  *
  * The subject line is the one part of this mail that leaks WITHOUT the mail
  * ever being opened: a lock-screen notification, the message list on a shared

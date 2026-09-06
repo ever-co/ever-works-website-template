@@ -19,7 +19,7 @@ import {
 } from './two-factor-code';
 
 /**
- * Stateful half of email two-factor authentication (spec 047 —
+ * Stateful half of email two-factor authentication (spec 053 —
  * EW-135 … EW-142): reading and writing `twoFactorCodes` and the
  * `client_profiles` 2FA columns, and dispatching the code email.
  *

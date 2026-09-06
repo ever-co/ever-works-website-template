@@ -10,7 +10,7 @@ interface SecuritySettings {
   activeSessionsCount: number;
   loginAttemptsCount: number;
   accountLocked: boolean;
-  /** ISO timestamp the 2FA lockout lifts, when one is in force (spec 047). */
+  /** ISO timestamp the 2FA lockout lifts, when one is in force (spec 053). */
   accountLockedUntil?: string | null;
   /**
    * Whether the account may turn email 2FA on at all — false for

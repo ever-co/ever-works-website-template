@@ -407,7 +407,7 @@ export const passwordResetTokens = pgTable('passwordResetTokens', {
 ]);
 
 /**
- * One-time email 2FA login codes (spec 047).
+ * One-time email 2FA login codes (spec 053).
  *
  * **Only a hash of the code is stored** (`codeHash`, hex HMAC-SHA256 of
  * the plaintext under a server-only key). The plaintext exists solely
@@ -838,8 +838,8 @@ export enum ActivityType {
 	/** Admin closed a billing issue without a refund (Spec 051). */
 	ADMIN_BILLING_ISSUE_RESOLVED = 'ADMIN_BILLING_ISSUE_RESOLVED',
 	/** Admin exported a payment report (Spec 052). */
-	ADMIN_PAYMENT_REPORT_EXPORTED = 'ADMIN_PAYMENT_REPORT_EXPORTED'
-	// Email two-factor authentication (spec 047)
+	ADMIN_PAYMENT_REPORT_EXPORTED = 'ADMIN_PAYMENT_REPORT_EXPORTED',
+	// Email two-factor authentication (spec 053)
 	TWO_FACTOR_ENABLED = 'TWO_FACTOR_ENABLED',
 	TWO_FACTOR_DISABLED = 'TWO_FACTOR_DISABLED',
 	TWO_FACTOR_CHALLENGE_SENT = 'TWO_FACTOR_CHALLENGE_SENT',

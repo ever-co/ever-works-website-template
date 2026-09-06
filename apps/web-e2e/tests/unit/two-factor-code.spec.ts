@@ -31,7 +31,7 @@ const SECRET = 'unit-test-two-factor-secret';
 
 /**
  * Unit coverage for the pure half of email two-factor authentication
- * (spec 047 — EW-138 code generation, EW-140 expiry, EW-141 lockout).
+ * (spec 053 — EW-138 code generation, EW-140 expiry, EW-141 lockout).
  *
  * These import `apps/web/lib/auth/two-factor-code.ts` directly and touch
  * no database, mail provider or browser — the module is deliberately free

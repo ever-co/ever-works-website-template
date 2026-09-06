@@ -1,4 +1,4 @@
--- Email two-factor authentication (spec 047 — EW-135 … EW-142)
+-- Email two-factor authentication (spec 053 — EW-135 … EW-142)
 --
 -- Adds:
 --   * "twoFactorCodes" — one-time login codes. Only a KEYED HMAC-SHA256 of

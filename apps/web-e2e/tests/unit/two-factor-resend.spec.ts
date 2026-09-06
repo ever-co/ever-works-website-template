@@ -6,7 +6,7 @@ import {
 } from '../../../web/lib/auth/two-factor-resend';
 
 /**
- * Unit coverage for the resend route's answer (spec 047 — EW-140).
+ * Unit coverage for the resend route's answer (spec 053 — EW-140).
  *
  * `POST /api/auth/2fa/resend` used to `await issueTwoFactorCode(...)` and
  * throw the result away, so a caller whose per-account issuance budget was

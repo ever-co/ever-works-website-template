@@ -672,6 +672,7 @@ const sidebars: SidebarsConfig = {
         "guides/footer-customization",
         "guides/pagination-patterns",
         "guides/slug-utilities",
+        "guides/static-page-content",
         "guides/url-utilities",
         "guides/filter-sync",
         "guides/database-health-check",

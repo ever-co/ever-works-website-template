@@ -5,10 +5,10 @@ import { PageContainer } from '@/components/ui/container';
 import { Breadcrumb, type BreadcrumbItem } from '@/components/ui/breadcrumb';
 import { MDX } from '@/components/mdx';
 import { getCachedPageContent } from '@/lib/content';
-import { getBaseUrl } from '@/lib/utils/url-cleaner';
 import { formatDisplayName } from '@/components/filters/utils/text-utils';
 import { getSiteName } from '@/lib/seo/site-identity';
 import { generatePageHreflangAlternates, getLocalizedUrl } from '@/lib/seo/hreflang';
+import { frontmatterString } from '@/lib/seo/frontmatter';
 import { type Locale, DEFAULT_LOCALE } from '@/lib/constants';
 import { BreadcrumbJsonLd } from '@/components/seo/breadcrumb-json-ld';
 
@@ -21,19 +21,20 @@ interface PageProps {
 export const revalidate = 600;
 export const dynamicParams = true;
 
-const _baseUrl = getBaseUrl();
-
 /**
- * Extracts page title from metadata or generates it from slug
+ * Extracts page title from metadata or generates it from slug.
+ *
+ * Delegates to `frontmatterString` so this route resolves `title` by exactly
+ * the same rule as the dedicated legal routes, their `<head>` metadata and the
+ * `.md` mirror: author-supplied YAML that parses to a number, a mapping or a
+ * whitespace-only string falls back instead of reaching the page.
+ *
  * @param metadata - Page metadata object
  * @param slug - Page slug as fallback
  * @returns Formatted page title
  */
 function getPageTitle(metadata: Record<string, unknown> | undefined, slug: string): string {
-	if (metadata?.title && typeof metadata.title === 'string') {
-		return metadata.title;
-	}
-	return formatDisplayName(slug);
+	return frontmatterString(metadata, 'title') ?? formatDisplayName(slug);
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -45,7 +46,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 	}
 
 	const title = getPageTitle(pageData.metadata, slug);
-	const description = (pageData.metadata?.description as string) || '';
+	// A bare cast let a non-string `description:` through to `Metadata`, which
+	// Next then stringifies into `<meta name="description" content="[object
+	// Object]">`. Same validated read as the title above.
+	const description = frontmatterString(pageData.metadata, 'description') ?? '';
 
 	return {
 		title,
@@ -67,7 +71,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 			canonical: getLocalizedUrl(`/pages/${slug}`, locale as Locale),
 			languages: generatePageHreflangAlternates(slug),
 			types: {
-				'text/markdown': `${_baseUrl}${getLocalizedUrl(`/pages/${slug}`, locale as Locale)}.md`
+				'text/markdown': `${getLocalizedUrl(`/pages/${slug}`, locale as Locale)}.md`
 			}
 		}
 	};

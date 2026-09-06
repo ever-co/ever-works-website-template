@@ -68,9 +68,11 @@ would have fixed only the locale-prefixed half.
 ### Non-goals
 
 - The doubled origin in the `text/markdown` alternate href on `/about`,
-  `/cookies`, `/privacy-policy`, `/terms-of-service` — a separate defect
-  owned by PR #1046 and `md-alternate-link-absolute-url.spec.ts`. The same
-  doubling exists on `/items/<slug>` and `/pages/<slug>`; not fixed here.
+  `/cookies`, `/privacy-policy`, `/terms-of-service`, `/items/<slug>` and
+  `/pages/<slug>` — a separate defect, guarded by
+  `md-alternate-link-absolute-url.spec.ts` and since fixed on `develop` by
+  [spec 048](../048-legal-pages-frontmatter-seo/spec.md) (PR #1045). Not
+  touched here; see Q-047b.
 - Adding mirrors for page types that never had one (paginated category /
   tag catch-alls).
 - Changing the Markdown rendering itself.

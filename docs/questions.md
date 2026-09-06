@@ -27,45 +27,6 @@ confirm, override, or refine.
 
 ---
 
-## Spec 019 — CDN-Cacheable Public Surface with Pluggable Locale Detection
-
-### Q-019a `server-redirect` value in YAML
-
-- **Context.** `settings.i18n.locale_detection` accepts
-  `client-banner` (default) and `none`. Should it also accept
-  `server-redirect`?
-- **Options.**
-  - **Env var only.** `LOCALE_DETECTION_MODE=server-redirect` is
-    the single switch. YAML stays focused on client-side concerns.
-  - YAML accepts `server-redirect` too. Operators can set it from
-    the data repo without touching env vars; middleware reads YAML
-    on every request.
-- **Default.** **Env var only.** Middleware needs to know at edge
-  time, before any YAML is loaded; an env var is the cleaner shape.
-- **Owner.** Template maintainers.
-- **Status.** `open`.
-
-### Q-019b Localized banner copy
-
-- **Context.** The locale-suggestion banner currently shows English
-  copy (`"This page is also available in <NativeName>"`). Should it
-  be localized to the *current* page locale?
-- **Options.**
-  - **Stay English.** The banner is by definition shown when the
-    visitor's preferred locale doesn't match the current page; the
-    visitor likely understands English well enough to read a one-line
-    suggestion, and the actionable CTA ("Switch to Français?") uses
-    the native name.
-  - Localize via `messages/<locale>.json`. Adds 21 new keys per
-    locale and keeps the banner copy in the visitor's *current* page
-    locale.
-- **Default.** **Stay English in v1**, revisit when there's a
-  user complaint.
-- **Owner.** Template maintainers.
-- **Status.** `open`.
-
----
-
 ## Spec 002 — Plugin Architecture
 
 ### Q-002a SDK package name
@@ -73,12 +34,12 @@ confirm, override, or refine.
 - **Context.** We need a name for the canonical plugin SDK package that
   every plugin will depend on.
 - **Options.**
-  - `@ever-works/plugin-sdk` — explicit; follows ecosystem
-    conventions (`@stripe/stripe-sdk`, `@aws-sdk/client-*`).
-  - `@ever-works/plugins` — shorter; matches the runtime package
-    `@ever-works/plugin-runtime` and the `packages/plugin-*` naming.
-  - `@ever-works/plugin-api` — describes the surface; less common
-    convention.
+    - `@ever-works/plugin-sdk` — explicit; follows ecosystem
+      conventions (`@stripe/stripe-sdk`, `@aws-sdk/client-*`).
+    - `@ever-works/plugins` — shorter; matches the runtime package
+      `@ever-works/plugin-runtime` and the `packages/plugin-*` naming.
+    - `@ever-works/plugin-api` — describes the surface; less common
+      convention.
 - **Default.** **`@ever-works/plugin-sdk`**.
 - **Owner.** Template maintainers.
 - **Status.** `open`.
@@ -88,10 +49,10 @@ confirm, override, or refine.
 - **Context.** Should a plugin be able to expose its own slots and
   capability interfaces to other plugins, or is that v2 only?
 - **Options.**
-  - **Yes, minimal.** Allow re-exporting from
-    `@ever-works/plugin-sdk` so a plugin can add new capabilities,
-    but keep the API tiny.
-  - No. Plugins consume only the SDK-defined surface in v1.
+    - **Yes, minimal.** Allow re-exporting from
+      `@ever-works/plugin-sdk` so a plugin can add new capabilities,
+      but keep the API tiny.
+    - No. Plugins consume only the SDK-defined surface in v1.
 - **Default.** **Yes, minimal.**
 - **Owner.** Template maintainers.
 - **Status.** `open`.
@@ -101,9 +62,9 @@ confirm, override, or refine.
 - **Context.** Where do per-plugin configs live? Some adopters want
   source-of-truth in env vars; others want admin-editable configs.
 - **Options.**
-  - DB row + override via env vars (env wins).
-  - Env vars only (admins must redeploy to change anything).
-  - DB only (env vars ignored if a row exists).
+    - DB row + override via env vars (env wins).
+    - Env vars only (admins must redeploy to change anything).
+    - DB only (env vars ignored if a row exists).
 - **Default.** **DB row + override via env vars.**
 - **Owner.** Template maintainers.
 - **Status.** `open`.
@@ -116,9 +77,9 @@ confirm, override, or refine.
 
 - **Context.** Passkeys are increasingly expected.
 - **Options.**
-  - Add as a built-in Auth.js provider in v1.
-  - Defer to a separate spec when the Auth.js Passkey support is
-    GA-stable.
+    - Add as a built-in Auth.js provider in v1.
+    - Defer to a separate spec when the Auth.js Passkey support is
+      GA-stable.
 - **Default.** **Defer.**
 - **Owner.** Template maintainers.
 - **Status.** `open`.
@@ -133,8 +94,8 @@ confirm, override, or refine.
   parallel (e.g. Stripe for cards, LemonSqueezy for VAT-handled
   countries).
 - **Options.**
-  - **Single active provider per session.** Simpler.
-  - Routing rules per country / SKU.
+    - **Single active provider per session.** Simpler.
+    - Routing rules per country / SKU.
 - **Default.** **Single active provider per session** in v1; routing
   rules in a future spec.
 - **Owner.** Template maintainers.
@@ -149,9 +110,9 @@ confirm, override, or refine.
 - **Context.** Translating docs and UI strings is currently manual
   with PR-based review.
 - **Options.**
-  - Add a CI step that proposes machine translations on every English
-    update, with human review before merge.
-  - Stay manual, but maintain a translation status dashboard.
+    - Add a CI step that proposes machine translations on every English
+      update, with human review before merge.
+    - Stay manual, but maintain a translation status dashboard.
 - **Default.** **Stay manual** in v1; revisit once
   `docs/internationalization/coverage.md` exists and shows real
   drift.
@@ -167,9 +128,9 @@ confirm, override, or refine.
 - **Context.** Several adopters use Hygraph; an adapter could ship in
   the box.
 - **Options.**
-  - Ship a Hygraph plugin under `packages/plugin-content-hygraph/`
-    once SDK 002 stabilises.
-  - Leave as third-party.
+    - Ship a Hygraph plugin under `packages/plugin-content-hygraph/`
+      once SDK 002 stabilises.
+    - Leave as third-party.
 - **Default.** **Wait until plugin SDK is stable**, then ship.
 - **Owner.** Template maintainers.
 - **Status.** `open`.
@@ -182,9 +143,9 @@ confirm, override, or refine.
 
 - **Context.** Admins currently set the logo via env / static assets.
 - **Options.**
-  - Add an admin upload form using whatever object-store integration
-    is configured (S3 / Supabase Storage).
-  - Defer, keep static assets.
+    - Add an admin upload form using whatever object-store integration
+      is configured (S3 / Supabase Storage).
+    - Defer, keep static assets.
 - **Default.** **Future plugin.**
 - **Owner.** Template maintainers.
 - **Status.** `open`.
@@ -198,8 +159,8 @@ confirm, override, or refine.
 - **Context.** GDPR / CCPA compliance often requires a consent banner
   before loading analytics scripts.
 - **Options.**
-  - Ship a built-in cookie banner with provider gating.
-  - Ship as a future plugin (`packages/plugin-consent-…/`).
+    - Ship a built-in cookie banner with provider gating.
+    - Ship as a future plugin (`packages/plugin-consent-…/`).
 - **Default.** **Future plugin.**
 - **Owner.** Template maintainers.
 - **Status.** `open`.
@@ -213,8 +174,8 @@ confirm, override, or refine.
 - **Context.** Playwright runs with `workers: 2` in CI today; suite
   growth may push run-time too high.
 - **Options.**
-  - Keep `workers: 2`, add sharding when needed.
-  - Bump to `workers: 4` and accept higher CI cost.
+    - Keep `workers: 2`, add sharding when needed.
+    - Bump to `workers: 4` and accept higher CI cost.
 - **Default.** **Keep `workers: 2`** until measured wall time exceeds
   20 minutes.
 - **Owner.** Template maintainers.
@@ -247,25 +208,25 @@ confirm, override, or refine.
   response (current behaviour) AND for a 401 (post-fix
   behaviour).
 - **Options.**
-  - **Add the same two-step gate as the sibling
-    `/api/admin/roles/stats` route** —
-    `if (!session?.user) return 401` followed by
-    `if (!session.user.isAdmin) return 403`. The
-    matching `admin-roles-query.spec.ts` smoke spec
-    is invariant to this fix and stays green.
-  - Add a single-step gate that returns 401 for both
-    branches (matches the
-    `/api/admin/clients` / `/api/admin/comments` /
-    `/api/admin/companies` / `/api/admin/users` shape).
-  - Add the longer-message
-    `'Unauthorized. Admin access required.'` envelope
-    (matches the
-    `/api/admin/sponsor-ads` /
-    `/api/admin/twenty-crm/config` shape).
-  - Leave the route open and document the
-    intentionally-public posture in a follow-up
-    `apps/web/app/api/admin/roles/route.ts` JSDoc
-    block.
+    - **Add the same two-step gate as the sibling
+      `/api/admin/roles/stats` route** —
+      `if (!session?.user) return 401` followed by
+      `if (!session.user.isAdmin) return 403`. The
+      matching `admin-roles-query.spec.ts` smoke spec
+      is invariant to this fix and stays green.
+    - Add a single-step gate that returns 401 for both
+      branches (matches the
+      `/api/admin/clients` / `/api/admin/comments` /
+      `/api/admin/companies` / `/api/admin/users` shape).
+    - Add the longer-message
+      `'Unauthorized. Admin access required.'` envelope
+      (matches the
+      `/api/admin/sponsor-ads` /
+      `/api/admin/twenty-crm/config` shape).
+    - Leave the route open and document the
+      intentionally-public posture in a follow-up
+      `apps/web/app/api/admin/roles/route.ts` JSDoc
+      block.
 - **Default.** **Add the two-step gate matching
   `/api/admin/roles/stats`** — uniform with the closest
   sibling route and minimal risk of widening or
@@ -283,8 +244,8 @@ confirm, override, or refine.
 - **Context.** Some providers (Resend, Mailchimp) own the subscriber
   list; others (e.g. Loops) require us to mirror.
 - **Options.**
-  - Mirror via DB row for audit and offline reads.
-  - Provider as source of truth, no DB row.
+    - Mirror via DB row for audit and offline reads.
+    - Provider as source of truth, no DB row.
 - **Default.** **Mirror in DB for audit.**
 - **Owner.** Template maintainers.
 - **Status.** `open`.
@@ -298,8 +259,8 @@ confirm, override, or refine.
 - **Context.** Novu owns the notification list, but UI offline reads
   benefit from a local mirror.
 - **Options.**
-  - Mirror in DB.
-  - Provider as source of truth.
+    - Mirror in DB.
+    - Provider as source of truth.
 - **Default.** **Mirror in DB**.
 - **Owner.** Template maintainers.
 - **Status.** `open`.
@@ -313,9 +274,25 @@ confirm, override, or refine.
 - **Context.** Translations currently live in repo; some teams prefer
   Crowdin / Lokalise.
 - **Options.**
-  - Keep in repo with PR review.
-  - Move to Crowdin and sync via CI.
+    - Keep in repo with PR review.
+    - Move to Crowdin and sync via CI.
 - **Default.** **Keep in repo.**
+- **Owner.** Template maintainers.
+- **Status.** `open`.
+
+---
+
+## Spec 015 — Spec Kit adoption
+
+### Q-015a Automate spec coverage report
+
+- **Context.** Each package / feature should have a spec; a script
+  could enforce that.
+- **Options.**
+    - Author `apps/web/scripts/lint-specs.ts` that fails CI when a
+      package lacks a spec.
+    - Manual review.
+- **Default.** **Manual for now**, automate later.
 - **Owner.** Template maintainers.
 - **Status.** `open`.
 
@@ -330,8 +307,8 @@ confirm, override, or refine.
   is "show me the map", not "explore the homepage". Reusing the
   `(listing)` route group would inherit the homepage hero.
 - **Options.**
-  - Render `/map` full-bleed without a hero (current implementation).
-  - Reuse the `(listing)` route group and ship the hero too.
+    - Render `/map` full-bleed without a hero (current implementation).
+    - Reuse the `(listing)` route group and ship the hero too.
 - **Default.** **Full-bleed, no hero.** Visitors clicking the header
   Map link want to see the map immediately; the hero would push the
   map below the fold.
@@ -348,11 +325,11 @@ confirm, override, or refine.
   down feedback loops. Running it only on PRs labelled `perf-check`
   contains cost but means contributors must opt in.
 - **Options.**
-  - **Labelled-only (`perf-check`).** Maintainers opt in for
-    perf-sensitive PRs. Nightly run on `develop` catches drift.
-  - Every PR. Heavier CI bill; faster regression detection.
-  - Periodic only (nightly + manual). Relies on bisecting when a
-    regression is reported.
+    - **Labelled-only (`perf-check`).** Maintainers opt in for
+      perf-sensitive PRs. Nightly run on `develop` catches drift.
+    - Every PR. Heavier CI bill; faster regression detection.
+    - Periodic only (nightly + manual). Relies on bisecting when a
+      regression is reported.
 - **Default.** **Labelled-only (`perf-check`)** plus the nightly
   `develop` run. Re-evaluate once we have CI minute usage data.
 - **Owner.** Template maintainers.
@@ -364,8 +341,8 @@ confirm, override, or refine.
   monorepo root; an app-specific file under `apps/web/` keeps the
   blast radius small but assumes a single app.
 - **Options.**
-  - `performance/budgets.json` at the monorepo root.
-  - `apps/web/performance/budgets.json`.
+    - `performance/budgets.json` at the monorepo root.
+    - `apps/web/performance/budgets.json`.
 - **Default.** **Monorepo root (`performance/budgets.json`)** —
   future apps under `apps/**` reuse the same script and config.
 - **Owner.** Template maintainers.
@@ -373,17 +350,40 @@ confirm, override, or refine.
 
 ---
 
-## Spec 015 — Spec Kit adoption
+## Spec 019 — CDN-Cacheable Public Surface with Pluggable Locale Detection
 
-### Q-015a Automate spec coverage report
+### Q-019a `server-redirect` value in YAML
 
-- **Context.** Each package / feature should have a spec; a script
-  could enforce that.
+- **Context.** `settings.i18n.locale_detection` accepts
+  `client-banner` (default) and `none`. Should it also accept
+  `server-redirect`?
 - **Options.**
-  - Author `apps/web/scripts/lint-specs.ts` that fails CI when a
-    package lacks a spec.
-  - Manual review.
-- **Default.** **Manual for now**, automate later.
+    - **Env var only.** `LOCALE_DETECTION_MODE=server-redirect` is
+      the single switch. YAML stays focused on client-side concerns.
+    - YAML accepts `server-redirect` too. Operators can set it from
+      the data repo without touching env vars; middleware reads YAML
+      on every request.
+- **Default.** **Env var only.** Middleware needs to know at edge
+  time, before any YAML is loaded; an env var is the cleaner shape.
+- **Owner.** Template maintainers.
+- **Status.** `open`.
+
+### Q-019b Localized banner copy
+
+- **Context.** The locale-suggestion banner currently shows English
+  copy (`"This page is also available in <NativeName>"`). Should it
+  be localized to the _current_ page locale?
+- **Options.**
+    - **Stay English.** The banner is by definition shown when the
+      visitor's preferred locale doesn't match the current page; the
+      visitor likely understands English well enough to read a one-line
+      suggestion, and the actionable CTA ("Switch to Français?") uses
+      the native name.
+    - Localize via `messages/<locale>.json`. Adds 21 new keys per
+      locale and keeps the banner copy in the visitor's _current_ page
+      locale.
+- **Default.** **Stay English in v1**, revisit when there's a
+  user complaint.
 - **Owner.** Template maintainers.
 - **Status.** `open`.
 
@@ -397,11 +397,11 @@ confirm, override, or refine.
   sensible default model so a fresh template that opts in works
   without a model-selection UI.
 - **Options.**
-  - **`openai/gpt-4o-mini` via OpenRouter.** Cheap, fast, broadly
-    multilingual; OpenRouter is the same gateway the Ever Works
-    platform uses by default.
-  - `anthropic/claude-3-5-haiku` via OpenRouter. Better quality on
-    long context; slightly higher cost; same gateway.
+    - **`openai/gpt-4o-mini` via OpenRouter.** Cheap, fast, broadly
+      multilingual; OpenRouter is the same gateway the Ever Works
+      platform uses by default.
+    - `anthropic/claude-3-5-haiku` via OpenRouter. Better quality on
+      long context; slightly higher cost; same gateway.
 - **Default.** **`openai/gpt-4o-mini` via OpenRouter.**
 - **Owner.** Template maintainers.
 - **Status.** `open`.
@@ -409,15 +409,15 @@ confirm, override, or refine.
 ### Q-023b Should v1 allow chat-driven mutations?
 
 - **Context.** The chat could navigate the visitor to a submission
-  form *and* fill it in / submit it on their behalf via tool calls.
+  form _and_ fill it in / submit it on their behalf via tool calls.
   Mutations multiply the abuse surface and prompt-injection blast
   radius.
 - **Options.**
-  - **Read-only + navigate.** Tools fetch data and return a route
-    to the visitor; the visitor confirms by clicking.
-  - Read + write. Tools can also call into existing
-    submit/follow/favourite repositories with the visitor's
-    session.
+    - **Read-only + navigate.** Tools fetch data and return a route
+      to the visitor; the visitor confirms by clicking.
+    - Read + write. Tools can also call into existing
+      submit/follow/favourite repositories with the visitor's
+      session.
 - **Default.** **Read-only + navigate.** Re-evaluate once the
   read-only tools have been used in anger.
 - **Owner.** Template maintainers.
@@ -426,21 +426,21 @@ confirm, override, or refine.
 ### Q-023e Test runner for `plugin-ai-chat` (and possibly the wider repo)
 
 - **Context.** The repo has no JS test framework today —
-  CLAUDE.md §4 says *"Treat `pnpm lint`, `pnpm tsc --noEmit`,
+  CLAUDE.md §4 says _"Treat `pnpm lint`, `pnpm tsc --noEmit`,
   and `pnpm build` as the main 'test suite' (there is currently
-  no Jest/Vitest setup)."* But for `plugin-ai-chat` we want
+  no Jest/Vitest setup)."_ But for `plugin-ai-chat` we want
   real unit tests of the Zod schema, the tools, and the agent's
   scenario filter — typecheck alone can't catch a wrongly-named
   scenario or a missing `requiresAuth` flag.
 - **Options.**
-  - **Add `vitest` to `packages/plugin-ai-chat` only.** Small
-    blast radius; doesn't commit the whole repo. Other packages
-    that want it later opt in independently.
-  - Add `vitest` to the repo root + a `vitest.workspace.ts`.
-    Bigger change; would also need a separate spec since it
-    affects every package, including `apps/web`.
-  - Skip unit tests entirely; lean on Playwright e2e (T-013)
-    for coverage.
+    - **Add `vitest` to `packages/plugin-ai-chat` only.** Small
+      blast radius; doesn't commit the whole repo. Other packages
+      that want it later opt in independently.
+    - Add `vitest` to the repo root + a `vitest.workspace.ts`.
+      Bigger change; would also need a separate spec since it
+      affects every package, including `apps/web`.
+    - Skip unit tests entirely; lean on Playwright e2e (T-013)
+      for coverage.
 - **Default.** **Add `vitest` to `plugin-ai-chat` only**
   (T-002b). The pure-TS schema + tool logic is exactly where
   unit tests pay back the most; Playwright is good enough for
@@ -456,19 +456,19 @@ confirm, override, or refine.
   `packages/plugin-sdk/src/slots.ts` — the canonical `SLOT_IDS`
   array currently covers header / footer / item-detail /
   admin / client-dashboard slots only. The SDK file notes:
-  *"Slot ids are stable; renaming a slot is a breaking change.
-  New slot ids land via a small spec."*
+  _"Slot ids are stable; renaming a slot is a breaking change.
+  New slot ids land via a small spec."_
 - **Options.**
-  - **Add three new SLOT_IDS** (`chat.launcher.overlay`,
-    `home.hero.takeover`, `layout.sidebar.tab`) to
-    `packages/plugin-sdk/src/slots.ts` as a coordinated
-    sub-task of T-001, called out in this spec since it is
-    materially part of the chat feature surface.
-  - Skip the slot system entirely for v1: mount
-    `<ChatLauncher>` directly from
-    `apps/web/app/[locale]/layout.tsx` behind the
-    `aiChat.enabled` config gate. Lose the
-    plugin-discoverability story; gain simplicity.
+    - **Add three new SLOT_IDS** (`chat.launcher.overlay`,
+      `home.hero.takeover`, `layout.sidebar.tab`) to
+      `packages/plugin-sdk/src/slots.ts` as a coordinated
+      sub-task of T-001, called out in this spec since it is
+      materially part of the chat feature surface.
+    - Skip the slot system entirely for v1: mount
+      `<ChatLauncher>` directly from
+      `apps/web/app/[locale]/layout.tsx` behind the
+      `aiChat.enabled` config gate. Lose the
+      plugin-discoverability story; gain simplicity.
 - **Default.** **Add three new SLOT_IDS** — preserves the
   plugin-first principle (Article I) and keeps the
   manifest stub honest. Adding new slot IDs lands in the
@@ -483,12 +483,12 @@ confirm, override, or refine.
   (`next-intl` + Crowdin per Spec 014) but they're conceptually
   part of the plugin package.
 - **Options.**
-  - **`apps/web/messages/<locale>.json` under `AI_CHAT_*`.** The
-    plugin package reads them through `next-intl` at call time;
-    Crowdin/translators see them like any other UI string.
-  - Inline `.ts` constants under
-    `packages/plugin-ai-chat/src/prompts/<locale>.ts`. Keeps the
-    plugin self-contained but bypasses the translation pipeline.
+    - **`apps/web/messages/<locale>.json` under `AI_CHAT_*`.** The
+      plugin package reads them through `next-intl` at call time;
+      Crowdin/translators see them like any other UI string.
+    - Inline `.ts` constants under
+      `packages/plugin-ai-chat/src/prompts/<locale>.ts`. Keeps the
+      plugin self-contained but bypasses the translation pipeline.
 - **Default.** **`apps/web/messages/<locale>.json` under
   `AI_CHAT_*`.**
 - **Owner.** Template maintainers.
@@ -510,12 +510,12 @@ confirm, override, or refine.
   `[locale]/layout.tsx` → `Providers` would remove that round-trip and make
   SSR + first client render identical in every deployment mode.
 - **Options.**
-  - **Route + hook only (current).** One tiny fetch per page load, same
-    pattern as `useStripeProducts`, and it also serves modals/hooks rendered
-    outside the locale tree (root `app/layout.tsx`).
-  - Route + hook **and** a server prop seeded into the hook's `initialData`
-    via `Providers`. Zero-request first paint; slightly more plumbing and two
-    sources to keep consistent.
+    - **Route + hook only (current).** One tiny fetch per page load, same
+      pattern as `useStripeProducts`, and it also serves modals/hooks rendered
+      outside the locale tree (root `app/layout.tsx`).
+    - Route + hook **and** a server prop seeded into the hook's `initialData`
+      via `Providers`. Zero-request first paint; slightly more plumbing and two
+      sources to keep consistent.
 - **Default.** **Route + hook only.** Revisit if the post-fetch re-render is
   visible in the field.
 - **Owner.** Template maintainers.
@@ -525,7 +525,7 @@ confirm, override, or refine.
 
 ## Spec 046 — Provider-aware pricing configuration in works.yml
 
-### Q-046a Should `provider: manual` render a distinct pricing surface?
+### Q-048a Should `provider: manual` render a distinct pricing surface?
 
 - **Context.** EW-131 asks `works.yml` to accept `provider: manual` —
   "show the prices, take payment elsewhere". Spec 046 accepts the value and
@@ -536,27 +536,27 @@ confirm, override, or refine.
   silent: a manual-checkout operator arguably wants a "Contact us" call to
   action on the paid cards rather than a button that does nothing.
 - **Options.**
-  - **Suppress the checkout and render the existing cards (current).** One
-    guard in the pricing flow, no new strings, no new localisation work.
-  - Add a manual-checkout mode: a per-plan contact URL in `works.yml` and a
-    dedicated CTA on the card. Needs new i18n keys in all locales and a new
-    branch in `use-pricing-section.ts`.
+    - **Suppress the checkout and render the existing cards (current).** One
+      guard in the pricing flow, no new strings, no new localisation work.
+    - Add a manual-checkout mode: a per-plan contact URL in `works.yml` and a
+      dedicated CTA on the card. Needs new i18n keys in all locales and a new
+      branch in `use-pricing-section.ts`.
 - **Default.** **Suppress the checkout, keep the existing cards.** The value
   is accepted and documented now; the UX affordance can land on its own ticket
   once someone actually runs manual checkout.
 - **Owner.** Template maintainers.
 - **Status.** `open`.
 
-### Q-046b Should a malformed `pricing:` block ever be fatal?
+### Q-048b Should a malformed `pricing:` block ever be fatal?
 
 - **Context.** Spec 046 logs each problem and falls back to the built-in
   plans. `getConfig()` runs on every render, so throwing would take a whole
   directory offline over a typo in an optional block.
 - **Options.**
-  - **Warn and fall back (current).** The site stays up; the operator sees
-    `[CONTENT] Invalid "pricing" section …` with one line per field.
-  - Fail the build (not the request) when the data repository is cloned at
-    build time, so the typo is caught before deploy.
+    - **Warn and fall back (current).** The site stays up; the operator sees
+      `[CONTENT] Invalid "pricing" section …` with one line per field.
+    - Fail the build (not the request) when the data repository is cloned at
+      build time, so the typo is caught before deploy.
 - **Default.** **Warn and fall back.** Revisit if operators report missing
   the log line; a build-time check is additive and can land later.
 - **Owner.** Template maintainers.
@@ -571,3 +571,42 @@ confirm, override, or refine.
 3. Always include a **Default**; never block on a question.
 4. Append a line to [`log.md`](log.md):
    `YYYY-MM-DD questions: added Q-NNN — short summary`.
+
+## Spec 048 — Legal page SEO metadata from Markdown frontmatter
+
+### Q-048a Which routes adopt `buildStaticPageMetadata()`
+
+- **Context.** `apps/web/lib/seo/static-page-metadata.ts` resolves a static
+  info page's `<title>` / `<meta name="description">` from the data
+  repository's Markdown frontmatter with an i18n fallback. EW-17 scoped the
+  change to `/terms-of-service` and `/privacy-policy`, but `/about` and
+  `/cookies` are the same shape (dedicated route, `pages/<slug>.<locale>.md`
+  body, frontmatter title in the `<h1>` and in the `.md` mirror, i18n-only
+  `generateMetadata`) and have the same drift.
+- **Options.**
+    - **Legal routes now, `about` / `cookies` in a follow-up.** Keeps the
+      ticket's diff reviewable; the helper is already generic, so the follow-up
+      is a four-line change per route.
+    - Migrate all four in one PR. Removes the inconsistency immediately but
+      widens a small ticket into every static info page, and `/about` is
+      asserted by more specs (`about.spec.ts`,
+      `each-page-document-title-length.spec.ts`).
+- **Default.** **Legal routes now, `about` / `cookies` in a follow-up.**
+- **Owner.** Template maintainers.
+- **Status.** `open`.
+
+### Q-048b `.md` vs `.mdx` for data-repository pages
+
+- **Context.** EW-17 asks for `terms-of-service.mdx` / `privacy-policy.mdx`.
+  The template's reader (`fetchPageContent`) globs `pages/<slug>.<locale>.md`
+  and the content is rendered by `next-mdx-remote`, so the files already get
+  full MDX rendering under a `.md` extension; the demo data repository ships
+  them as `.md`.
+- **Options.**
+    - **Keep `.md`.** No behaviour difference, no data-repository migration, and
+      the extension every existing Work and the `pages/` docs already use.
+    - Accept both extensions in `fetchPageContent` and document `.mdx` as
+      preferred. Matches the ticket's wording; costs an extra stat per lookup
+      and a docs/data migration for no rendering gain.
+- **Default.** **Keep `.md`** — the requirement is "MDX rendering with
+  frontmatter", which is satisfied.

@@ -10,6 +10,20 @@ sidebar_position: 99
 ## 2026-09-04
 
 - `spec-048` `apps/web/lib/seo/{frontmatter,static-page-metadata}.ts` `apps/web/app/[locale]/{terms-of-service,privacy-policy}`: the two legal routes now build their SEO metadata from the data repository’s Markdown frontmatter (`title` / `description`) through the new `buildStaticPageMetadata()` helper, with the i18n strings kept as the fallback; both routes gain a `loading.tsx`; the `<h1>`, the "last updated" chip and `renderStaticPageMarkdown()` now share one non-empty-string frontmatter reader with the `<head>`; the doubled base URL in the `text/markdown` alternate is fixed here and in `about`, `cookies`, `items/[slug]` and `pages/[slug]`; and the data-repository file layout is documented in the new `docs/guides/static-page-content.md` ([spec 048](spec/048-legal-pages-frontmatter-seo/spec.md), EW-17, PR #1045).
+- `apps/web-e2e`: added `public/md-alternate-link-absolute-url.spec.ts`, the
+  regression guard for the doubled-origin `text/markdown` alternate fixed in
+  PR #1045. It reads the href the HTML actually advertises —
+  `md-mirror-routes.spec.ts` fetches the `.md` paths directly and never looks
+  at it — and asserts each page declares exactly one alternate, and that every
+  matched href is a single absolute URL whose pathname is the plain
+  `<page>.md` mirror path. The malformed form survived both `new URL()` and a
+  "one `://`" check because Next.js resolved the unparseable doubled string
+  against `metadataBase`, burying the origin in the pathname — observed on a
+  dev server as
+  `href="http://localhost:3000/http:/localhost:3000http:/localhost:3000/about.md"`
+  — so the pathname comparison is the load-bearing assertion. Covers the six
+  static info pages, `/pages/<slug>` and a runtime-discovered item detail
+  page, across the default and `/fr` locale prefixes (PR #1046).
 
 ## 2026-09-03
 

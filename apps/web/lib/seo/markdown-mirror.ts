@@ -19,6 +19,7 @@
 import type { ItemData } from '@/lib/content';
 import type { Collection } from '@/types/collection';
 import type { ComparisonData } from '@/types/comparison';
+import { frontmatterString } from '@/lib/seo/frontmatter';
 
 type Comparison = ComparisonData;
 
@@ -262,9 +263,12 @@ export function renderStaticPageMarkdown(
 	const localePrefix = options.locale && options.locale !== 'en' ? `/${options.locale}` : '';
 	const canonicalUrl = `${base}${localePrefix}${options.path}`;
 
-	const title = (pageData?.metadata?.title as string) || options.title;
-	const description = (pageData?.metadata?.description as string) || '';
-	const lastUpdated = (pageData?.metadata?.lastUpdated as string) || '';
+	// Same non-empty-string rule as the HTML `<head>` and the page body: a
+	// `title:` that parses to a number or a mapping must fall back rather than
+	// making the mirror disagree with the page it mirrors.
+	const title = frontmatterString(pageData?.metadata, 'title') ?? options.title;
+	const description = frontmatterString(pageData?.metadata, 'description') ?? '';
+	const lastUpdated = frontmatterString(pageData?.metadata, 'lastUpdated') ?? '';
 
 	const body = (pageData?.content ?? options.defaultContent ?? '').trim();
 

@@ -85,8 +85,12 @@ Each task ends in a verification step. `[x]` = done in PR #1050.
       Q-047b under a single `## Spec 047` heading; every `Spec 047` mention
       outside this directory (`docs/features/seo.md`, `next.config.ts`,
       `md-mirror-routes.spec.ts`) points at `047-md-mirror-route-reachability`.
-      Checked with `grep -rn "046-md-mirror\|Spec 046" apps docs` returning
-      nothing for this feature.
+      Checked with `grep -rn "046-md-mirror" apps docs`, whose only hit is
+      this bullet quoting the command. The check is on the old *slug*, not on
+      the number: `Spec 046` and `046-works-yml-pricing-config` still
+      legitimately name the pricing spec in `docs/spec/README.md`,
+      `docs/log.md` and the pricing docs, so grepping the number would match
+      those and prove nothing.
 
 ## T10 — Renumber 046 → 047 after the merge collision
 

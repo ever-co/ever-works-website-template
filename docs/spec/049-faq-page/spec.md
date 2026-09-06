@@ -1,10 +1,10 @@
 ---
-id: spec-046-faq-page
+id: spec-049-faq-page
 title: Spec 046 — Visitor-facing FAQ page (/faq) with FAQPage structured data
 sidebar_label: 046 FAQ Page
 ---
 
-# Feature spec — `046-faq-page`
+# Feature spec — `049-faq-page`
 
 ## 1. Summary
 

@@ -1,10 +1,10 @@
 ---
-id: plan-046-faq-page
+id: plan-049-faq-page
 title: Plan 046 — Visitor-facing FAQ page
 sidebar_label: 046 Plan
 ---
 
-# Implementation Plan — `046-faq-page`
+# Implementation Plan — `049-faq-page`
 
 > **Spec:** [`spec.md`](./spec.md)
 

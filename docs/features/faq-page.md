@@ -106,17 +106,17 @@ static info pages.
 
 The page is wired into discovery the same way its siblings are:
 
-| Surface           | Entry                                                  |
-| ----------------- | ------------------------------------------------------ |
-| Navigation        | Footer product column and the header **More** menu      |
-| `sitemap.xml`     | `/faq`, plus one entry per non-default locale           |
-| `robots.txt`      | Explicitly allowed                                      |
-| Markdown mirror   | `/faq.md`, advertised via `<link rel="alternate">`      |
-| `llms.txt`        | Listed among the per-page Markdown mirrors              |
-| Structured data   | `FAQPage` **and** `BreadcrumbList`                      |
+| Surface         | Entry                                              |
+| --------------- | -------------------------------------------------- |
+| Navigation      | Footer product column and the header **More** menu |
+| `sitemap.xml`   | `/faq`, plus one entry per non-default locale      |
+| `robots.txt`    | Explicitly allowed                                 |
+| Markdown mirror | `/faq.md`, advertised via `<link rel="alternate">` |
+| `llms.txt`      | Listed among the per-page Markdown mirrors         |
+| Structured data | `FAQPage` **and** `BreadcrumbList`                 |
 
 ## Related
 
 - [SEO Configuration](seo.md) — the `FAQPage` generator and the rest of the
   structured-data module.
-- [Spec 046](../spec/046-faq-page/spec.md) — the full feature specification.
+- [Spec 049](../spec/049-faq-page/spec.md) — the full feature specification.

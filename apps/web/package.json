@@ -28,6 +28,7 @@
 		"build:ci": "node scripts/check-env-ci.js --silent && next build",
 		"start": "node scripts/check-env.js --silent --quick && next start",
 		"lint": "node scripts/lint.js",
+		"test:unit": "tsx --test \"lib/**/*.spec.ts\" \"scripts/**/*.spec.ts\"",
 		"prebuild": "node scripts/clone.cjs",
 		"clean": "rm -rf .next node_modules",
 		"check-env": "node scripts/check-env.js",

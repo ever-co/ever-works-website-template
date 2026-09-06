@@ -180,9 +180,9 @@ test.describe('Markdown alternate link is a single absolute URL', () => {
 
 	// `items/[slug]` builds its alternate the same way and carried the same
 	// doubled origin. Item slugs are content-dependent, so one is discovered
-	// at runtime. One test per locale prefix, each doing a single navigation,
-	// so an item detail page gets the same time budget as the static pages
-	// above rather than having to compile two heavy routes inside one.
+	// at runtime. One test per locale prefix rather than one test looping
+	// over both: each then compiles a single heavy route inside its own
+	// timeout instead of two inside one.
 	for (const prefix of LOCALE_PREFIXES) {
 		test(`${prefix}/items/<first published item> advertises a well-formed text/markdown alternate`, async ({
 			page

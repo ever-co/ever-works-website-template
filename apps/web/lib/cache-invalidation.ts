@@ -66,6 +66,7 @@ export async function invalidateContentCaches(): Promise<void> {
   safeRevalidateTag(CACHE_TAGS.TAGS);
   safeRevalidateTag(CACHE_TAGS.COLLECTIONS);
   safeRevalidateTag(CACHE_TAGS.COMPARISONS);
+  safeRevalidateTag(CACHE_TAGS.POSTS);
   safeRevalidateTag(CACHE_TAGS.PAGES);
 
   // Clear in-memory fetchItems cache

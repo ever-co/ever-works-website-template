@@ -7,6 +7,7 @@ import { PaymentInterval, PaymentPlan, SponsorAdPricing } from '@/lib/constants'
 import { PaymentFlowSelectorModal } from '../payment';
 import { PricingConfig } from '@/lib/content';
 import { usePricingSection } from '@/hooks/use-pricing-section';
+import { resolveGatewayProvider } from '@/lib/utils/payment-provider';
 import { usePaymentAvailability } from '@/hooks/use-payment-availability';
 import { useTheme } from 'next-themes';
 import { useDisclosure } from '@heroui/react';
@@ -406,7 +407,9 @@ export function PricingSection({ onSelectPlan, isReview, initialSelectedPlan }: 
 				checkoutUrl={paymentForm.checkoutUrl}
 				isReady={isReady}
 				isError={paymentForm.isError}
-				provider={provider!}
+				// The modal is only ever opened from a gateway branch of handleCheckout,
+				// so `provider` cannot be `manual` here (spec 046).
+				provider={resolveGatewayProvider(provider)}
 				theme={theme}
 				isDismissable={true}
 			/>

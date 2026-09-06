@@ -59,7 +59,7 @@ export async function GET(): Promise<NextResponse> {
 		`- ${siteUrl}/collections/<slug>.md`,
 		`- ${siteUrl}/comparisons/<slug>.md`,
 		`- ${siteUrl}/pages/<slug>.md`,
-		`- ${siteUrl}/about.md, /help.md, /pricing.md, /privacy-policy.md, /terms-of-service.md, /cookies.md`,
+		`- ${siteUrl}/about.md, /help.md, /faq.md, /pricing.md, /privacy-policy.md, /terms-of-service.md, /cookies.md`,
 		'',
 		'Each HTML page advertises its mirror via `<link rel="alternate" type="text/markdown" href="…">`.',
 		'',

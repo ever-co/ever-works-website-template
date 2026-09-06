@@ -21,35 +21,36 @@ Used on item detail pages:
 import { generateProductSchema } from '@/lib/seo/schema';
 
 const schema = generateProductSchema({
-  name: 'Product Name',
-  description: 'Product description',
-  image: 'https://example.com/image.jpg',
-  url: 'https://example.com/product',
-  category: 'Software',
-  sourceUrl: 'https://product-website.com',
-  brandName: 'Brand Name',
+	name: 'Product Name',
+	description: 'Product description',
+	image: 'https://example.com/image.jpg',
+	url: 'https://example.com/product',
+	category: 'Software',
+	sourceUrl: 'https://product-website.com',
+	brandName: 'Brand Name'
 });
 ```
 
 Generates:
+
 ```json
 {
-  "@context": "https://schema.org",
-  "@type": "Product",
-  "name": "Product Name",
-  "description": "Product description",
-  "image": "https://example.com/image.jpg",
-  "url": "https://example.com/product",
-  "category": "Software",
-  "brand": {
-    "@type": "Brand",
-    "name": "Brand Name"
-  },
-  "offers": {
-    "@type": "Offer",
-    "url": "https://product-website.com",
-    "availability": "https://schema.org/InStock"
-  }
+	"@context": "https://schema.org",
+	"@type": "Product",
+	"name": "Product Name",
+	"description": "Product description",
+	"image": "https://example.com/image.jpg",
+	"url": "https://example.com/product",
+	"category": "Software",
+	"brand": {
+		"@type": "Brand",
+		"name": "Brand Name"
+	},
+	"offers": {
+		"@type": "Offer",
+		"url": "https://product-website.com",
+		"availability": "https://schema.org/InStock"
+	}
 }
 ```
 
@@ -57,12 +58,32 @@ Generates:
 
 Used for site-wide brand identity on the homepage and about pages.
 
+### FAQPage Schema
+
+`generateFaqPageSchema()` builds the `FAQPage` block rendered on `/faq` by
+`components/seo/faq-json-ld.tsx`. Its question/answer pairs are extracted from
+the page's own content by `lib/seo/faq-parser.ts`, so the rich result always
+matches what a visitor reads:
+
+- Every `##`--`######` heading in `pages/faq.<locale>.md` becomes a `Question`,
+  and the prose beneath it becomes the `acceptedAnswer`. `#` (H1) is the
+  document title and is ignored, and a heading immediately followed by another
+  heading is treated as a section grouping rather than a question.
+- A `faqs: [{ question, answer }]` array in the file's frontmatter is
+  authoritative whenever it is present -- the headings are not consulted at
+  all, so `faqs: []` opts a page out of the rich result while keeping its
+  prose.
+- Nothing is emitted when no question/answer pair can be extracted -- an
+  `FAQPage` with an empty `mainEntity` is invalid structured data.
+
+See [Spec 046](../spec/049-faq-page/spec.md) for the full content contract.
+
 ### Other Schema Types
 
 The module provides generators for:
+
 - **WebSite** -- Site-level metadata with search action
 - **BreadcrumbList** -- Navigation breadcrumbs
-- **FAQPage** -- FAQ sections with question/answer pairs
 - **ItemList** -- Category and collection listing pages
 
 ## Hreflang Tags
@@ -81,6 +102,7 @@ it | ja | ko | nl | pl | tr | vi | th | hi | id | bg
 ### URL Generation
 
 The hreflang utility follows the "as-needed" locale prefix pattern:
+
 - Default locale (`en`) uses the root path: `https://example.com/page`
 - Other locales use prefixed paths: `https://example.com/fr/page`
 
@@ -99,30 +121,70 @@ Each locale maps to its ISO 639-1 hreflang value. Most use the same code, but so
 
 Located at `lib/seo/listing-metadata.ts`, this module generates metadata for listing pages including category pages, search results, and filtered views with appropriate title templates, descriptions, and canonical URLs.
 
+## Static Page Metadata (from Markdown frontmatter)
+
+The Markdown-backed static info pages read their body from the data
+repository's `pages/<slug>.<locale>.md` file. Their SEO metadata comes from the
+**frontmatter of that same file**, so a directory that publishes its own legal
+copy also gets its own search-result snippet:
+
+```markdown
+---
+title: Terms of Service
+description: Terms and conditions for using the Awesome Chairs directory
+lastUpdated: '2026-01-15'
+---
+
+## Acceptance of Terms
+
+...
+```
+
+`lib/seo/static-page-metadata.ts` exposes `buildStaticPageMetadata()`, which
+resolves each field **frontmatter → i18n fallback**:
+
+| Rendered as                                                          | Source                                                        |
+| -------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `<title>`                                                            | frontmatter `title` → i18n label, suffixed with the site name |
+| `<meta name="description">`, `og:description`, `twitter:description` | frontmatter `description` → i18n `*_META_DESCRIPTION`         |
+| `<h1>` and the `.md` mirror heading                                  | frontmatter `title` → i18n label                              |
+| `og:title`, `og:url`, `og:site_name`, `twitter:card`                 | resolved title / canonical URL / site name (Spec 042)         |
+
+A Work whose data repository has no `pages/` directory keeps the template's
+translated title and description — the frontmatter is an override, never a
+requirement. `/terms-of-service` and `/privacy-policy` use this helper today
+(see [Spec 046](../spec/048-legal-pages-frontmatter-seo/spec.md)); the generic
+`/pages/[slug]` route has always read the frontmatter directly.
+
+The data-repository file layout these pages read — the `pages/` directory, the
+`<slug>.<locale>.md` naming convention, the frontmatter keys and the
+missing-file fallbacks — is documented in
+[Static Page Content](../guides/static-page-content.md).
+
 ## OpenGraph & Twitter Cards
 
 The template generates OpenGraph and Twitter Card metadata through Next.js Metadata API in page components:
 
 ```typescript
 export async function generateMetadata({ params }): Promise<Metadata> {
-  return {
-    title: 'Page Title',
-    description: 'Page description',
-    openGraph: {
-      title: 'Page Title',
-      description: 'Page description',
-      images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
-      type: 'website',
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: 'Page Title',
-      description: 'Page description',
-    },
-    alternates: {
-      languages: generateHreflangTags('/current-path'),
-    },
-  };
+	return {
+		title: 'Page Title',
+		description: 'Page description',
+		openGraph: {
+			title: 'Page Title',
+			description: 'Page description',
+			images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
+			type: 'website'
+		},
+		twitter: {
+			card: 'summary_large_image',
+			title: 'Page Title',
+			description: 'Page description'
+		},
+		alternates: {
+			languages: generateHreflangTags('/current-path')
+		}
+	};
 }
 ```
 
@@ -169,7 +231,7 @@ The template ships three feed formats out of the box, each at a stable URL:
 All three are generated by pure helpers in `lib/seo/feeds.ts` (`buildFeedEntries`, `generateRss`, `generateAtom`, `generateJsonFeed`) sharing the same `FeedConfig`. Items are sorted by `updated_at` descending and capped at 50 by default. Feed autodiscovery is wired into the locale layout's `generateMetadata` so every page's `<head>` contains:
 
 ```html
-<link rel="alternate" type="application/rss+xml"  href="<site>/rss.xml" />
+<link rel="alternate" type="application/rss+xml" href="<site>/rss.xml" />
 <link rel="alternate" type="application/atom+xml" href="<site>/atom.xml" />
 <link rel="alternate" type="application/feed+json" href="<site>/feed.json" />
 ```
@@ -198,16 +260,19 @@ Every public page also serves a clean Markdown twin at the same path with `.md` 
 - `/collections/<slug>.md`
 - `/comparisons/<slug>.md`
 - `/pages/<slug>.md`
-- `/about.md`, `/help.md`, `/pricing.md`, `/privacy-policy.md`, `/terms-of-service.md`, `/cookies.md`
+- `/about.md`, `/help.md`, `/faq.md`, `/pricing.md`, `/privacy-policy.md`, `/terms-of-service.md`, `/cookies.md`
 
 Each HTML page advertises its mirror via `<link rel="alternate" type="text/markdown" href="…">`.
 
 How it works:
 
 - `lib/seo/markdown-mirror.ts` exports renderers (`renderItemMarkdown`, `renderCategoryMarkdown`, etc.) that take normalized data and return a Markdown string. They are pure functions with no I/O.
-- `next.config.ts` contains `rewrites` that map every `/path.md` URL to an internal `/path/_md` route handler (one per page type, plus a catch-all under `_static-md` for the static info pages).
+- `next.config.ts` contains `rewrites` that map every `/path.md` URL to an internal `/<locale>/path/md` route handler (one per page type, plus a catch-all under `/<locale>/static-md` for the static info pages). The unprefixed URLs (`/about.md`) rewrite to the default locale's handler explicitly, because `proxy.ts` — which is what adds the locale segment for normal pages — skips every path containing a dot.
+- The internal segment must not start with an underscore: the App Router treats `_foo` as a private folder and removes it from the route table entirely. See [Spec 047](../spec/047-md-mirror-route-reachability/spec.md).
 - The internal route handler reuses the same cached content layer (`getCachedItem`, `getCachedItems`, `getCachedComparisons`, `getCachedPageContent`) the HTML pages use, then delegates rendering to a helper from `lib/seo/markdown-mirror.ts`.
-- Responses set `Content-Type: text/markdown` and `X-Robots-Tag: noindex` so search engines index the canonical HTML, not the mirror.
+- Responses set `Content-Type: text/markdown` and `X-Robots-Tag: noindex` so search engines index the canonical HTML, not the mirror — which is also what keeps the internal `/<locale>/…/md` URLs out of search results.
+- An unknown slug 404s, matching the HTML page it mirrors, rather than rendering an empty document.
+- The category and tag mirrors also read `settings.categories_enabled` / `settings.tags_enabled` from `.works/works.yml`: a site that switches a facet off 404s its HTML listing, and the mirror answers the same rather than publishing a withdrawn surface to agents.
 
 ### `BreadcrumbList` JSON-LD on every page
 

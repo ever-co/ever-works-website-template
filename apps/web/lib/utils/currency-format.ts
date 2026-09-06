@@ -111,3 +111,27 @@ export function formatAmountWithSymbol(amount: number, currency: string = 'USD')
 	const decimalPlaces = getCurrencyDecimalPlaces(currency);
 	return `${symbol}${amount.toFixed(decimalPlaces)}`;
 }
+
+/**
+ * How many of a currency's smallest units make one major unit.
+ *
+ * 100 for most currencies, 1 for the zero-decimal ones (JPY, KRW, …) where the
+ * smallest unit IS the major unit. Anything converting between a stored
+ * minor-unit integer and an amount a person or a payment provider reads must go
+ * through this rather than a hard-coded `100`, or every JPY figure is off by 100x.
+ */
+export function currencyMinorUnitFactor(currency: string = 'USD'): number {
+	return getCurrencyDecimalPlaces(currency) === 0 ? 1 : 100;
+}
+
+/** Convert a major-unit amount (12.34) into the smallest currency unit (1234). */
+export function toMinorUnits(majorAmount: number | null | undefined, currency: string = 'USD'): number {
+	if (!majorAmount || !Number.isFinite(majorAmount)) return 0;
+	return Math.round(majorAmount * currencyMinorUnitFactor(currency));
+}
+
+/** Convert a smallest-unit amount (1234) into major units (12.34). */
+export function fromMinorUnits(minorAmount: number | null | undefined, currency: string = 'USD'): number {
+	if (!minorAmount || !Number.isFinite(minorAmount)) return 0;
+	return minorAmount / currencyMinorUnitFactor(currency);
+}

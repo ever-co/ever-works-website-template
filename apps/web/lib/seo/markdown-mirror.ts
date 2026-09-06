@@ -16,9 +16,11 @@
  * plus the absolute base URL of the site, and return text. No I/O.
  */
 
+import { resolveStaticPageBody } from '@/lib/default-page-content';
 import type { ItemData } from '@/lib/content';
 import type { Collection } from '@/types/collection';
 import type { ComparisonData } from '@/types/comparison';
+import { frontmatterString } from '@/lib/seo/frontmatter';
 
 type Comparison = ComparisonData;
 
@@ -262,11 +264,21 @@ export function renderStaticPageMarkdown(
 	const localePrefix = options.locale && options.locale !== 'en' ? `/${options.locale}` : '';
 	const canonicalUrl = `${base}${localePrefix}${options.path}`;
 
-	const title = (pageData?.metadata?.title as string) || options.title;
-	const description = (pageData?.metadata?.description as string) || '';
-	const lastUpdated = (pageData?.metadata?.lastUpdated as string) || '';
+	// Same non-empty-string rule as the HTML `<head>` and the page body: a
+	// `title:` that parses to a number or a mapping must fall back rather than
+	// making the mirror disagree with the page it mirrors.
+	const title = frontmatterString(pageData?.metadata, 'title') ?? options.title;
+	const description = frontmatterString(pageData?.metadata, 'description') ?? '';
+	const lastUpdated = frontmatterString(pageData?.metadata, 'lastUpdated') ?? '';
 
-	const body = (pageData?.content ?? options.defaultContent ?? '').trim();
+	// Emptiness is decided by `resolveStaticPageBody`, the single rule this
+	// mirror shares with the HTML pages it mirrors (`/faq`, `/about`,
+	// `/cookies`, …). Keeping the rule in one place is the point: a mirror that
+	// calls a page "empty" when the page does not — or the reverse — serves a
+	// `text/markdown` alternate that says something different from the page
+	// advertising it, which is what shipped here twice with two hand-written
+	// fallback expressions.
+	const body = resolveStaticPageBody(pageData?.content, options.defaultContent ?? '').trim();
 
 	const lines: string[] = [];
 	lines.push(`# ${title}`);

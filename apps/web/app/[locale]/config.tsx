@@ -6,7 +6,7 @@ import { getAuthConfig } from '@/lib/auth/config';
 import { defaultPricingConfig, getDefaultPricingConfigWithCurrency } from '@/lib/types';
 import { useOptionalCurrencyContext } from '@/components/context/currency-provider';
 import { useSelectedCheckoutProvider } from '@/hooks/use-selected-checkout-provider';
-import { usePaymentProvider } from '@/lib/utils/payment-provider';
+import { resolveGatewayProvider, usePaymentProvider } from '@/lib/utils/payment-provider';
 
 const ConfigContext = createContext<Config>({});
 const initialAuthConfig = getAuthConfig();
@@ -20,7 +20,10 @@ export function ConfigProvider({ config, children }: { config: Config; children:
 		let pricing = config.pricing;
 
 		if (!pricing && !currencyLoading) {
-			pricing = getDefaultPricingConfigWithCurrency(currency, paymentProvider);
+			// The built-in defaults name a gateway for their price IDs. Reached only
+			// when works.yml carries no `pricing:` block at all, so `paymentProvider`
+			// can never be `manual` here (spec 046).
+			pricing = getDefaultPricingConfigWithCurrency(currency, resolveGatewayProvider(paymentProvider));
 		} else if (!pricing) {
 			pricing = defaultPricingConfig;
 		}

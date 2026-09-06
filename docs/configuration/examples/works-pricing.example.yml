@@ -1,0 +1,130 @@
+# Complete `pricing:` block for a data repository's `.works/works.yml`.
+#
+# Spec: docs/spec/046-works-yml-pricing-config/spec.md (EW-131)
+# Reference: docs/configuration/works-yml-pricing.md
+#
+# This file is the canonical example: it lists EVERY field of the
+# `PricingPlanConfig` / `PricingConfig` TypeScript contract in
+# `apps/web/lib/content.ts`, and a unit test
+# (`apps/web/lib/config/schemas/__tests__/works-pricing.schema.spec.ts`)
+# parses it on every run, so it cannot drift from the code.
+#
+# Copy the `pricing:` key below into your own `.works/works.yml` and delete
+# the fields you do not need — everything except `id`, `name` and `price` is
+# optional, and omitting the whole block keeps the template's built-in plans.
+
+pricing:
+  # Which checkout gateway the site defaults to. One of:
+  #   stripe | lemonsqueezy | polar | solidgate | manual
+  # `manual` means "show the prices, handle payment outside the template":
+  # the site starts no checkout of its own, so a plan button does nothing
+  # beyond a warning in the visitor's browser console. Omitting `provider` is
+  # NOT the same thing -- that falls back to the Stripe default.
+  # A user's own choice in Settings -> Checkout provider still wins.
+  provider: stripe
+
+  # Currency symbol or ISO code shown next to the price.
+  currency: USD
+
+  # Optional LemonSqueezy hosted-checkout URL shared by every plan.
+  # A plan-level `lemonCheckoutUrl` overrides it.
+  lemonCheckoutUrl: https://your-store.lemonsqueezy.com/checkout
+
+  plans:
+    # The three plan keys are FREE, STANDARD and PREMIUM.
+    # `PRO` is accepted as an alias for `STANDARD` for configs written
+    # against the original EW-131 wording.
+    FREE:
+      id: free
+      name: Free Plan
+      description: Access basic features and submit content for free.
+      price: 0
+      annualDiscount: 0
+      interval: per-submission
+      features:
+        - List your product
+        - Basic analytics
+      popular: false
+      isPremium: false
+      isActive: true
+      isFeatured: false
+      disabled: false
+      envKey: FREE_PLAN
+      trialPeriodDays: 0
+      trialAmountId: ''
+      trialAmount: 0
+      isAuthorizedTrialAmount: false
+      stripeProductId: prod_free_xxx
+      stripePriceId: price_free_monthly_xxx
+      annualPriceId: price_free_annual_xxx
+      lemonProductId: '111111'
+      lemonVariantId: '222222'
+      lemonCheckoutUrl: https://your-store.lemonsqueezy.com/checkout/buy/free
+      polarFreePlanId: polar_free_plan_id
+      polarStandardPlanId: ''
+      polarPremiumPlanId: ''
+      polarProductId: polar_free_product_id
+
+    STANDARD:
+      id: standard
+      name: Standard Plan
+      description: Get more visibility and unlock additional directory features.
+      price: 19
+      annualDiscount: 10
+      interval: monthly
+      features:
+        - Everything in Free
+        - Priority listing
+        - Advanced analytics
+      popular: true
+      isPremium: true
+      isActive: true
+      isFeatured: true
+      disabled: false
+      envKey: STANDARD_PLAN
+      trialPeriodDays: 4
+      trialAmountId: price_standard_trial_xxx
+      trialAmount: 1
+      isAuthorizedTrialAmount: true
+      stripeProductId: prod_standard_xxx
+      stripePriceId: price_standard_monthly_xxx
+      annualPriceId: price_standard_annual_xxx
+      lemonProductId: '333333'
+      lemonVariantId: '444444'
+      lemonCheckoutUrl: https://your-store.lemonsqueezy.com/checkout/buy/standard
+      polarFreePlanId: ''
+      polarStandardPlanId: polar_standard_plan_id
+      polarPremiumPlanId: ''
+      polarProductId: polar_standard_product_id
+
+    PREMIUM:
+      id: premium
+      name: Premium Plan
+      description: Maximum exposure and premium support for directory listings.
+      price: 49
+      annualDiscount: 20
+      interval: monthly
+      features:
+        - Everything in Standard
+        - Featured placement
+        - API access
+      popular: false
+      isPremium: true
+      isActive: true
+      isFeatured: true
+      disabled: false
+      envKey: PREMIUM_PLAN
+      trialPeriodDays: 4
+      trialAmountId: price_premium_trial_xxx
+      trialAmount: 1
+      isAuthorizedTrialAmount: true
+      stripeProductId: prod_premium_xxx
+      stripePriceId: price_premium_monthly_xxx
+      annualPriceId: price_premium_annual_xxx
+      lemonProductId: '555555'
+      lemonVariantId: '666666'
+      lemonCheckoutUrl: https://your-store.lemonsqueezy.com/checkout/buy/premium
+      polarFreePlanId: ''
+      polarStandardPlanId: ''
+      polarPremiumPlanId: polar_premium_plan_id
+      polarProductId: polar_premium_product_id

@@ -46,6 +46,12 @@ export const CACHE_TAGS = {
 	/** All comparisons */
 	COMPARISONS: 'comparisons',
 
+	/** All blog posts */
+	POSTS: 'posts',
+
+	/** Specific blog post by slug */
+	POST: (slug: string) => `post:${slug}`,
+
 	/** Site configuration */
 	CONFIG: 'config' /** All static pages */,
 	PAGES: 'pages',
@@ -66,7 +72,10 @@ export const CACHE_TAGS = {
 	COLLECTIONS_LOCALE: (locale: string) => `collections:${locale}`,
 
 	/** Comparisons by locale */
-	COMPARISONS_LOCALE: (locale: string) => `comparisons:${locale}`
+	COMPARISONS_LOCALE: (locale: string) => `comparisons:${locale}`,
+
+	/** Blog posts by locale */
+	POSTS_LOCALE: (locale: string) => `posts:${locale}`
 } as const;
 
 /**

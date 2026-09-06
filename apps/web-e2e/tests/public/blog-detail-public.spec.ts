@@ -16,14 +16,24 @@ const UNKNOWN_ROUTES = [
 	'/blog/tag/zzqx-tag-that-cannot-exist-zzqx'
 ];
 
-/** Undo the XML entity escaping the feed applies to a URL. */
+const XML_ENTITIES: Record<string, string> = {
+	'&amp;': '&',
+	'&lt;': '<',
+	'&gt;': '>',
+	'&quot;': '"',
+	'&apos;': "'"
+};
+
+/**
+ * Undo the XML entity escaping the feed applies to a URL.
+ *
+ * One scan with a lookup rather than a chain of `.replace()` calls: replacing
+ * `&amp;` first turns `&amp;lt;` into `<`, so a chain double-unescapes its own
+ * output (CodeQL `js/double-escaping`). A single pass cannot re-consume what
+ * it has already produced, whatever order the entities appear in.
+ */
 function unescapeXml(value: string): string {
-	return value
-		.replace(/&amp;/g, '&')
-		.replace(/&lt;/g, '<')
-		.replace(/&gt;/g, '>')
-		.replace(/&quot;/g, '"')
-		.replace(/&apos;/g, "'");
+	return value.replace(/&(?:amp|lt|gt|quot|apos);/g, (entity) => XML_ENTITIES[entity]);
 }
 
 /** Navigate to the listing and return the href of the first post link, if any. */

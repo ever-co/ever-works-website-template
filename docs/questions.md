@@ -525,7 +525,7 @@ confirm, override, or refine.
 
 ## Spec 046 — Provider-aware pricing configuration in works.yml
 
-### Q-048a Should `provider: manual` render a distinct pricing surface?
+### Q-046a Should `provider: manual` render a distinct pricing surface?
 
 - **Context.** EW-131 asks `works.yml` to accept `provider: manual` —
   "show the prices, take payment elsewhere". Spec 046 accepts the value and
@@ -547,7 +547,7 @@ confirm, override, or refine.
 - **Owner.** Template maintainers.
 - **Status.** `open`.
 
-### Q-048b Should a malformed `pricing:` block ever be fatal?
+### Q-046b Should a malformed `pricing:` block ever be fatal?
 
 - **Context.** Spec 046 logs each problem and falls back to the built-in
   plans. `getConfig()` runs on every render, so throwing would take a whole
@@ -564,6 +564,8 @@ confirm, override, or refine.
 
 ---
 
+## Spec 047 — Markdown mirrors reachable (private-folder routing fix)
+
 ## Spec 051 — Admin billing issues
 
 ### Q-051-1 Should a refund carry a provider-side idempotency key?
@@ -578,22 +580,22 @@ confirm, override, or refine.
   strand the issue forever. That expiry is the one remaining theoretical window:
   a provider call still in flight when the TTL elapses could be joined by a
   second claim, and the row-level `onlyWithClaim` guard on the write can stop the
-  second request from *recording* over the first, but not from *placing* the call.
+  second request from _recording_ over the first, but not from _placing_ the call.
 - **Options.**
-  - **Leave it (current).** The window requires a single provider HTTP request to
-    still be open five minutes after it started — longer than every adapter's own
-    SDK timeout and than the serverless function budget the template targets — and
-    it needs a second admin to press refund inside exactly that window. The cost
-    of the alternative reading (never reclaim) is an issue permanently locked by
-    any crashed request.
-  - **Add an idempotency key to the provider seam.** Widen
-    `PaymentProviderInterface.refundPayment(paymentId, amount?)` with an optional
-    idempotency key derived from the billing issue, and thread it through the
-    Stripe, Polar, Solidgate and LemonSqueezy adapters plus `payment-service.ts`.
-    Stripe and Polar both honour one; this closes the window completely rather
-    than narrowing it.
-  - Lengthen `REFUND_CLAIM_TTL_MS`. Cheapest, and strictly worse on the other
-    axis: it narrows the duplicate window only by widening the stranded window.
+    - **Leave it (current).** The window requires a single provider HTTP request to
+      still be open five minutes after it started — longer than every adapter's own
+      SDK timeout and than the serverless function budget the template targets — and
+      it needs a second admin to press refund inside exactly that window. The cost
+      of the alternative reading (never reclaim) is an issue permanently locked by
+      any crashed request.
+    - **Add an idempotency key to the provider seam.** Widen
+      `PaymentProviderInterface.refundPayment(paymentId, amount?)` with an optional
+      idempotency key derived from the billing issue, and thread it through the
+      Stripe, Polar, Solidgate and LemonSqueezy adapters plus `payment-service.ts`.
+      Stripe and Polar both honour one; this closes the window completely rather
+      than narrowing it.
+    - Lengthen `REFUND_CLAIM_TTL_MS`. Cheapest, and strictly worse on the other
+      axis: it narrows the duplicate window only by widening the stranded window.
 - **Default.** **Leave it, and fix it properly in the payment-provider spec.**
   Spec 051 states it adds no new payment abstraction, and an idempotency
   parameter is a change to the shared provider interface and all four adapters —
@@ -615,15 +617,15 @@ confirm, override, or refine.
   first before adding new dependencies") both point away from pulling a PDF
   engine in as a side effect of this feature.
 - **Options.**
-  - **CSV + XLSX only (current).** No new dependency. XLSX already covers the
-    "hand it to a stakeholder" case, and a spreadsheet is more useful than a PDF
-    for revenue numbers because the recipient can re-sort and sum it.
-  - Add a client-side PDF library (`jspdf` + `jspdf-autotable`, ~350 KB). Renders
-    in the browser from the rows already loaded, so no server cost — but only the
-    current page of rows, not the full filtered set.
-  - Add a server-side renderer (`@react-pdf/renderer`, or headless Chromium).
-    Full fidelity over the whole filtered set; a heavy dependency, and headless
-    Chromium is not viable in the template's serverless targets.
+    - **CSV + XLSX only (current).** No new dependency. XLSX already covers the
+      "hand it to a stakeholder" case, and a spreadsheet is more useful than a PDF
+      for revenue numbers because the recipient can re-sort and sum it.
+    - Add a client-side PDF library (`jspdf` + `jspdf-autotable`, ~350 KB). Renders
+      in the browser from the rows already loaded, so no server cost — but only the
+      current page of rows, not the full filtered set.
+    - Add a server-side renderer (`@react-pdf/renderer`, or headless Chromium).
+      Full fidelity over the whole filtered set; a heavy dependency, and headless
+      Chromium is not viable in the template's serverless targets.
 - **Default.** **CSV + XLSX only.** `SUPPORTED_EXPORT_FORMATS` in
   `apps/web/lib/services/payment-report-export.service.ts` is the single place to
   extend, and `?format=pdf` already returns a 400 naming the supported formats
@@ -636,11 +638,54 @@ confirm, override, or refine.
 
 ## How to add a question
 
-1. Pick the next available `Q-NNN…` id under the relevant spec.
-2. Use the format above.
-3. Always include a **Default**; never block on a question.
-4. Append a line to [`log.md`](log.md):
-   `YYYY-MM-DD questions: added Q-NNN — short summary`.
+### Q-047a Should the internal mirror segment stay reachable as a public URL?
+
+- **Context.** The `.md` mirrors are served by route handlers that used to
+  live in `_`-prefixed _private_ folders, which the App Router excludes from
+  routing — so every mirror URL 404'd. Renaming the segment (`_md` → `md`,
+  `_static-md` → `static-md`) is what makes them routable at all, and it also
+  makes the internal paths directly requestable: measured `/items/<slug>/md`
+  and `/static-md/about` → `200 text/markdown`, and `/en/items/<slug>/md` →
+  `307` to the unprefixed form (`localePrefix: 'as-needed'`).
+- **Options.**
+    - **Leave them reachable.** The handlers already send
+      `X-Robots-Tag: noindex`, they are absent from the sitemap and nothing
+      links to them, so the exposure is a duplicate of content already public
+      at the `.md` URL.
+    - Add a `Disallow: /*/md$` + `/*/static-md/` pair to `robots.ts`, or gate
+      the handlers on an internal header set by the rewrite.
+- **Default.** **Leave them reachable.** `noindex` already answers the only
+  concern (crawlers indexing the mirror instead of the canonical HTML), and a
+  header gate would make the handlers untestable except through the rewrite.
+- **Owner.** Template maintainers.
+- **Status.** `open`.
+
+### Q-047b Should the doubled origin in the item / CMS-page `text/markdown` alternates be fixed here?
+
+- **Context.** `getLocalizedUrl()` already returns an absolute URL, so
+  `` `${appUrl}${getLocalizedUrl(…)}.md` `` emits
+  `http://hosthttp://host/…md`. PR #1046 fixes the four static info pages
+  (`/about`, `/cookies`, `/privacy-policy`, `/terms-of-service`); the same
+  doubling remains on `app/[locale]/items/[slug]/page.tsx` and
+  `app/[locale]/pages/[slug]/page.tsx`.
+- **Options.**
+    - **Leave to the owning PR / a follow-up.** Spec 047 is about
+      reachability; touching the same four-file blast radius as PR #1046 while
+      it is open invites a conflict, and the two remaining pages are the same
+      one-line change.
+    - Fix all six in this PR.
+- **Default.** **Leave to a follow-up**, tracked here. Spec 047's e2e guard
+  deliberately checks alternate-href _resolution_ on `/help` and `/pricing`
+  only — the two pages whose href is already origin-correct — so it neither
+  duplicates nor collides with `md-alternate-link-absolute-url.spec.ts`.
+- **Outcome.** Answered by [spec 048](spec/048-legal-pages-frontmatter-seo/spec.md)
+  (PR #1045), which fixed the doubling on `about`, `cookies`,
+  `items/[slug]` and `pages/[slug]` alongside the two legal routes. Nothing
+  is left for this spec to do here.
+- **Owner.** Template maintainers.
+- **Status.** `answered`.
+
+---
 
 ## Spec 048 — Legal page SEO metadata from Markdown frontmatter
 
@@ -703,3 +748,13 @@ confirm, override, or refine.
 - **Default.** **Plain prose.** Revisit if a Work ships an FAQ long enough that
   scanning it becomes the complaint. `<details>`-based progressive enhancement
   is the cheapest upgrade path and would not break the parser or the mirror.
+
+---
+
+## How to add a question
+
+1. Pick the next available `Q-NNN…` id under the relevant spec.
+2. Use the format above.
+3. Always include a **Default**; never block on a question.
+4. Append a line to [`log.md`](log.md):
+   `YYYY-MM-DD questions: added Q-NNN — short summary`.

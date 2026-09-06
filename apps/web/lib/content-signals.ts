@@ -13,6 +13,7 @@ export interface ContentSignals {
 	hasTags: boolean;
 	hasCollections: boolean;
 	hasComparisons: boolean;
+	hasPosts: boolean;
 }
 
 async function readCollectionExists(type: 'categories' | 'tags' | 'collections'): Promise<boolean> {
@@ -46,29 +47,51 @@ async function readComparisonsExists(): Promise<boolean> {
 	}
 }
 
-async function fetchContentSignals(): Promise<ContentSignals> {
+/**
+ * True when the data repository ships at least one PUBLISHED post.
+ *
+ * Delegates to `lib/content.ts` rather than re-walking the filesystem here, so
+ * this signal and the `/blog` listing can never disagree about which posts
+ * directory is authoritative or about what counts as a post. Getting that
+ * wrong shows a Blog nav entry that leads to an empty page.
+ */
+async function readPostsExists(locale: string): Promise<boolean> {
+	try {
+		const { hasPublishedPosts } = await import('./content');
+		return await hasPublishedPosts(locale);
+	} catch (error) {
+		console.error('[CONTENT] Failed to read posts existence:', error);
+		return false;
+	}
+}
+
+async function fetchContentSignals(locale: string): Promise<ContentSignals> {
 	const { ensureContentAvailable } = await import('./lib');
 	await ensureContentAvailable();
 
-	const [hasCategories, hasTags, hasCollections, hasComparisons] = await Promise.all([
+	const [hasCategories, hasTags, hasCollections, hasComparisons, hasPosts] = await Promise.all([
 		readCollectionExists('categories'),
 		readCollectionExists('tags'),
 		readCollectionExists('collections'),
-		readComparisonsExists()
+		readComparisonsExists(),
+		// Locale-scoped: a slug can be a draft in one locale and published in
+		// another, and the nav gate must agree with the listing THIS visitor sees.
+		readPostsExists(locale)
 	]);
 
 	return {
 		hasCategories,
 		hasTags,
 		hasCollections,
-		hasComparisons
+		hasComparisons,
+		hasPosts
 	};
 }
 
 export const getCachedContentSignals = async (locale: string = 'en') => {
 	return unstable_cache(
 		async () => {
-			return await fetchContentSignals();
+			return await fetchContentSignals(locale);
 		},
 		['content-signals', locale],
 		{
@@ -79,8 +102,10 @@ export const getCachedContentSignals = async (locale: string = 'en') => {
 				CACHE_TAGS.TAGS,
 				CACHE_TAGS.COLLECTIONS,
 				CACHE_TAGS.COMPARISONS,
+				CACHE_TAGS.POSTS,
 				CACHE_TAGS.ITEMS_LOCALE(locale),
-				CACHE_TAGS.COMPARISONS_LOCALE(locale)
+				CACHE_TAGS.COMPARISONS_LOCALE(locale),
+				CACHE_TAGS.POSTS_LOCALE(locale)
 			]
 		}
 	)();

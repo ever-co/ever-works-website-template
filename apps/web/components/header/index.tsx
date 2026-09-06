@@ -32,6 +32,7 @@ import { useLocationSettings } from '@/hooks/use-location-settings';
 import { useCategoriesExists } from '@/hooks/use-categories-exists';
 import { useCollectionsExists } from '@/hooks/use-collections-exists';
 import { useComparisonsExists } from '@/hooks/use-comparisons-exists';
+import { useBlogExists } from '@/hooks/use-blog-exists';
 import { useTagsExists } from '@/hooks/use-tags-exists';
 import { isDemoMode } from '@/lib/utils';
 import { isExternalUrl, resolveLabel } from '@/lib/utils/custom-navigation';
@@ -95,6 +96,12 @@ const NAVIGATION_CONFIG: Array<{
 		key: 'comparisons',
 		href: '/comparisons',
 		translationKey: 'COMPARISONS',
+		translationNamespace: 'common'
+	},
+	{
+		key: 'blog',
+		href: '/blog',
+		translationKey: 'BLOG',
 		translationNamespace: 'common'
 	},
 	{
@@ -197,6 +204,7 @@ export default function Header() {
 	const { data: categoriesData, isLoading: categoriesLoading } = useCategoriesExists();
 	const { data: collectionsData, isLoading: collectionsLoading } = useCollectionsExists();
 	const { data: comparisonsData, isLoading: comparisonsLoading } = useComparisonsExists();
+	const { data: blogData, isLoading: blogLoading } = useBlogExists();
 	const { data: tagsData, isLoading: tagsLoading } = useTagsExists();
 	const isDemo = isDemoMode();
 
@@ -220,12 +228,14 @@ export default function Header() {
 	tGlobalRef.current = tGlobal;
 
 	// Check if we're still loading essential data for navigation
-	const isNavigationLoading = categoriesLoading || collectionsLoading || comparisonsLoading || tagsLoading;
+	const isNavigationLoading =
+		categoriesLoading || collectionsLoading || comparisonsLoading || tagsLoading || blogLoading;
 
 	// Extract existence flags from React Query data
 	const hasCategories = categoriesData?.exists ?? false;
 	const hasCollections = collectionsData?.exists ?? false;
 	const hasComparisons = comparisonsData?.exists ?? false;
+	const hasPosts = blogData?.exists ?? false;
 	const hasTags = tagsData?.exists ?? false;
 
 	const navigationItems = useMemo((): NavigationItem[] => {
@@ -236,6 +246,10 @@ export default function Header() {
 				return false;
 			}
 			if (item.key === 'comparisons' && !hasComparisons) {
+				return false;
+			}
+			// Hide the blog link when the data repository ships no posts
+			if (item.key === 'blog' && !hasPosts) {
 				return false;
 			}
 			// Hide categories link when categories are disabled or no categories exist
@@ -317,6 +331,7 @@ export default function Header() {
 		hasCategories,
 		hasCollections,
 		hasComparisons,
+		hasPosts,
 		hasTags
 	]);
 

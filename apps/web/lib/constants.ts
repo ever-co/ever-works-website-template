@@ -1,34 +1,16 @@
 import { getNextPublicEnv } from '@/env-config';
 import { clientEnv } from '@/lib/config/client';
+import type { Locale } from '@/lib/i18n/locales';
 
 // ============================================
 // LOCALIZATION
 // ============================================
-export const DEFAULT_LOCALE = 'en';
-export const LOCALES = [
-	'en',
-	'fr',
-	'es',
-	'de',
-	'zh',
-	'ar',
-	'he',
-	'ru',
-	'uk',
-	'pt',
-	'it',
-	'ja',
-	'ko',
-	'nl',
-	'pl',
-	'tr',
-	'vi',
-	'th',
-	'hi',
-	'id',
-	'bg'
-] as const;
-export type Locale = (typeof LOCALES)[number];
+// The values live in `lib/i18n/locales.ts`, a dependency-free module, because
+// `next.config.ts` has to read `DEFAULT_LOCALE` when it builds the `.md`
+// mirror rewrites and cannot resolve the `@/` imports at the top of this file.
+// Re-exported here so every existing `@/lib/constants` import keeps working.
+export { DEFAULT_LOCALE, LOCALES } from '@/lib/i18n/locales';
+export type { Locale } from '@/lib/i18n/locales';
 
 /** Locales that use right-to-left text direction */
 export const RTL_LOCALES: readonly Locale[] = ['ar', 'he'] as const;

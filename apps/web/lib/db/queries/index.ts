@@ -10,7 +10,7 @@
 // Activity queries
 export * from './activity.queries';
 
-// Billing issue queries (Spec 046)
+// Billing issue queries (Spec 051)
 export * from './billing-issue.queries';
 
 // Authentication queries
@@ -34,7 +34,7 @@ export * from './newsletter.queries';
 // Payment queries
 export * from './payment.queries';
 
-// Payment report queries (Spec 047)
+// Payment report queries (Spec 052)
 export * from './payment-report.queries';
 
 // Report queries

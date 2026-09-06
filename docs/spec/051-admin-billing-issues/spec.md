@@ -1,10 +1,10 @@
 ---
-id: spec-046-admin-billing-issues
-title: Spec 046 — Admin billing issues and refunds
+id: spec-051-admin-billing-issues
+title: Spec 051 — Admin billing issues and refunds
 sidebar_label: 046 Admin billing issues
 ---
 
-# Feature spec — `046-admin-billing-issues`
+# Feature spec — `051-admin-billing-issues`
 
 ## 1. Summary
 
@@ -222,5 +222,5 @@ the admin route and API coverage matrices.
 ## 13. References
 
 - Related spec: [004 payment providers](../004-payment-providers/spec.md)
-- Related spec: [047 admin payment reports](../047-admin-payment-reports/spec.md)
+- Related spec: [047 admin payment reports](../052-admin-payment-reports/spec.md)
 - Plan: [`plan.md`](./plan.md) · Tasks: [`tasks.md`](./tasks.md)

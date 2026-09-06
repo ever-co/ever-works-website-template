@@ -4,7 +4,7 @@ import { parseReportDate, type PaymentReportFilters } from '@/lib/db/queries/pay
 
 /**
  * Filter parsing shared by `GET /api/admin/payment-reports` and
- * `GET /api/admin/payment-reports/export` (Spec 047).
+ * `GET /api/admin/payment-reports/export` (Spec 052).
  *
  * It lives outside both route files on purpose: a Next.js `route.ts` may only
  * export route handlers and route config, and an exported and re-imported

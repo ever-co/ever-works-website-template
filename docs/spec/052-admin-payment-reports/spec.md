@@ -1,10 +1,10 @@
 ---
-id: spec-047-admin-payment-reports
-title: Spec 047 — Admin payment reports and export
+id: spec-052-admin-payment-reports
+title: Spec 052 — Admin payment reports and export
 sidebar_label: 047 Admin payment reports
 ---
 
-# Feature spec — `047-admin-payment-reports`
+# Feature spec — `052-admin-payment-reports`
 
 ## 1. Summary
 
@@ -41,7 +41,7 @@ Jira: [EW-117](https://evertech.atlassian.net/browse/EW-117).
 ## 4. Non-Goals
 
 - **PDF.** The repository carries no PDF generation dependency; adding one is a
-  dependency decision recorded in `docs/questions.md` (Q-047-1), not a silent
+  dependency decision recorded in `docs/questions.md` (Q-052-1), not a silent
   side effect of this feature.
 - Pulling live rows from a provider API (a `?source=provider` follow-up).
 - Scheduled or emailed reports.
@@ -142,7 +142,7 @@ None. Export uses `papaparse` and `exceljs`, both already dependencies of
 
 ## 11. Risks & Open Questions
 
-- Q-047-1 (`docs/questions.md`): PDF export. **Default: not shipped** — no PDF
+- Q-052-1 (`docs/questions.md`): PDF export. **Default: not shipped** — no PDF
   library in the repo. `SUPPORTED_EXPORT_FORMATS` is the single place to extend.
 - Multi-currency sites get one summary row per currency rather than a converted
   total; converting would need a rate source this template does not have.
@@ -160,5 +160,5 @@ Both routes are added to the coverage matrices.
 ## 13. References
 
 - Related spec: [004 payment providers](../004-payment-providers/spec.md)
-- Related spec: [046 admin billing issues](../046-admin-billing-issues/spec.md)
+- Related spec: [046 admin billing issues](../051-admin-billing-issues/spec.md)
 - Plan: [`plan.md`](./plan.md) · Tasks: [`tasks.md`](./tasks.md)

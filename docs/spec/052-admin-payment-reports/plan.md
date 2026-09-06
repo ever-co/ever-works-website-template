@@ -1,10 +1,10 @@
 ---
-id: plan-047-admin-payment-reports
+id: plan-052-admin-payment-reports
 title: Plan 047 — Admin payment reports and export
 sidebar_label: 047 Plan
 ---
 
-# Implementation Plan — `047-admin-payment-reports`
+# Implementation Plan — `052-admin-payment-reports`
 
 > **Spec:** [`spec.md`](./spec.md)
 
@@ -78,7 +78,7 @@ in the file so a spreadsheet `SUM()` reads as money. The XLSX carries a second
 
 `SUPPORTED_EXPORT_FORMATS = ['csv', 'xlsx']` is the single extension point. PDF is
 absent because no PDF library is in `apps/web/package.json` and Article VII says
-reuse before build — see Q-047-1.
+reuse before build — see Q-052-1.
 
 ## 6. Constitution Check
 

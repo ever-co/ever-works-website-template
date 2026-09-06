@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { ADMIN_STATE_FILE, CLIENT_STATE_FILE } from '../../helpers/test-data';
 
 /**
- * Admin Billing Issues page (Spec 046, Jira EW-116).
+ * Admin Billing Issues page (Spec 051, Jira EW-116).
  *
  * `/admin/billing-issues` is the admin surface for payment problems detected on
  * the payment records the site already stores: failed renewal charges, disputes,

@@ -15,7 +15,7 @@ import type { PaymentProviderInterface } from '@/lib/payment/types/payment-types
 import { toMinorUnits } from '@/lib/utils/currency-format';
 
 /**
- * Billing-issue actions (Spec 046).
+ * Billing-issue actions (Spec 051).
  *
  * The refund is executed by whichever provider the underlying payment record
  * names — the template already builds those instances through

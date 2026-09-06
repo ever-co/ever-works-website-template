@@ -348,7 +348,7 @@ valid states (e.g. `/sponsor` may redirect or 404 depending on env).
 
 ## PR #1049 — Admin billing issues & payment reports (30 new tests)
 
-Specs 046 / 047 (Jira EW-116, EW-117). Two admin surfaces over the payment
+Specs 051 / 052 (Jira EW-116, EW-117). Two admin surfaces over the payment
 records the site already stores. The API specs carry most of the weight here
 because these are the only routes in the template that move money or emit a file
 full of customer data — the gate, not the happy path, is the invariant.

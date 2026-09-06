@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { ADMIN_STATE_FILE, CLIENT_STATE_FILE } from '../../helpers/test-data';
 
 /**
- * Admin Payment Reports page (Spec 047, Jira EW-117).
+ * Admin Payment Reports page (Spec 052, Jira EW-117).
  *
  * `/admin/payment-reports` filters the stored payment records by date range,
  * plan, provider and status, shows revenue roll-ups, and exports the same filter

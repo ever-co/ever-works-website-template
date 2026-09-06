@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { ADMIN_STATE_FILE } from '../../helpers/test-data';
 
 /**
- * Query-surface smoke for the admin payment-report API (Spec 047, Jira EW-117),
+ * Query-surface smoke for the admin payment-report API (Spec 052, Jira EW-117),
  * served by `apps/web/app/api/admin/payment-reports/**`.
  *
  * Two routes, one filter contract:

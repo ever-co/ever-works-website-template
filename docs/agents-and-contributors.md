@@ -17,6 +17,7 @@ non-trivial change goes through a spec → plan → tasks trio.
 - [Spec Index](https://github.com/ever-works/directory-web-template/tree/develop/docs/spec) -- Per-feature spec/plan/tasks documents under `docs/spec/`.
 - [Change Log](https://github.com/ever-works/directory-web-template/blob/develop/docs/log.md) -- Running log of doc and spec changes.
 - [Open Questions](https://github.com/ever-works/directory-web-template/blob/develop/docs/questions.md) -- Open questions with chosen defaults.
+- [`works.yml` Pricing Configuration](https://github.com/ever-works/directory-web-template/blob/develop/docs/configuration/works-yml-pricing.md) -- Field reference for the data repository's `pricing:` block and the schema that validates it (see [Spec 046](https://github.com/ever-works/directory-web-template/tree/develop/docs/spec/046-works-yml-pricing-config)).
 - [Plugin System (Architecture)](https://github.com/ever-works/directory-web-template/blob/develop/docs/architecture/plugin-system.md) -- The pluggable, modular core (see [Spec 002](https://github.com/ever-works/directory-web-template/tree/develop/docs/spec/002-plugin-architecture)).
 - [Authoring a Plugin](https://github.com/ever-works/directory-web-template/blob/develop/docs/plugins/authoring-a-plugin.md) -- Walk-through for authoring your first plugin.
 - [Plugin Lifecycle](https://github.com/ever-works/directory-web-template/blob/develop/docs/plugins/lifecycle.md) -- Boot, validation, enable/disable, and teardown semantics every plugin must cooperate with.

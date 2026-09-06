@@ -3,7 +3,7 @@ import ExcelJS from 'exceljs';
 import type { PaymentReportRecord, PaymentReportSummary } from '@/lib/db/queries/payment-report.queries';
 
 /**
- * Payment-report export (Spec 047).
+ * Payment-report export (Spec 052).
  *
  * CSV and XLSX only. The repository carries no PDF generation dependency
  * (`exceljs` + `papaparse` are the only document libraries in

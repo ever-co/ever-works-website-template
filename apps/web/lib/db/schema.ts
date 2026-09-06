@@ -760,11 +760,11 @@ export enum ActivityType {
 	DELETE_ACCOUNT = 'DELETE_ACCOUNT',
 	UPDATE_ACCOUNT = 'UPDATE_ACCOUNT',
 	UPDATE_TWENTY_CRM_CONFIG = 'UPDATE_TWENTY_CRM_CONFIG',
-	/** Admin issued a refund from the billing-issues page (Spec 046). */
+	/** Admin issued a refund from the billing-issues page (Spec 051). */
 	ADMIN_BILLING_REFUND = 'ADMIN_BILLING_REFUND',
-	/** Admin closed a billing issue without a refund (Spec 046). */
+	/** Admin closed a billing issue without a refund (Spec 051). */
 	ADMIN_BILLING_ISSUE_RESOLVED = 'ADMIN_BILLING_ISSUE_RESOLVED',
-	/** Admin exported a payment report (Spec 047). */
+	/** Admin exported a payment report (Spec 052). */
 	ADMIN_PAYMENT_REPORT_EXPORTED = 'ADMIN_PAYMENT_REPORT_EXPORTED'
 }
 
@@ -1564,7 +1564,7 @@ export const chatMessages = pgTable(
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type NewChatMessage = typeof chatMessages.$inferInsert;
 
-// ######################### Billing Issues (Spec 046) #########################
+// ######################### Billing Issues (Spec 051) #########################
 /**
  * An admin-workflow record layered on top of the payment data the template
  * already stores. A billing issue NEVER holds money state of its own — the

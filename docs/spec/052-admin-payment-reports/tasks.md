@@ -1,10 +1,10 @@
 ---
-id: tasks-047-admin-payment-reports
+id: tasks-052-admin-payment-reports
 title: Tasks 047 — Admin payment reports and export
 sidebar_label: 047 Tasks
 ---
 
-# Tasks — `047-admin-payment-reports`
+# Tasks — `052-admin-payment-reports`
 
 > **Spec:** [`spec.md`](./spec.md) · **Plan:** [`plan.md`](./plan.md)
 
@@ -20,7 +20,7 @@ sidebar_label: 047 Tasks
 | T-8 | Add the dashboard-grid card and the profile-menu entry | Admin route coverage matrix | done |
 | T-9 | Add `admin.ADMIN_PAYMENT_REPORTS_PAGE` to all 21 locale files | `pnpm run lint`; every locale parses | done |
 | T-10 | Add both Playwright specs and register the routes in both coverage matrices | Specs run under `@ever-works/web-e2e` | done |
-| T-11 | Record the PDF decision as Q-047-1 with a chosen default | `docs/questions.md` | done |
+| T-11 | Record the PDF decision as Q-052-1 with a chosen default | `docs/questions.md` | done |
 | T-12 | Spec, plan, tasks, `docs/spec/README.md` row, `docs/log.md` line | Definition of Done checklist in `AGENTS.md` §2 | done |
 | T-13 | Group every roll-up BY currency and label each amount with its own, in the API, the page and the XLSX Summary sheet | `admin-payment-reports-query.spec.ts` currency test | done |
 | T-14 | Book revenue from `amount_paid`, falling back to `amount` only when it is NULL | A pending subscription no longer counts its scheduled amount as collected | done |

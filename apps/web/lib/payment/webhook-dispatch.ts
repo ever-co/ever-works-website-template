@@ -523,7 +523,7 @@ async function handleSubscriptionPaymentSucceeded(data: any) {
  * Read one property off an unverified webhook payload.
  *
  * The payload arrives as JSON over the wire, so its shape is a claim, not a fact —
- * `unknown` plus these two guards keeps the Spec 046 extraction below honest
+ * `unknown` plus these two guards keeps the Spec 051 extraction below honest
  * without an `any` (AGENTS.md §4) and without pulling a Stripe payload type into
  * a file that also serves the platform relay.
  */
@@ -540,7 +540,7 @@ function readReferenceId(value: unknown): string | null {
 }
 
 /**
- * Read the provider's own subscription id off a failed-invoice payload (Spec 046).
+ * Read the provider's own subscription id off a failed-invoice payload (Spec 051).
  *
  * Stripe moved the reference from `invoice.subscription` to
  * `invoice.parent.subscription_details.subscription` in the 2025 API versions and
@@ -560,7 +560,7 @@ function extractProviderSubscriptionId(data: unknown): string | null {
 }
 
 /**
- * Read the reference a refund would target off a failed-invoice payload (Spec 046).
+ * Read the reference a refund would target off a failed-invoice payload (Spec 051).
  *
  * The invoice's `payment_intent` is what a refund actually needs — the template's
  * Stripe adapter passes whatever it is given as `payment_intent` to
@@ -584,7 +584,7 @@ async function handleSubscriptionPaymentFailed(data: any) {
 	try {
 		await webhookSubscriptionService.handleSubscriptionPaymentFailed(data);
 
-		// Spec 046: surface the failure in the admin Billing Issues queue as well as
+		// Spec 051: surface the failure in the admin Billing Issues queue as well as
 		// in the customer email. Best-effort by design — see the helper's contract.
 		//
 		// `data` here is the Stripe invoice. Its subscription reference moved between

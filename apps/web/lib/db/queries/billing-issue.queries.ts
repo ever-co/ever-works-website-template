@@ -19,7 +19,7 @@ import { getTenantId } from '@/lib/auth/tenant';
 import { toMinorUnits } from '@/lib/utils/currency-format';
 
 /**
- * Billing-issue queries (Spec 046).
+ * Billing-issue queries (Spec 051).
  *
  * A billing issue is an admin-workflow record layered on the payment data the
  * template already stores — it is deliberately NOT a second source of truth for

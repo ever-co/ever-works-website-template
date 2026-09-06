@@ -523,9 +523,50 @@ confirm, override, or refine.
 
 ---
 
-## Spec 046 — Admin billing issues
+## Spec 046 — Provider-aware pricing configuration in works.yml
 
-### Q-046-1 Should a refund carry a provider-side idempotency key?
+### Q-046a Should `provider: manual` render a distinct pricing surface?
+
+- **Context.** EW-131 asks `works.yml` to accept `provider: manual` —
+  "show the prices, take payment elsewhere". Spec 046 accepts the value and
+  suppresses the in-site checkout: `handleCheckout()` returns before any
+  gateway branch and logs the reason. Which cards render is unchanged — still
+  the LIVE / DEMO logic of
+  [spec 044](spec/044-public-payment-config/spec.md). That is safe but
+  silent: a manual-checkout operator arguably wants a "Contact us" call to
+  action on the paid cards rather than a button that does nothing.
+- **Options.**
+  - **Suppress the checkout and render the existing cards (current).** One
+    guard in the pricing flow, no new strings, no new localisation work.
+  - Add a manual-checkout mode: a per-plan contact URL in `works.yml` and a
+    dedicated CTA on the card. Needs new i18n keys in all locales and a new
+    branch in `use-pricing-section.ts`.
+- **Default.** **Suppress the checkout, keep the existing cards.** The value
+  is accepted and documented now; the UX affordance can land on its own ticket
+  once someone actually runs manual checkout.
+- **Owner.** Template maintainers.
+- **Status.** `open`.
+
+### Q-046b Should a malformed `pricing:` block ever be fatal?
+
+- **Context.** Spec 046 logs each problem and falls back to the built-in
+  plans. `getConfig()` runs on every render, so throwing would take a whole
+  directory offline over a typo in an optional block.
+- **Options.**
+  - **Warn and fall back (current).** The site stays up; the operator sees
+    `[CONTENT] Invalid "pricing" section …` with one line per field.
+  - Fail the build (not the request) when the data repository is cloned at
+    build time, so the typo is caught before deploy.
+- **Default.** **Warn and fall back.** Revisit if operators report missing
+  the log line; a build-time check is additive and can land later.
+- **Owner.** Template maintainers.
+- **Status.** `open`.
+
+---
+
+## Spec 051 — Admin billing issues
+
+### Q-051-1 Should a refund carry a provider-side idempotency key?
 
 - **Context.** `refundBillingIssue()` takes an atomic claim on the issue row
   (`billing_issues.refund_claimed_at`, a single conditional UPDATE) before it
@@ -554,7 +595,7 @@ confirm, override, or refine.
   - Lengthen `REFUND_CLAIM_TTL_MS`. Cheapest, and strictly worse on the other
     axis: it narrows the duplicate window only by widening the stranded window.
 - **Default.** **Leave it, and fix it properly in the payment-provider spec.**
-  Spec 046 states it adds no new payment abstraction, and an idempotency
+  Spec 051 states it adds no new payment abstraction, and an idempotency
   parameter is a change to the shared provider interface and all four adapters —
   it belongs with the seam it changes, not inside an admin feature.
 - **Owner.** Template maintainers.
@@ -562,9 +603,9 @@ confirm, override, or refine.
 
 ---
 
-## Spec 047 — Admin payment reports and export
+## Spec 052 — Admin payment reports and export
 
-### Q-047-1 Should the payment report also export PDF?
+### Q-052-1 Should the payment report also export PDF?
 
 - **Context.** [EW-117](https://evertech.atlassian.net/browse/EW-117) asks for
   "tools to filter and export reports (CSV, PDF, etc.)". `apps/web` has no PDF

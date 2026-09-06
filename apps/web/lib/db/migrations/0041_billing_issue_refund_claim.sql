@@ -1,4 +1,4 @@
--- Refund claim column for admin billing issues (Spec 046)
+-- Refund claim column for admin billing issues (Spec 051)
 --
 -- Split out of 0040 rather than edited into it: Drizzle records applied
 -- migrations by tag, so a database that already ran 0040 would never see an

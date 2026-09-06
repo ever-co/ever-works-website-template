@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { ADMIN_STATE_FILE } from '../../helpers/test-data';
 
 /**
- * Query-surface smoke for the admin billing-issues API (Spec 046, Jira EW-116),
+ * Query-surface smoke for the admin billing-issues API (Spec 051, Jira EW-116),
  * served by `apps/web/app/api/admin/billing-issues/**`.
  *
  * These routes are the only place in the template that can move real money — the

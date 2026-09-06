@@ -1,10 +1,10 @@
 ---
-id: plan-046-admin-billing-issues
+id: plan-051-admin-billing-issues
 title: Plan 046 — Admin billing issues and refunds
 sidebar_label: 046 Plan
 ---
 
-# Implementation Plan — `046-admin-billing-issues`
+# Implementation Plan — `051-admin-billing-issues`
 
 > **Spec:** [`spec.md`](./spec.md)
 

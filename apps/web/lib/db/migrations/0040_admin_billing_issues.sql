@@ -1,4 +1,4 @@
--- Admin Billing Issues (Spec 046)
+-- Admin Billing Issues (Spec 051)
 --
 -- Triage state for payment problems an admin has to act on. The row never holds
 -- authoritative money state: amount / plan / provider live on the referenced

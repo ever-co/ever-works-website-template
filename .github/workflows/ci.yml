@@ -172,6 +172,13 @@ jobs:
       - name: Type check
         run: pnpm run --filter @ever-works/web typecheck || echo "No type check script found, skipping"
 
+      - name: Run unit tests
+        # node:test specs under apps/web (lib/**/*.spec.ts, scripts/**/*.spec.ts).
+        # They existed since the Stripe relay work (spec 045) but nothing ran
+        # them, so their assertions gated nothing. Seconds to run, no server,
+        # no database — see docs/spec/046-works-yml-pricing-config/plan.md.
+        run: pnpm run --filter @ever-works/web test:unit
+
       - name: Create content directories
         run: |
           mkdir -p apps/web/.content/data

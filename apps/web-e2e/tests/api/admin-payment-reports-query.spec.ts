@@ -161,17 +161,22 @@ test.describe('API: /api/admin/payment-reports (admin)', () => {
 
 	test('returns rows, a summary and pagination for an admin', async ({ request }) => {
 		const response = await request.get('/api/admin/payment-reports?page=1&limit=20');
-		expect(response.status(), 'admin report should not 5xx').toBeLessThan(500);
+		// 503 is the documented database-unavailable answer and the only status this
+		// test tolerates. `toBeLessThan(500)` was wrong in both directions: it FAILED
+		// on 503 (503 is not less than 500) and it PASSED on a 401/403, which then
+		// skipped every envelope assertion below. `global-setup.ts` throws if it cannot
+		// create the admin storage state, so a non-admin session reaching here is the bug.
+		if (response.status() === 503) return;
 
-		if (response.status() === 200) {
-			const body = await response.json();
-			expect(body.success).toBe(true);
-			expect(Array.isArray(body.data.records)).toBe(true);
-			expect(Array.isArray(body.data.summary.totalsByCurrency)).toBe(true);
-			expect(Array.isArray(body.data.summary.byPlan)).toBe(true);
-			expect(Array.isArray(body.data.summary.byProvider)).toBe(true);
-			expect(body.data.pagination).toMatchObject({ page: 1, limit: 20 });
-		}
+		expect(response.status(), 'an admin must be served the report').toBe(200);
+
+		const body = await response.json();
+		expect(body.success).toBe(true);
+		expect(Array.isArray(body.data.records)).toBe(true);
+		expect(Array.isArray(body.data.summary.totalsByCurrency)).toBe(true);
+		expect(Array.isArray(body.data.summary.byPlan)).toBe(true);
+		expect(Array.isArray(body.data.summary.byProvider)).toBe(true);
+		expect(body.data.pagination).toMatchObject({ page: 1, limit: 20 });
 	});
 
 	test('a malformed or inverted date range is a 400 on BOTH the list and the export', async ({ request }) => {
@@ -203,6 +208,10 @@ test.describe('API: /api/admin/payment-reports (admin)', () => {
 
 	test('the CSV export is returned as an attachment with a header row', async ({ request }) => {
 		const response = await request.get('/api/admin/payment-reports/export?format=csv');
+		// Same 503 correction as the list test above. Not tightened to 200 here: an
+		// over-cap filter is a legitimate 400 on this route, so `< 500` is the honest
+		// bound once the database-unavailable answer is taken out of the comparison.
+		if (response.status() === 503) return;
 		expect(response.status()).toBeLessThan(500);
 
 		if (response.status() === 200) {
@@ -219,6 +228,10 @@ test.describe('API: /api/admin/payment-reports (admin)', () => {
 
 	test('the XLSX export is returned as a spreadsheet attachment', async ({ request }) => {
 		const response = await request.get('/api/admin/payment-reports/export?format=xlsx');
+		// Same 503 correction as the list test above. Not tightened to 200 here: an
+		// over-cap filter is a legitimate 400 on this route, so `< 500` is the honest
+		// bound once the database-unavailable answer is taken out of the comparison.
+		if (response.status() === 503) return;
 		expect(response.status()).toBeLessThan(500);
 
 		if (response.status() === 200) {

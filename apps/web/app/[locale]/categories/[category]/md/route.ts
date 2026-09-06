@@ -3,8 +3,10 @@
  * Public URL: `/<locale>/categories/<category>.md`.
  */
 
+import { NextResponse } from 'next/server';
 import { getCachedItems } from '@/lib/content';
 import { getBaseUrl } from '@/lib/utils/url-cleaner';
+import { getCategoriesEnabled } from '@/lib/utils/settings';
 import { slugify } from '@/lib/utils';
 import { renderCategoryMarkdown, MARKDOWN_RESPONSE_HEADERS } from '@/lib/seo/markdown-mirror';
 
@@ -14,6 +16,14 @@ export async function GET(
 	_req: Request,
 	{ params }: { params: Promise<{ category: string; locale: string }> }
 ): Promise<Response> {
+	// A site can switch the whole category surface off
+	// (`settings.categories_enabled` in `.works/works.yml`), and the HTML
+	// listing `notFound()`s when it is off. The mirror has to give the same
+	// answer, or a withdrawn surface stays readable at `.md`.
+	if (!getCategoriesEnabled()) {
+		return NextResponse.json({ error: 'Not found' }, { status: 404 });
+	}
+
 	const { category, locale } = await params;
 	const decoded = decodeURIComponent(category);
 	const { categories, items } = await getCachedItems({ lang: locale });
@@ -22,7 +32,13 @@ export async function GET(
 	const matched = categories.find(
 		(c) => c.id === decoded || c.id === slug || c.name.toLowerCase() === decoded.toLowerCase()
 	);
-	const resolvedId = matched?.id ?? slug;
+	// Unknown category slug → 404, the same answer the HTML page gives.
+	// Rendering an empty listing here would make the mirror a soft-404 that
+	// disagrees with the page it mirrors.
+	if (!matched) {
+		return NextResponse.json({ error: 'Not found' }, { status: 404 });
+	}
+	const resolvedId = matched.id;
 	const matchingItems = items.filter((item) => {
 		const cat = item.category;
 		if (!cat) return false;

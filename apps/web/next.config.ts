@@ -4,6 +4,7 @@ import createNextIntlPlugin from 'next-intl/plugin';
 import { withSentryConfig } from '@sentry/nextjs';
 import { sentryWebpackPluginOptions } from './sentry.config';
 import { generateImageRemotePatterns } from './lib/utils/image-domains';
+import { DEFAULT_LOCALE, LOCALES } from './lib/i18n/locales';
 const isDev = process.env.NODE_ENV === 'development';
 
 const nextConfig: NextConfig = {
@@ -68,33 +69,51 @@ const nextConfig: NextConfig = {
 		// Markdown twin at the same path with `.md` appended, so AI agents
 		// (ChatGPT, Claude, Perplexity) can consume the canonical content
 		// without parsing HTML. Internally each `<path>.md` is dispatched to
-		// a `/_md` sibling route handler that renders Markdown from the same
+		// a `/md` sibling route handler that renders Markdown from the same
 		// data layer the HTML page uses.
+		//
+		// Two rules the destinations have to respect (Spec 047):
+		//
+		// 1. The internal segment must NOT start with an underscore. The App
+		//    Router treats `_foo` as a *private folder* and drops it and
+		//    everything under it from the route table, so `/_md` and
+		//    `/_static-md` destinations resolved to nothing and every public
+		//    `.md` URL 404'd while looking perfectly wired up.
+		// 2. The unprefixed destinations have to name the locale themselves.
+		//    `proxy.ts` is what normally rewrites `/about` to `/en/about`, and
+		//    its matcher skips every path containing a dot — including all of
+		//    these — so nothing else will add the segment.
+		//
+		// The locale group is built from `LOCALES` rather than a generic
+		// `[a-z]{2}`: because `proxy.ts` skips these paths, nothing else
+		// rejects an unsupported locale, and `/zz/about.md` would happily
+		// serve the mirror while `/zz/about` 404s.
+		const localeGroup = LOCALES.join('|');
 		const mdMirrors = [
 			// Items
-			{ source: '/:locale([a-z]{2})/items/:slug.md', destination: '/:locale/items/:slug/_md' },
-			{ source: '/items/:slug.md', destination: '/items/:slug/_md' },
+			{ source: `/:locale(${localeGroup})/items/:slug.md`, destination: '/:locale/items/:slug/md' },
+			{ source: '/items/:slug.md', destination: `/${DEFAULT_LOCALE}/items/:slug/md` },
 			// Categories — single
-			{ source: '/:locale([a-z]{2})/categories/:category.md', destination: '/:locale/categories/:category/_md' },
-			{ source: '/categories/:category.md', destination: '/categories/:category/_md' },
+			{ source: `/:locale(${localeGroup})/categories/:category.md`, destination: '/:locale/categories/:category/md' },
+			{ source: '/categories/:category.md', destination: `/${DEFAULT_LOCALE}/categories/:category/md` },
 			// Categories — paginated/multi-segment (no .md inside the catch-all to keep things simple)
 			// Tags — single
-			{ source: '/:locale([a-z]{2})/tags/:tag.md', destination: '/:locale/tags/:tag/_md' },
-			{ source: '/tags/:tag.md', destination: '/tags/:tag/_md' },
+			{ source: `/:locale(${localeGroup})/tags/:tag.md`, destination: '/:locale/tags/:tag/md' },
+			{ source: '/tags/:tag.md', destination: `/${DEFAULT_LOCALE}/tags/:tag/md` },
 			// Collections
-			{ source: '/:locale([a-z]{2})/collections/:slug.md', destination: '/:locale/collections/:slug/_md' },
-			{ source: '/collections/:slug.md', destination: '/collections/:slug/_md' },
+			{ source: `/:locale(${localeGroup})/collections/:slug.md`, destination: '/:locale/collections/:slug/md' },
+			{ source: '/collections/:slug.md', destination: `/${DEFAULT_LOCALE}/collections/:slug/md` },
 			// Comparisons
-			{ source: '/:locale([a-z]{2})/comparisons/:slug.md', destination: '/:locale/comparisons/:slug/_md' },
-			{ source: '/comparisons/:slug.md', destination: '/comparisons/:slug/_md' },
+			{ source: `/:locale(${localeGroup})/comparisons/:slug.md`, destination: '/:locale/comparisons/:slug/md' },
+			{ source: '/comparisons/:slug.md', destination: `/${DEFAULT_LOCALE}/comparisons/:slug/md` },
 			// Pages (about, privacy-policy, etc — anything under /pages and the static info pages too)
-			{ source: '/:locale([a-z]{2})/pages/:slug.md', destination: '/:locale/pages/:slug/_md' },
-			{ source: '/pages/:slug.md', destination: '/pages/:slug/_md' },
-			// Static info pages — about, help, pricing, privacy-policy, terms-of-service, cookies, faq
-			// served via a dedicated catch-all in /_static-md. Keep this list in
-			// sync with ALLOWED_STATIC_SLUGS in app/[locale]/_static-md/[slug]/route.ts.
-			{ source: '/:locale([a-z]{2})/:staticSlug(about|help|pricing|privacy-policy|terms-of-service|cookies|faq).md', destination: '/:locale/_static-md/:staticSlug' },
-			{ source: '/:staticSlug(about|help|pricing|privacy-policy|terms-of-service|cookies|faq).md', destination: '/_static-md/:staticSlug' }
+			{ source: `/:locale(${localeGroup})/pages/:slug.md`, destination: '/:locale/pages/:slug/md' },
+			{ source: '/pages/:slug.md', destination: `/${DEFAULT_LOCALE}/pages/:slug/md` },
+			// Static info pages — about, help, pricing, privacy-policy, terms-of-service,
+			// cookies, faq — served via a dedicated catch-all in /static-md. Keep this
+			// list in sync with ALLOWED_STATIC_SLUGS in app/[locale]/static-md/[slug]/route.ts.
+			{ source: `/:locale(${localeGroup})/:staticSlug(about|help|pricing|privacy-policy|terms-of-service|cookies|faq).md`, destination: '/:locale/static-md/:staticSlug' },
+			{ source: '/:staticSlug(about|help|pricing|privacy-policy|terms-of-service|cookies|faq).md', destination: `/${DEFAULT_LOCALE}/static-md/:staticSlug` }
 		];
 
 		return [

@@ -4,7 +4,7 @@
  *   /privacy-policy.md, /terms-of-service.md, /cookies.md, /faq.md
  *
  * The rewrite in next.config.ts dispatches each of those public URLs
- * to `/<locale>/_static-md/<slug>` for unified rendering.
+ * to `/<locale>/static-md/<slug>` for unified rendering.
  */
 
 import { NextResponse } from 'next/server';

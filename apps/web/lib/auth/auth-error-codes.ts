@@ -9,7 +9,7 @@ export enum AuthErrorCode {
   USE_OAUTH_PROVIDER = "USE_OAUTH_PROVIDER",
   SESSION_REFRESH_FAILED = "SESSION_REFRESH_FAILED",
   PAGE_REFRESH_FAILED = "PAGE_REFRESH_FAILED",
-  // Email two-factor authentication (spec 046 — EW-139 / EW-140 / EW-141).
+  // Email two-factor authentication (spec 047 — EW-139 / EW-140 / EW-141).
   /** Password accepted; a code was emailed and must be submitted next. */
   TWO_FACTOR_REQUIRED = "TWO_FACTOR_REQUIRED",
   /** Code did not match the stored hash. */

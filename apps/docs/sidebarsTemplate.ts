@@ -640,6 +640,7 @@ const sidebars: SidebarsConfig = {
         "configuration/sentry-config",
         "configuration/auth-config-reference",
         "configuration/payment-config",
+        "configuration/works-yml-pricing",
         "configuration/location-config",
         "configuration/multi-tenancy",
       ],

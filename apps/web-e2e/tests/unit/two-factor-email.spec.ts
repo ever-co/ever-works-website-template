@@ -5,7 +5,7 @@ import {
 } from '../../../web/lib/mail/templates/two-factor-code';
 
 /**
- * Unit coverage for the one-time-code email (spec 046 — EW-138).
+ * Unit coverage for the one-time-code email (spec 047 — EW-138).
  *
  * The subject line is the one part of this mail that leaks WITHOUT the mail
  * ever being opened: a lock-screen notification, the message list on a shared
@@ -14,6 +14,11 @@ import {
  * can glance at the screen — or read a mail log — already holds, which is
  * exactly the property the factor exists to provide. So the code belongs in
  * the body and nowhere else.
+ *
+ * The same assertions also live as a `node:test` spec beside the module
+ * (`apps/web/lib/mail/templates/__tests__/two-factor-code.spec.ts`), which is the copy CI runs on every
+ * PR via `pnpm --filter @ever-works/web test:unit`. This one runs with the
+ * rest of the Playwright suite on stage/main.
  */
 const CODE = '482913';
 

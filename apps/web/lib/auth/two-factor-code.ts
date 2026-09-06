@@ -3,7 +3,7 @@ import { getRuntimeAuthSecret } from './auth-secret';
 
 /**
  * Pure, dependency-free primitives behind email two-factor authentication
- * (spec 046 — EW-135 … EW-142).
+ * (spec 047 — EW-135 … EW-142).
  *
  * Everything here is deliberately free of database, mail, `next/headers`
  * and session imports so that it can be unit-tested directly (see

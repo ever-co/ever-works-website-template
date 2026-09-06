@@ -1,10 +1,10 @@
 ---
-id: tasks-046-email-two-factor-auth
+id: tasks-047-email-two-factor-auth
 title: Tasks 046 — Email two-factor authentication
 sidebar_label: 046 Tasks
 ---
 
-# Tasks — `046-email-two-factor-auth`
+# Tasks — `047-email-two-factor-auth`
 
 > **Spec:** [`spec.md`](./spec.md)
 >
@@ -44,7 +44,7 @@ sidebar_label: 046 Tasks
       flow and the API contract; the `two-factor-db` test helper.
 - [x] T-014: document the four env vars in `.env.example`,
       `docs/authentication/two-factor-auth.md`, this spec trio, the spec index,
-      `docs/log.md`, and Q-046a / Q-046b.
+      `docs/log.md`, and Q-047a / Q-047b.
 - [x] T-015 (review follow-up): key the code digest with an HMAC under
       `TWO_FACTOR_CODE_SECRET` / `AUTH_SECRET` so a database dump cannot reverse
       the 10^6 code space; scope the linked-account lookup by tenant; increment

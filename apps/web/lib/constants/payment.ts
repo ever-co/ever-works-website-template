@@ -69,6 +69,23 @@ export enum PaymentProvider {
 	POLAR = 'polar'
 }
 
+/**
+ * `works.yml` `pricing.provider: manual` — "this directory takes payment
+ * outside the template" (spec 046, EW-131).
+ *
+ * Deliberately NOT a `PaymentProvider` member: that enum names gateways
+ * `PaymentProviderFactory` can instantiate and the `payment_provider` column
+ * stores. `manual` is the declared absence of one, so it must never select a
+ * checkout branch.
+ */
+export const MANUAL_PAYMENT_PROVIDER = 'manual';
+
+/**
+ * What `works.yml` may declare as its pricing provider: any gateway, or
+ * {@link MANUAL_PAYMENT_PROVIDER}.
+ */
+export type PricingProvider = PaymentProvider | typeof MANUAL_PAYMENT_PROVIDER;
+
 export enum SubmissionStatus {
 	DRAFT = 'draft',
 	PENDING = 'pending',

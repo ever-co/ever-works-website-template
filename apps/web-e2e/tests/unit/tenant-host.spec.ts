@@ -15,6 +15,11 @@ import { tenantHostFromHeaders } from '../../../web/lib/auth/tenant-host';
  *
  * The `host` fallback is what closes that. These tests pin it, and pin that
  * it never overrides the injected header.
+ *
+ * The same assertions also live as a `node:test` spec beside the module
+ * (`apps/web/lib/auth/__tests__/tenant-host.spec.ts`), which is the copy CI runs on every
+ * PR via `pnpm --filter @ever-works/web test:unit`. This one runs with the
+ * rest of the Playwright suite on stage/main.
  */
 
 /** Minimal stand-in for the `Headers` object `next/headers` returns. */

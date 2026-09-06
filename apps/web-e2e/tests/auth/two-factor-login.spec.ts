@@ -11,7 +11,7 @@ import {
 } from '../../helpers/two-factor-db';
 
 /**
- * End-to-end coverage for email two-factor authentication (spec 046):
+ * End-to-end coverage for email two-factor authentication (spec 047):
  * enable it in the security settings, sign in and be stopped by the code
  * step, satisfy it with the real emailed code, then turn it off again.
  *

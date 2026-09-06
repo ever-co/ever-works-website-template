@@ -521,7 +521,7 @@ export async function getClientProfiles(params: {
 			locationPrivacy: clientProfiles.locationPrivacy,
 			profileVisibility: clientProfiles.profileVisibility,
 			twoFactorEnabled: clientProfiles.twoFactorEnabled,
-			// Spec 046 email-2FA brute-force state. Listed explicitly because this
+			// Spec 047 email-2FA brute-force state. Listed explicitly because this
 			// projection is typed as ClientProfileWithAuth: omitting a new column
 			// here is a compile error, not a silent drop.
 			twoFactorFailedAttempts: clientProfiles.twoFactorFailedAttempts,
@@ -1188,7 +1188,7 @@ export async function getAdminDashboardData(params: {
 			locationPrivacy: clientProfiles.locationPrivacy,
 			profileVisibility: clientProfiles.profileVisibility,
 			twoFactorEnabled: clientProfiles.twoFactorEnabled,
-			// Spec 046 email-2FA brute-force state. Listed explicitly because this
+			// Spec 047 email-2FA brute-force state. Listed explicitly because this
 			// projection is typed as ClientProfileWithAuth: omitting a new column
 			// here is a compile error, not a silent drop.
 			twoFactorFailedAttempts: clientProfiles.twoFactorFailedAttempts,
@@ -1566,7 +1566,7 @@ export async function advancedClientSearch(params: {
 			locationPrivacy: clientProfiles.locationPrivacy,
 			profileVisibility: clientProfiles.profileVisibility,
 			twoFactorEnabled: clientProfiles.twoFactorEnabled,
-			// Spec 046 email-2FA brute-force state. Listed explicitly because this
+			// Spec 047 email-2FA brute-force state. Listed explicitly because this
 			// projection is typed as ClientProfileWithAuth: omitting a new column
 			// here is a compile error, not a silent drop.
 			twoFactorFailedAttempts: clientProfiles.twoFactorFailedAttempts,

@@ -11,7 +11,7 @@ Client accounts that registered with an email address and a password can add a
 second sign-in step: a six-digit code emailed to the account address on every
 sign-in. It is off by default and each member turns it on for themselves.
 
-Specification: [Spec 046](../spec/046-email-two-factor-auth/spec.md).
+Specification: [Spec 047](../spec/047-email-two-factor-auth/spec.md).
 
 ## For members
 
@@ -129,7 +129,7 @@ account up in the wrong tenant and silently sent nothing. `getTenantId()` now
 falls back to the request's own `Host` header, which is the same value the proxy
 copies into `x-tenant-domain`, so `/api` resolves the tenant the way a page
 request does. It can only ever select an **existing** `tenant` row, so an
-unrecognised host still falls through to the previous behaviour. See Q-046c.
+unrecognised host still falls through to the previous behaviour. See Q-047c.
 
 ### Storage
 

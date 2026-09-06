@@ -49,7 +49,7 @@ export default async function SecuritySettingsPage() {
 					{/* Security overview */}
 					<SecurityOverview />
 
-					{/* Two-factor authentication (spec 046) */}
+					{/* Two-factor authentication (spec 047) */}
 					<TwoFactorCard />
 
 					{/* Change password form */}

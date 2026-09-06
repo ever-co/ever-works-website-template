@@ -209,7 +209,7 @@ export function SecurityOverview() {
 		{
 			icon: <Shield className="w-3.5 h-3.5" />,
 			label: "Account status",
-			// Spec 046 made `accountLocked` / `loginAttemptsCount` real (they were
+			// Spec 047 made `accountLocked` / `loginAttemptsCount` real (they were
 			// hardcoded false / 0). The lock they now report is the TEMPORARY 2FA
 			// brute-force lockout, which lifts on its own — so telling the user to
 			// contact support would be wrong. Deliberately no timestamp: this file

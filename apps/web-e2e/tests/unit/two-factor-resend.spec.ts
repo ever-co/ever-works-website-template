@@ -6,7 +6,7 @@ import {
 } from '../../../web/lib/auth/two-factor-resend';
 
 /**
- * Unit coverage for the resend route's answer (spec 046 — EW-140).
+ * Unit coverage for the resend route's answer (spec 047 — EW-140).
  *
  * `POST /api/auth/2fa/resend` used to `await issueTwoFactorCode(...)` and
  * throw the result away, so a caller whose per-account issuance budget was
@@ -18,6 +18,11 @@ import {
  *
  * Every assertion here is on that decision. The route's only job with an
  * issuance result is to hand it to this function and echo what comes back.
+ *
+ * The same assertions also live as a `node:test` spec beside the module
+ * (`apps/web/lib/auth/__tests__/two-factor-resend.spec.ts`), which is the copy CI runs on every
+ * PR via `pnpm --filter @ever-works/web test:unit`. This one runs with the
+ * rest of the Playwright suite on stage/main.
  */
 test.describe('Email 2FA: resend reports what actually happened (EW-140)', () => {
 	test('a sent code answers 200 with the expiry the form counts down from', () => {

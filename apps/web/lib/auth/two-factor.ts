@@ -19,7 +19,7 @@ import {
 } from './two-factor-code';
 
 /**
- * Stateful half of email two-factor authentication (spec 046 —
+ * Stateful half of email two-factor authentication (spec 047 —
  * EW-135 … EW-142): reading and writing `twoFactorCodes` and the
  * `client_profiles` 2FA columns, and dispatching the code email.
  *
@@ -31,7 +31,7 @@ import {
  * the brute-force budget live on `client_profiles`, and the security
  * settings surface it owns is `/client/settings/security`. Admin users
  * (a `users` row with an admin role and no client profile) are out of
- * scope for this spec — see `docs/questions.md` Q-046a.
+ * scope for this spec — see `docs/questions.md` Q-047a.
  */
 
 /** How a user authenticates today. Drives the OAuth gate in EW-142. */

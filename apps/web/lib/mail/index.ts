@@ -312,7 +312,7 @@ async function mailService() {
 /**
  * Is a usable mail provider configured right now?
  *
- * Used by the 2FA enable route (spec 046): turning on a factor that is
+ * Used by the 2FA enable route (spec 047): turning on a factor that is
  * delivered by email on a deployment with no mail provider would lock the
  * member out of their own account at the next sign-in, so the toggle
  * refuses rather than accepting a setting it cannot honour.

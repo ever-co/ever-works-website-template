@@ -523,11 +523,52 @@ confirm, override, or refine.
 
 ---
 
-## Spec 046 — Email two-factor authentication
+## Spec 046 — Provider-aware pricing configuration in works.yml
 
-### Q-046a Should admin `users` rows be able to enable email 2FA as well?
+### Q-046a Should `provider: manual` render a distinct pricing surface?
 
-- **Context.** Spec 046 stores `two_factor_enabled`, the failed-attempt
+- **Context.** EW-131 asks `works.yml` to accept `provider: manual` —
+  "show the prices, take payment elsewhere". Spec 046 accepts the value and
+  suppresses the in-site checkout: `handleCheckout()` returns before any
+  gateway branch and logs the reason. Which cards render is unchanged — still
+  the LIVE / DEMO logic of
+  [spec 044](spec/044-public-payment-config/spec.md). That is safe but
+  silent: a manual-checkout operator arguably wants a "Contact us" call to
+  action on the paid cards rather than a button that does nothing.
+- **Options.**
+  - **Suppress the checkout and render the existing cards (current).** One
+    guard in the pricing flow, no new strings, no new localisation work.
+  - Add a manual-checkout mode: a per-plan contact URL in `works.yml` and a
+    dedicated CTA on the card. Needs new i18n keys in all locales and a new
+    branch in `use-pricing-section.ts`.
+- **Default.** **Suppress the checkout, keep the existing cards.** The value
+  is accepted and documented now; the UX affordance can land on its own ticket
+  once someone actually runs manual checkout.
+- **Owner.** Template maintainers.
+- **Status.** `open`.
+
+### Q-046b Should a malformed `pricing:` block ever be fatal?
+
+- **Context.** Spec 046 logs each problem and falls back to the built-in
+  plans. `getConfig()` runs on every render, so throwing would take a whole
+  directory offline over a typo in an optional block.
+- **Options.**
+  - **Warn and fall back (current).** The site stays up; the operator sees
+    `[CONTENT] Invalid "pricing" section …` with one line per field.
+  - Fail the build (not the request) when the data repository is cloned at
+    build time, so the typo is caught before deploy.
+- **Default.** **Warn and fall back.** Revisit if operators report missing
+  the log line; a build-time check is additive and can land later.
+- **Owner.** Template maintainers.
+- **Status.** `open`.
+
+---
+
+## Spec 047 — Email two-factor authentication
+
+### Q-047a Should admin `users` rows be able to enable email 2FA as well?
+
+- **Context.** Spec 047 stores `two_factor_enabled`, the failed-attempt
   counter and the lock timestamp on `client_profiles`, and surfaces the
   toggle on `/client/settings/security`. An **admin** signs in through the
   same credentials provider but has a `users` row with an admin role and no
@@ -555,9 +596,9 @@ confirm, override, or refine.
 
 ---
 
-### Q-046b Should enabling email 2FA require a verified email address?
+### Q-047b Should enabling email 2FA require a verified email address?
 
-- **Context.** Spec 046 lets any credentials account switch on email 2FA. If
+- **Context.** Spec 047 lets any credentials account switch on email 2FA. If
   the address on file is wrong or unreachable, the member locks themselves
   out at their next sign-in. The obvious guard — refuse to enable until
   `client_profiles.email_verified` is `true` — is unusable today because that
@@ -584,7 +625,7 @@ confirm, override, or refine.
 
 ---
 
-### Q-046c How should a session-free `/api` route resolve the tenant on a host-routed multi-tenant deployment?
+### Q-047c How should a session-free `/api` route resolve the tenant on a host-routed multi-tenant deployment?
 
 - **Context.** `POST /api/auth/2fa/resend` runs mid-login, so it has no
   session, and Next middleware does not run for `/api` — the

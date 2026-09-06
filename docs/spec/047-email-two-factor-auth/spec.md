@@ -1,10 +1,10 @@
 ---
-id: spec-046-email-two-factor-auth
-title: Spec 046 — Email two-factor authentication
+id: spec-047-email-two-factor-auth
+title: Spec 047 — Email two-factor authentication
 sidebar_label: 046 Email 2FA
 ---
 
-# Feature spec — `046-email-two-factor-auth`
+# Feature spec — `047-email-two-factor-auth`
 
 ## 1. Summary
 
@@ -51,7 +51,7 @@ device, and no new enrolment ceremony.
   be added later without changing the sign-in step machine.
 - 2FA for **admin** users. The flag, the counters and the settings surface all
   live on `client_profiles`; an admin `users` row has no profile. See
-  [Q-046a](../../questions.md).
+  [Q-047a](../../questions.md).
 - Rate limiting shared across pods. The template's `ratelimit()` helper is
   in-memory by design; the authoritative brute-force guard in this spec is the
   per-account counter in the database, which is shared.

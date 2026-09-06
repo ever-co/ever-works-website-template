@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 /**
- * Contract coverage for the email two-factor endpoints added by spec 046
+ * Contract coverage for the email two-factor endpoints added by spec 047
  * (EW-137 enable/disable, EW-138/EW-140 resend, EW-142 OAuth gate):
  *
  *   POST /api/auth/security/2fa/enable
@@ -27,7 +27,7 @@ import { test, expect } from '@playwright/test';
  *     password they already hold did not.
  *
  * The 404-tolerance in the "route exists" assertions keeps this spec honest
- * on a deployment that has not shipped spec 046 yet, in the same spirit as
+ * on a deployment that has not shipped spec 047 yet, in the same spirit as
  * the other skip-on-absence probes in this suite.
  */
 

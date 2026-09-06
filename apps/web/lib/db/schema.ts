@@ -407,7 +407,7 @@ export const passwordResetTokens = pgTable('passwordResetTokens', {
 ]);
 
 /**
- * One-time email 2FA login codes (spec 046).
+ * One-time email 2FA login codes (spec 047).
  *
  * **Only a hash of the code is stored** (`codeHash`, hex HMAC-SHA256 of
  * the plaintext under a server-only key). The plaintext exists solely
@@ -833,7 +833,7 @@ export enum ActivityType {
 	DELETE_ACCOUNT = 'DELETE_ACCOUNT',
 	UPDATE_ACCOUNT = 'UPDATE_ACCOUNT',
 	UPDATE_TWENTY_CRM_CONFIG = 'UPDATE_TWENTY_CRM_CONFIG',
-	// Email two-factor authentication (spec 046)
+	// Email two-factor authentication (spec 047)
 	TWO_FACTOR_ENABLED = 'TWO_FACTOR_ENABLED',
 	TWO_FACTOR_DISABLED = 'TWO_FACTOR_DISABLED',
 	TWO_FACTOR_CHALLENGE_SENT = 'TWO_FACTOR_CHALLENGE_SENT',

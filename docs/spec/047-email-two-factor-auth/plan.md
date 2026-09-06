@@ -1,10 +1,10 @@
 ---
-id: plan-046-email-two-factor-auth
+id: plan-047-email-two-factor-auth
 title: Plan 046 — Email two-factor authentication
 sidebar_label: 046 Plan
 ---
 
-# Implementation Plan — `046-email-two-factor-auth`
+# Implementation Plan — `047-email-two-factor-auth`
 
 > **Spec:** [`spec.md`](./spec.md)
 
@@ -185,7 +185,7 @@ rows that expired more than a day ago so the table cannot grow without bound.
   default deployment. The lockout risk it addresses is instead handled by
   refusing to enable when no mail provider is configured at all (`503`
   `EMAIL_NOT_CONFIGURED`) — the case where a code could *never* arrive — plus
-  the documented operator unlock. Recorded as Q-046b.
+  the documented operator unlock. Recorded as Q-047b.
 
 ## 7. Constitution Check
 
@@ -199,7 +199,7 @@ rows that expired more than a day ago so the table cannot grow without bound.
 | VI — Reuse before build | Pass. Reuses `lib/mail`, `ratelimit()`, `logActivity`, the `hasPassword` detection from the connected-accounts route, and the `expires`-column pattern from `passwordResetTokens`. |
 | VII — Test coverage | Pass. Unit coverage for the pure half, Playwright coverage for the flow and the routes. |
 | VIII — No removal without migration | Pass. Purely additive; the pre-existing read-only 2FA badge keeps working and now reflects a value users can change. |
-| IX — Documentation | Pass. This trio, [`docs/authentication/two-factor-auth.md`](../../authentication/two-factor-auth.md), a `docs/log.md` line and Q-046a. |
+| IX — Documentation | Pass. This trio, [`docs/authentication/two-factor-auth.md`](../../authentication/two-factor-auth.md), a `docs/log.md` line and Q-047a. |
 | X — Modular packages | Pass. Two focused modules, ~200 and ~170 lines. |
 
 ## 8. Rollout & Rollback

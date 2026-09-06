@@ -759,7 +759,13 @@ export enum ActivityType {
 	UPDATE_PASSWORD = 'UPDATE_PASSWORD',
 	DELETE_ACCOUNT = 'DELETE_ACCOUNT',
 	UPDATE_ACCOUNT = 'UPDATE_ACCOUNT',
-	UPDATE_TWENTY_CRM_CONFIG = 'UPDATE_TWENTY_CRM_CONFIG'
+	UPDATE_TWENTY_CRM_CONFIG = 'UPDATE_TWENTY_CRM_CONFIG',
+	/** Admin issued a refund from the billing-issues page (Spec 051). */
+	ADMIN_BILLING_REFUND = 'ADMIN_BILLING_REFUND',
+	/** Admin closed a billing issue without a refund (Spec 051). */
+	ADMIN_BILLING_ISSUE_RESOLVED = 'ADMIN_BILLING_ISSUE_RESOLVED',
+	/** Admin exported a payment report (Spec 052). */
+	ADMIN_PAYMENT_REPORT_EXPORTED = 'ADMIN_PAYMENT_REPORT_EXPORTED'
 }
 
 // ######################### Client Profile Types #########################
@@ -1557,3 +1563,142 @@ export const chatMessages = pgTable(
 
 export type ChatMessage = typeof chatMessages.$inferSelect;
 export type NewChatMessage = typeof chatMessages.$inferInsert;
+
+// ######################### Billing Issues (Spec 051) #########################
+/**
+ * An admin-workflow record layered on top of the payment data the template
+ * already stores. A billing issue NEVER holds money state of its own — the
+ * authoritative amount / plan / provider always come from the referenced
+ * `subscriptions` row, and the refund itself is executed by the provider that
+ * row names (`payment_provider`). This table only carries the triage state an
+ * admin needs: what kind of problem it is, whether it is still open, what
+ * refund (if any) the provider returned, and who resolved it.
+ */
+export const BillingIssueType = {
+	/** One or more renewal charges failed (`subscriptions.failed_payment_count > 0`). */
+	PAYMENT_FAILED: 'payment_failed',
+	/** A customer asked for their money back; the admin decides. */
+	REFUND_REQUEST: 'refund_request',
+	/** The provider reported a chargeback / dispute. */
+	DISPUTE: 'dispute',
+	/** The subscription itself is in a bad state (stuck pending, expired while auto-renewing…). */
+	SUBSCRIPTION_STATE: 'subscription_state',
+	OTHER: 'other'
+} as const;
+
+export type BillingIssueTypeValues = (typeof BillingIssueType)[keyof typeof BillingIssueType];
+
+export const BillingIssueStatus = {
+	/** Needs an admin. */
+	OPEN: 'open',
+	/** An admin picked it up but has not closed it. */
+	IN_REVIEW: 'in_review',
+	/** A refund was issued through the provider. */
+	REFUNDED: 'refunded',
+	/** Closed with an outcome other than a refund. */
+	RESOLVED: 'resolved',
+	/** Closed as not-an-issue. */
+	DISMISSED: 'dismissed'
+} as const;
+
+export type BillingIssueStatusValues = (typeof BillingIssueStatus)[keyof typeof BillingIssueStatus];
+
+/**
+ * How long a refund claim is honoured before another request may take it over.
+ * Long enough that a slow provider call is never double-submitted, short enough
+ * that a crashed request does not strand the issue for an operator.
+ */
+export const REFUND_CLAIM_TTL_MS = 5 * 60 * 1000;
+
+/** Statuses that still need an admin — the default list view. */
+export const OPEN_BILLING_ISSUE_STATUSES: BillingIssueStatusValues[] = [
+	BillingIssueStatus.OPEN,
+	BillingIssueStatus.IN_REVIEW
+];
+
+export const billingIssues = pgTable(
+	'billing_issues',
+	{
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		userId: text('user_id')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		/** The payment record this issue is about. Null only for a manually raised issue. */
+		subscriptionId: text('subscription_id').references(() => subscriptions.id, { onDelete: 'set null' }),
+		type: text('type', {
+			enum: [
+				BillingIssueType.PAYMENT_FAILED,
+				BillingIssueType.REFUND_REQUEST,
+				BillingIssueType.DISPUTE,
+				BillingIssueType.SUBSCRIPTION_STATE,
+				BillingIssueType.OTHER
+			]
+		})
+			.notNull()
+			.default(BillingIssueType.OTHER),
+		status: text('status', {
+			enum: [
+				BillingIssueStatus.OPEN,
+				BillingIssueStatus.IN_REVIEW,
+				BillingIssueStatus.REFUNDED,
+				BillingIssueStatus.RESOLVED,
+				BillingIssueStatus.DISMISSED
+			]
+		})
+			.notNull()
+			.default(BillingIssueStatus.OPEN),
+		/** Copied from the subscription at intake so the row stays readable after a cascade. */
+		paymentProvider: text('payment_provider').notNull().default(PaymentProvider.STRIPE),
+		/** Provider-side charge / payment-intent id used as the refund target. */
+		providerPaymentId: text('provider_payment_id'),
+		/**
+		 * Amount in the SMALLEST currency unit (1234 = $12.34), converted from
+		 * `subscriptions.amount` at intake — that column holds MAJOR units, because
+		 * the webhook writer runs `convertCentsToDecimal` before storing it. Keeping
+		 * the issue in minor units is what lets a partial refund carry cents at all.
+		 */
+		amount: integer('amount').default(0),
+		currency: text('currency').default('usd'),
+		/** Short machine-written summary of why the issue was raised. */
+		detectionReason: text('detection_reason'),
+		/** `subscriptions.id`-scoped dedupe key so re-running detection never doubles a row. */
+		sourceKey: text('source_key'),
+		/**
+		 * Set by the one request that owns an in-flight refund, so two admins
+		 * clicking "refund" at the same time cannot both reach the provider. Cleared
+		 * again when the provider rejects, and treated as stale after
+		 * `REFUND_CLAIM_TTL_MS` so a crashed request cannot strand the issue.
+		 */
+		refundClaimedAt: timestamp('refund_claimed_at'),
+		refundId: text('refund_id'),
+		/** Refunded amount, in the same smallest currency unit as `amount`. */
+		refundAmount: integer('refund_amount'),
+		refundedAt: timestamp('refunded_at'),
+		resolutionNote: text('resolution_note'),
+		resolvedBy: text('resolved_by').references(() => users.id, { onDelete: 'set null' }),
+		resolvedAt: timestamp('resolved_at'),
+		createdAt: timestamp('created_at').notNull().defaultNow(),
+		updatedAt: timestamp('updated_at').notNull().defaultNow(),
+		tenantId: text('tenant_id').references(() => tenant.id, { onDelete: 'cascade' })
+	},
+	(table) => ({
+		statusIndex: index('billing_issues_status_idx').on(table.status),
+		typeIndex: index('billing_issues_type_idx').on(table.type),
+		userIdIndex: index('billing_issues_user_id_idx').on(table.userId),
+		subscriptionIdIndex: index('billing_issues_subscription_id_idx').on(table.subscriptionId),
+		createdAtIndex: index('billing_issues_created_at_idx').on(table.createdAt),
+		tenantIdIdx: index('billing_issues_tenant_id_idx').on(table.tenantId),
+		/**
+		 * Detection is idempotent: one open row per (tenant, source key). The key is
+		 * built from the subscription id plus the issue type, so a subscription can
+		 * carry a failed-payment issue and a dispute at the same time without either
+		 * one being re-created on the next sync.
+		 */
+		sourceKeyUnique: uniqueIndex('billing_issues_tenant_source_key_idx').on(table.tenantId, table.sourceKey)
+	})
+);
+
+export type BillingIssue = typeof billingIssues.$inferSelect;
+export type NewBillingIssue = typeof billingIssues.$inferInsert;

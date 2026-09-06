@@ -10,6 +10,7 @@ import { ADMIN_STATE_FILE, CLIENT_STATE_FILE } from '../../helpers/test-data';
 
 const ADMIN_ROUTES: Array<{ path: string; name: string }> = [
 	{ path: '/admin', name: 'Admin dashboard' },
+	{ path: '/admin/billing-issues', name: 'Admin billing issues' },
 	{ path: '/admin/categories', name: 'Admin categories' },
 	{ path: '/admin/clients', name: 'Admin clients list' },
 	{ path: '/admin/collections', name: 'Admin collections' },
@@ -17,6 +18,7 @@ const ADMIN_ROUTES: Array<{ path: string; name: string }> = [
 	{ path: '/admin/companies', name: 'Admin companies' },
 	{ path: '/admin/featured-items', name: 'Admin featured items' },
 	{ path: '/admin/items', name: 'Admin items list' },
+	{ path: '/admin/payment-reports', name: 'Admin payment reports' },
 	{ path: '/admin/reports', name: 'Admin reports' },
 	{ path: '/admin/roles', name: 'Admin roles' },
 	{ path: '/admin/settings', name: 'Admin settings' },

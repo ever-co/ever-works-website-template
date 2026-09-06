@@ -21,6 +21,8 @@ import {
   Layers,
   DollarSign,
   LayoutDashboard,
+  ShieldAlert,
+  Receipt,
   type LucideIcon
 } from "lucide-react";
 import type { ExtendedUser } from "@/types/profile-button.types";
@@ -220,6 +222,26 @@ function MenuItems({ user, profilePath, onItemClick, onNavigationStart, isNaviga
           gradientFrom="from-red-100"
           gradientTo="to-orange-100 dark:from-red-900/30 dark:to-orange-900/30"
           iconColor="text-red-600 dark:text-red-400"
+        />
+
+        <MenuItem
+          href="/admin/billing-issues"
+          icon={ShieldAlert}
+          title={t("admin.ADMIN_BILLING_ISSUES_PAGE.TITLE")}
+          description={t("admin.ADMIN_BILLING_ISSUES_PAGE.SUBTITLE")}
+          gradientFrom="from-rose-100"
+          gradientTo="to-orange-100 dark:from-rose-900/30 dark:to-orange-900/30"
+          iconColor="text-rose-600 dark:text-rose-400"
+        />
+
+        <MenuItem
+          href="/admin/payment-reports"
+          icon={Receipt}
+          title={t("admin.ADMIN_PAYMENT_REPORTS_PAGE.TITLE")}
+          description={t("admin.ADMIN_PAYMENT_REPORTS_PAGE.SUBTITLE")}
+          gradientFrom="from-emerald-100"
+          gradientTo="to-teal-100 dark:from-emerald-900/30 dark:to-teal-900/30"
+          iconColor="text-emerald-600 dark:text-emerald-400"
         />
 
         <MenuItem

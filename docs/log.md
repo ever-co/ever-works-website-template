@@ -68,6 +68,15 @@ sidebar_position: 99
 - `spec-046`: EW-131 — the optional `pricing:` block of `.works/works.yml` is now documented field by field and validated on read: new `docs/configuration/works-yml-pricing.md` + complete `docs/configuration/examples/works-pricing.example.yml`, new `apps/web/lib/config/schemas/works-pricing.schema.ts` called from `getConfig()`, `provider` accepts `stripe`/`lemonsqueezy`/`polar`/`solidgate`/`manual` and `PRO` aliases `STANDARD`; a malformed block is logged per field and falls back to the built-in plans instead of throwing. `provider: manual` is carried through provider resolution rather than erased, so a site that declares it never starts an in-site checkout — distinct from omitting `provider`, which keeps the Stripe default ([spec 046](spec/046-works-yml-pricing-config/spec.md), PR #1043).
 - `docs/payment`: `payment.md` "Configure Pricing Plans" and `configuration/payment-config.md` now point at the full `works.yml` pricing reference and document `provider: manual` + the `PRO` alias ([spec 046](spec/046-works-yml-pricing-config/spec.md), PR #1043).
 - `questions`: added Q-046a (should `provider: manual` render its own pricing surface?) and Q-046b (should a malformed `pricing:` block ever be fatal?), both with chosen defaults ([spec 046](spec/046-works-yml-pricing-config/spec.md), PR #1043).
+- `spec-051`: admin **Billing Issues** queue at `/admin/billing-issues` — payment problems derived from the payment records the site already stores (failed charges, disputed/refund cases, subscriptions stuck pending or expired-while-renewing), with mark-resolved/dismissed and a refund issued through the provider named on the underlying subscription. Adds the `billing_issues` triage table (migration `0040`) and wires the previously caller-less `PaymentProviderInterface.refundPayment` seam; money state stays on `subscriptions` ([spec 051](spec/051-admin-billing-issues/spec.md), Jira EW-116, PR #1049).
+- `spec-052`: admin **Payment Reports** at `/admin/payment-reports` — the stored payment records filtered by date range, plan, provider and status, with roll-ups by currency/plan/provider/status and CSV + XLSX export sharing one filter validator with the JSON view. PDF deliberately not shipped; see Q-052-1 ([spec 052](spec/052-admin-payment-reports/spec.md), Jira EW-117, PR #1049).
+- `spec-051`/`spec-052` review follow-ups (same PR): unit boundaries made explicit and per-currency (`subscriptions.amount*` are MAJOR units, `billing_issues.amount` is minor, provider adapters take major — see the table in spec 051 §9); refunds are claimed atomically via `billing_issues.refund_claimed_at` before any provider call; report roll-ups are grouped by currency; revenue no longer falls back from `amount_paid = 0` to the scheduled amount; an over-cap export is refused rather than truncated; date filters reject calendar-invalid values such as `2026-02-30`.
+- `spec-051`/`spec-052` review round 3 (same PR): both writing POST routes test the RAW body for emptiness instead of a trimmed copy — a whitespace-only payload was reading as "no body supplied", which on `.../refund` meant a full irreversible refund; and `/api/admin/payment-reports` now applies the same strict whole-integer pagination pre-check the billing-issues list uses, so `limit=3.5` is a 400 rather than a 200 carrying a page size nobody asked for ([spec 051](spec/051-admin-billing-issues/spec.md) §9, [spec 052](spec/052-admin-payment-reports/spec.md) §9, PR #1049).
+- `spec-051`/`spec-052` review round 4 (same PR): `POST .../refund` now treats ONLY an absent `amount` key as "refund the whole charge" — `{"amount": null}` and `{"amount": ""}`, the shapes a truncated payload arrives in, were skipping validation and issuing a FULL refund, and `Number()` coercion was turning `true` into a 1-unit partial refund; the failed-payment webhook can now adopt a payment intent onto an issue whose stored reference is NULL (`ne(col, x)` is never true against NULL in SQL, so exactly the issues with no refund target could never gain one); the report export reads one snapshot that is both the file's rows and the input to its summary, so a concurrent payment can no longer truncate the file while the summary counts rows it does not contain; the refund dialog rejects sub-unit precision instead of rounding the typed amount; and the billing-issues queue renders a load failure instead of "No billing issues" ([spec 051](spec/051-admin-billing-issues/spec.md) §9, [spec 052](spec/052-admin-payment-reports/spec.md) §9, PR #1049).
+- `questions`: added Q-051-1 — should a refund carry a provider-side idempotency key? Default: no, fix it in the payment-provider spec where the adapter interface lives.
+- `questions`: added Q-052-1 — should the payment report also export PDF? Default: CSV + XLSX only, no new dependency.
+- `spec-051`/`spec-052` renumbered from 046/047 (same PR): PR #1043 merged `spec-046` (`works-yml-pricing-config`) into `develop` first, so these two took the next numbers no other open PR claims. Directory names, index rows, `docs/log.md` and `docs/questions.md` ids (Q-051-1, Q-052-1) and every in-code `Spec 04x` comment move together; no behaviour changes.
+- `spec-052`: the export's revenue roll-up moved to `apps/web/lib/db/queries/payment-report-summary.ts` — a module with no runtime imports, so it can be unit tested (`pnpm --filter @ever-works/web test:unit`). `payment-report.queries.ts` re-exports the two types and the function, so no import path changes. The new spec pins the coalesce semantics the SQL was carrying: a COLLECTED amount of 0 stays 0 rather than falling back to the scheduled amount, and currency is part of every grouping key.
 
 ## 2026-08-25
 
@@ -2500,39 +2509,32 @@ desc(featuredItems.featuredAt)` multi-key
   the **first per-source-file GET smoke pinning a
   public (no-auth-gate) zero-argument health-probe
   endpoint** combining a **hard-coded
-  `db.execute(sql\`SELECT 1 as test\`)` round-trip**
-  (no parameter binding, no URL-driven SQL), a
-  **two-branch (200-healthy / 500-unhealthy) status
-  envelope** determined by the database's
-  reachability NOT the URL, a **shared
-  `{ status, database, timestamp }` envelope
-  shape** across both branches with a branch-
-  specific fourth key (`result` on success, `error`
-  on failure), and a **bare zero-argument
-  `GET()` Next 16 handler signature** that NEVER
-  reads the request URL. UNIQUE: every prior per-
-  source-file public-route GET smoke
-  (`featured-items-query`, `items-popularity-scores`,
-  `sponsor-ads-public`, `agent-discovery`) asserts
-  a generic `< 500` contract because their `500` is
-  a regression signal; this is the FIRST per-
-  source-file GET smoke that asserts the tighter
-  `[200, 500]` two-valid-status contract because
-  the route's `500` is an EXPECTED outcome (catch
-  branch when the configured database is
-  unreachable, which the e2e environment does not
-  guarantee). The new page documents the hard-
-  coded `SELECT 1` round-trip, the two-branch
-  shared `{ status, database, timestamp }`
-  envelope shape, the bare zero-argument `GET()`
-  handler signature, the `[200, 500]` two-valid-
-  status contract, the status-invariance under URL
-  changes contract (parameterised URL's status MUST
-  equal baseline's AND parameterised body's
-  `status` field MUST equal baseline's), the SQL-
-  injection invariance contract (SQL-injection-
-  shaped `?schema=` / `?table=` values do NOT reach
-  the SQL layer because `sql\`SELECT 1\`` is hard-
+  `db.execute(sql\`SELECT 1 as test\`)`round-trip**
+(no parameter binding, no URL-driven SQL), a
+**two-branch (200-healthy / 500-unhealthy) status
+envelope** determined by the database's
+reachability NOT the URL, a **shared`{ status, database, timestamp }` envelope
+shape** across both branches with a branch-
+specific fourth key (`result`on success,`error`on failure), and a **bare zero-argument`GET()` Next 16 handler signature** that NEVER
+reads the request URL. UNIQUE: every prior per-
+source-file public-route GET smoke
+(`featured-items-query`, `items-popularity-scores`,
+`sponsor-ads-public`, `agent-discovery`) asserts
+a generic `< 500`contract because their`500`is
+a regression signal; this is the FIRST per-
+source-file GET smoke that asserts the tighter`[200, 500]`two-valid-status contract because
+the route's`500`is an EXPECTED outcome (catch
+branch when the configured database is
+unreachable, which the e2e environment does not
+guarantee). The new page documents the hard-
+coded`SELECT 1`round-trip, the two-branch
+shared`{ status, database, timestamp }`envelope shape, the bare zero-argument`GET()`handler signature, the`[200, 500]`two-valid-
+status contract, the status-invariance under URL
+changes contract (parameterised URL's status MUST
+equal baseline's AND parameterised body's`status`field MUST equal baseline's), the SQL-
+injection invariance contract (SQL-injection-
+shaped`?schema=`/`?table=`values do NOT reach
+the SQL layer because`sql\`SELECT 1\`` is hard-
 coded with no parameter binding), the canonical
 health-envelope shape contract (`status`is a
 string from`['healthy', 'unhealthy']`, `database`is a string from`['connected', 'disconnected']`,
@@ -7084,11 +7086,11 @@ use the bare`await request.json()`form), a required-
     - cache-invalidation-not-entered invariance walk
       pinning that the unauth response status must NOT be
       201, must NOT contain a`collection`key, and the
-     `revalidatePath` side-effects must NEVER fire, and a
-  three-branch-outer-catch-not-entered invariance walk
-  pinning that the unauth response must echo the
-  canonical 401 envelope, not any branch of the outer
-  catch chain.
+      `revalidatePath` side-effects must NEVER fire, and a
+      three-branch-outer-catch-not-entered invariance walk
+      pinning that the unauth response must echo the
+      canonical 401 envelope, not any branch of the outer
+      catch chain.
 - `docs/plugins` Added `admin-companies-create-body-spec.md` —
   the **forty-second** per-source-file reference the docs
   tree publishes for any file under
@@ -14342,38 +14344,39 @@ backups` (three patterns exhaustively covering the
   `scripts.dev` / `scripts.build` / `scripts.start` / `pnpm.*`
   / `prettier`); the consumer table mapping each reader
   (`pnpm install`, `pnpm --filter @ever-works/web-e2e
-    <script>`, Turborepo's `test:e2e` task, CI workflows, the
-  Playwright runner's CLI walk-up, TypeScript's `tsc --noEmit`
-  gate, Renovate / Dependabot, editors) to the fields it
-  consumes; the failure matrix that maps each manifest-level
-  mistake (drop `name`, rename off `@ever-works/*`, drop
-  `private: true`, drop `license`, drop `scripts.test:e2e` /
-  `scripts.lint`, switch the no-op `scripts.lint` to a real
-  lint without wiring `eslint.config.mjs`, drop any of the four
-  `devDependencies`, tighten / loosen the Playwright range,
-  move the file, add a `dependencies` block, add
-  `"type": "module"`, bump `version` away from `0.0.0`) onto
-  the layer that surfaces it; the per-line walkthrough table;
-  and the `package.json`-change checklist that ties any field
-  change to the appropriate cross-check
-  ([`pnpm-workspace.md`](plugins/pnpm-workspace.md) on `name`
-  change, [`playwright-config.md`](plugins/playwright-config.md)
-  on Playwright or dotenv change,
-  [`e2e-tsconfig.md`](plugins/e2e-tsconfig.md) on tsconfig or
-  typescript change,
-  [`auth-fixture.md`](plugins/auth-fixture.md) on Playwright
-  major bump, [`e2e-test-data.md`](plugins/e2e-test-data.md)
-  on Faker major bump,
-  [`turbo-config.md`](plugins/turbo-config.md) on new
-  workspace-spanning script,
-  [`workspace-root-manifest.md`](plugins/workspace-root-manifest.md)
-  on inherited posture divergence), a `pnpm install`
-  round-trip, a dual `pnpm tsc --noEmit` gate run, a
-  smoke-subset Playwright run, a
-  [Spec 010 — E2E Test Coverage](https://github.com/ever-works/directory-web-template/tree/develop/docs/spec/010-e2e-test-coverage)
-  cross-link if the change introduces a new shared concept,
-  and a reviewer pass. Indexed in
-  [`docs/index.md`](index.md).
+      <script>`, Turborepo's `test:e2e` task, CI workflows, the
+    Playwright runner's CLI walk-up, TypeScript's `tsc --noEmit`
+    gate, Renovate / Dependabot, editors) to the fields it
+    consumes; the failure matrix that maps each manifest-level
+    mistake (drop `name`, rename off `@ever-works/*`, drop
+    `private: true`, drop `license`, drop `scripts.test:e2e` /
+    `scripts.lint`, switch the no-op `scripts.lint` to a real
+    lint without wiring `eslint.config.mjs`, drop any of the four
+    `devDependencies`, tighten / loosen the Playwright range,
+    move the file, add a `dependencies` block, add
+    `"type": "module"`, bump `version` away from `0.0.0`) onto
+    the layer that surfaces it; the per-line walkthrough table;
+    and the `package.json`-change checklist that ties any field
+    change to the appropriate cross-check
+    ([`pnpm-workspace.md`](plugins/pnpm-workspace.md) on `name`
+    change, [`playwright-config.md`](plugins/playwright-config.md)
+    on Playwright or dotenv change,
+    [`e2e-tsconfig.md`](plugins/e2e-tsconfig.md) on tsconfig or
+    typescript change,
+    [`auth-fixture.md`](plugins/auth-fixture.md) on Playwright
+    major bump, [`e2e-test-data.md`](plugins/e2e-test-data.md)
+    on Faker major bump,
+    [`turbo-config.md`](plugins/turbo-config.md) on new
+    workspace-spanning script,
+    [`workspace-root-manifest.md`](plugins/workspace-root-manifest.md)
+    on inherited posture divergence), a `pnpm install`
+    round-trip, a dual `pnpm tsc --noEmit` gate run, a
+    smoke-subset Playwright run, a
+    [Spec 010 — E2E Test Coverage](https://github.com/ever-works/directory-web-template/tree/develop/docs/spec/010-e2e-test-coverage)
+    cross-link if the change introduces a new shared concept,
+    and a reviewer pass. Indexed in
+    [`docs/index.md`](index.md).
+
 - `apps/web-e2e/tests/api` Added
   [`item-votes-query.spec.ts`](https://github.com/ever-works/directory-web-template/tree/develop/apps/web-e2e/tests/api/item-votes-query.spec.ts) —
   the **query-param surface** smoke for `GET

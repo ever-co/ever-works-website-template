@@ -80,7 +80,8 @@ export function footerNavigation(t: (key: string) => string, options: FooterNavi
 		{ label: t('common.CATEGORY'), href: '/categories' },
 		{ label: t('common.TAG'), href: '/tags' },
 		{ label: t('common.PRICING'), href: '/pricing' },
-		{ label: t('footer.HELP'), href: '/help' }
+		{ label: t('footer.HELP'), href: '/help' },
+		{ label: t('footer.FAQ'), href: '/faq' }
 	];
 
 	const filteredProductLinks = productLinks.filter((link) => {

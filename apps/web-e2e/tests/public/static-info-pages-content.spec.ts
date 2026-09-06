@@ -8,6 +8,7 @@ import { test, expect } from '@playwright/test';
 const INFO_PAGES = [
 	'/about',
 	'/help',
+	'/faq',
 	'/privacy-policy',
 	'/terms-of-service',
 	'/cookies'

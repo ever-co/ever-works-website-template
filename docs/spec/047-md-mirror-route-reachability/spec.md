@@ -140,9 +140,13 @@ the same switch their pages read and answer with the handler's JSON 404.
 
 Against `next build && next start`:
 
-- `/about.md` `/help.md` `/pricing.md` `/privacy-policy.md`
+- `/about.md` `/help.md` `/faq.md` `/pricing.md` `/privacy-policy.md`
   `/terms-of-service.md` `/cookies.md` → `200`, `text/markdown; charset=utf-8`,
-  body opens with a Markdown `H1` and names its canonical page.
+  body opens with a Markdown `H1` and names its canonical page. (`/faq` joined
+  the static list on `develop` with [spec 049](../049-faq-page/spec.md), PR
+  #1044; it is carried into the rewrite alternation and the guard here, and its
+  own `status < 400` assertion in `faq.spec.ts` only becomes true once these
+  mirrors resolve at all.)
 - `/fr/about.md` → `200`, canonical page `/fr/about`.
 - `/items/<slug>.md`, `/fr/items/<slug>.md`, `/categories/<id>.md`,
   `/tags/<id>.md`, `/pages/<slug>.md`, `/collections/<slug>.md`,

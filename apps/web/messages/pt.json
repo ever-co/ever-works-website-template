@@ -25,6 +25,7 @@
 		"OPEN_USER_MENU": "Open user menu"
 	},
 	"common": {
+		"FAQ": "Perguntas frequentes",
 		"DISCOVER": "Descobrir",
 		"HOME": "Início",
 		"ABOUT": "Sobre",
@@ -470,6 +471,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "Perguntas frequentes",
 		"ALL_RIGHTS_RESERVED": "Todos os direitos reservados",
 		"BUILT_WITH": "Built with",
 		"CONNECT_WITH_US": "Connect with us",
@@ -3535,6 +3537,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "Ajuda",
+		"FAQ_META_DESCRIPTION": "Respostas às perguntas que os visitantes fazem com mais frequência sobre este diretório: navegar, submeter um registo e entrar em contacto",
+		"FAQ_INTRO": "Respostas às perguntas que nos fazem com mais frequência. Se não encontrar o que procura, fale connosco.",
+		"HELP_DESCRIPTION": "Consultar guias e tópicos de apoio",
 		"LEGAL_BADGE": "Legal",
 		"LAST_UPDATED": "Last updated:",
 		"RELATED_INFORMATION": "Related Information",

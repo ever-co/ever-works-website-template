@@ -29,6 +29,7 @@ const MARKDOWN_CONTENT_TYPE = /^text\/markdown\b/;
 const STATIC_INFO_PATHS = [
 	'/about',
 	'/help',
+	'/faq',
 	'/pricing',
 	'/privacy-policy',
 	'/terms-of-service',

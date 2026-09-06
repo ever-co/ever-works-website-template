@@ -4,7 +4,16 @@ import { memo, useCallback, useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { BookOpen, HelpCircle, FileText, Code, Building, Mail, LucideIcon } from "lucide-react";
+import {
+  BookOpen,
+  HelpCircle,
+  MessageCircleQuestion,
+  FileText,
+  Code,
+  Building,
+  Mail,
+  LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "./index";
 
@@ -36,6 +45,13 @@ const MENU_ITEMS_CONFIG: Array<{
       translationKey: "HELP",
       isExternal: false,
       icon: HelpCircle,
+    },
+    {
+      key: "faq",
+      href: "/faq",
+      translationKey: "FAQ",
+      isExternal: false,
+      icon: MessageCircleQuestion,
     },
     {
       key: "docs",

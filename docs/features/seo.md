@@ -58,13 +58,32 @@ Generates:
 
 Used for site-wide brand identity on the homepage and about pages.
 
+### FAQPage Schema
+
+`generateFaqPageSchema()` builds the `FAQPage` block rendered on `/faq` by
+`components/seo/faq-json-ld.tsx`. Its question/answer pairs are extracted from
+the page's own content by `lib/seo/faq-parser.ts`, so the rich result always
+matches what a visitor reads:
+
+- Every `##`--`######` heading in `pages/faq.<locale>.md` becomes a `Question`,
+  and the prose beneath it becomes the `acceptedAnswer`. `#` (H1) is the
+  document title and is ignored, and a heading immediately followed by another
+  heading is treated as a section grouping rather than a question.
+- A `faqs: [{ question, answer }]` array in the file's frontmatter is
+  authoritative whenever it is present -- the headings are not consulted at
+  all, so `faqs: []` opts a page out of the rich result while keeping its
+  prose.
+- Nothing is emitted when no question/answer pair can be extracted -- an
+  `FAQPage` with an empty `mainEntity` is invalid structured data.
+
+See [Spec 046](../spec/049-faq-page/spec.md) for the full content contract.
+
 ### Other Schema Types
 
 The module provides generators for:
 
 - **WebSite** -- Site-level metadata with search action
 - **BreadcrumbList** -- Navigation breadcrumbs
-- **FAQPage** -- FAQ sections with question/answer pairs
 - **ItemList** -- Category and collection listing pages
 
 ## Hreflang Tags
@@ -241,7 +260,7 @@ Every public page also serves a clean Markdown twin at the same path with `.md` 
 - `/collections/<slug>.md`
 - `/comparisons/<slug>.md`
 - `/pages/<slug>.md`
-- `/about.md`, `/help.md`, `/pricing.md`, `/privacy-policy.md`, `/terms-of-service.md`, `/cookies.md`
+- `/about.md`, `/help.md`, `/faq.md`, `/pricing.md`, `/privacy-policy.md`, `/terms-of-service.md`, `/cookies.md`
 
 Each HTML page advertises its mirror via `<link rel="alternate" type="text/markdown" href="…">`.
 

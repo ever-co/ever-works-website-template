@@ -116,3 +116,16 @@ Each task ends in a verification step. `[x]` = done in PR #1050.
       `/tags/<id>.md` `200` — the two new specs failed (`Expected: 404
       Received: 200`). With the gate they pass, and with the switches back on
       every mirror still serves `200 text/markdown`.
+
+## T12 — Carry the `/faq` mirror through the merge
+
+- [x] `develop` merged PR #1044 (spec 049) while this branch was open. It added
+      `faq` to the static-slug alternation and to `ALLOWED_STATIC_SLUGS`, but
+      against the *pre-fix* rewrites (`[a-z]{2}` locale group, `_static-md`
+      destinations). Resolved in favour of this branch's shape with `faq`
+      carried into the alternation, and added `/faq` to `STATIC_INFO_PATHS` in
+      the guard so it is asserted on the real contract rather than
+      `status < 400`.
+- **Verification.** `/faq.md` and `/fr/faq.md` measured `200 text/markdown`
+      with `X-Robots-Tag: noindex` and canonical page `/faq` / `/fr/faq`;
+      `md-mirror-routes.spec.ts` green including the new `/faq` case.

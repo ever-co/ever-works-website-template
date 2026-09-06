@@ -33,6 +33,7 @@ export const PUBLIC_ROUTES = [
 	{ path: '/pricing', name: 'Pricing' },
 	{ path: '/about', name: 'About' },
 	{ path: '/help', name: 'Help' },
+	{ path: '/faq', name: 'FAQ' },
 	{ path: '/privacy-policy', name: 'Privacy Policy' },
 	{ path: '/terms-of-service', name: 'Terms of Service' },
 	{ path: '/cookies', name: 'Cookies' },

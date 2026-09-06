@@ -109,10 +109,11 @@ const nextConfig: NextConfig = {
 			// Pages (about, privacy-policy, etc — anything under /pages and the static info pages too)
 			{ source: `/:locale(${localeGroup})/pages/:slug.md`, destination: '/:locale/pages/:slug/md' },
 			{ source: '/pages/:slug.md', destination: `/${DEFAULT_LOCALE}/pages/:slug/md` },
-			// Static info pages — about, help, pricing, privacy-policy, terms-of-service, cookies
-			// served via a dedicated catch-all in /static-md.
-			{ source: `/:locale(${localeGroup})/:staticSlug(about|help|pricing|privacy-policy|terms-of-service|cookies).md`, destination: '/:locale/static-md/:staticSlug' },
-			{ source: '/:staticSlug(about|help|pricing|privacy-policy|terms-of-service|cookies).md', destination: `/${DEFAULT_LOCALE}/static-md/:staticSlug` }
+			// Static info pages — about, help, pricing, privacy-policy, terms-of-service,
+			// cookies, faq — served via a dedicated catch-all in /static-md. Keep this
+			// list in sync with ALLOWED_STATIC_SLUGS in app/[locale]/static-md/[slug]/route.ts.
+			{ source: `/:locale(${localeGroup})/:staticSlug(about|help|pricing|privacy-policy|terms-of-service|cookies|faq).md`, destination: '/:locale/static-md/:staticSlug' },
+			{ source: '/:staticSlug(about|help|pricing|privacy-policy|terms-of-service|cookies|faq).md', destination: `/${DEFAULT_LOCALE}/static-md/:staticSlug` }
 		];
 
 		return [

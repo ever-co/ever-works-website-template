@@ -69,9 +69,25 @@ describe('getTwoFactorCodeTemplate', () => {
 	});
 
 	it('a javascript: URL cannot reach an href', () => {
+		// Asserted by extracting the href values and comparing them WHOLE rather
+		// than by substring-matching the rendered HTML: a substring test against
+		// a URL is exactly the incomplete-sanitization pattern CodeQL flags
+		// (`js/incomplete-url-substring-sanitization`), because the fragment can
+		// sit anywhere in the string with arbitrary hosts on either side.
 		const { html } = render({ companyUrl: 'javascript:alert(1)' });
+		const hrefs = [...html.matchAll(/href="([^"]*)"/g)].map((match) => match[1]);
 
-		assert.ok(!html.includes('javascript:'));
-		assert.ok(html.includes('https://ever.works'));
+		assert.ok(hrefs.length > 0, 'the template should render at least one link');
+		for (const href of hrefs) {
+			const scheme = href.slice(0, href.indexOf(':') + 1).toLowerCase();
+			assert.ok(['https:', 'http:', 'mailto:'].includes(scheme), `unsafe href scheme: ${href}`);
+		}
+		// The hostile value is dropped for the safe default, not merely escaped.
+		// (`mailto:` links carry no host, so only the web links are compared.)
+		const webHosts = hrefs.filter((href) => href.startsWith('https:')).map((href) => new URL(href).host);
+		assert.ok(webHosts.length > 0, 'the template should render at least one web link');
+		for (const host of webHosts) {
+			assert.equal(host, 'ever.works');
+		}
 	});
 });

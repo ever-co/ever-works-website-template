@@ -142,6 +142,12 @@ database. Verification re-hashes the submitted value and compares digests with
 `crypto.timingSafeEqual`. The brute-force counter lives on `client_profiles`,
 not on the code row, so that requesting a new code cannot reset it.
 
+Enabling and disabling are transactional: the `two_factor_enabled` flip and
+the purge of pending codes commit together, so a failed purge rolls the flag
+change back rather than leaving the factor off with a live code behind it. The
+purge runs on **both** transitions, so a code minted before a disable can never
+satisfy a sign-in after a later re-enable.
+
 **At most one live code per account**, and the database says so: a partial
 unique index (`two_factor_codes_active_user_idx`, on `"userId"` where
 `consumed_at IS NULL`) enforces it. Verification reads the newest unconsumed row

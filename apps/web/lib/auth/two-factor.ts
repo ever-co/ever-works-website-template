@@ -164,8 +164,21 @@ export async function canEnableTwoFactor(userId: string, tenantId?: string | nul
 /**
  * Persist `client_profiles.two_factor_enabled` (EW-137).
  *
- * Disabling also clears any pending code and the brute-force budget, so
- * a user who turns 2FA off and on again starts from a clean slate.
+ * Flipping the flag and purging pending codes happen in ONE transaction, so
+ * the two can never disagree: if the purge fails, the flag change rolls back
+ * with it and the caller reports failure, rather than leaving the factor off
+ * with a live code still in the table.
+ *
+ * The purge runs on BOTH transitions. Disabling obviously discards pending
+ * codes; enabling must too, because a code minted before the factor was last
+ * turned off would otherwise still satisfy the very next sign-in. That second
+ * purge is what makes the atomicity belt-and-braces rather than load-bearing:
+ * even if a row somehow survived a disable, re-enabling drops it before any
+ * verification can run, and while the flag is off no sign-in consults the code
+ * table at all.
+ *
+ * The brute-force budget is reset alongside, so a user who turns 2FA off and
+ * on again starts from a clean slate.
  */
 export async function setTwoFactorEnabled(
 	userId: string,
@@ -176,26 +189,24 @@ export async function setTwoFactorEnabled(
 		? and(eq(clientProfiles.userId, userId), eq(clientProfiles.tenantId, tenantId))
 		: eq(clientProfiles.userId, userId);
 
-	const updated = await db
-		.update(clientProfiles)
-		.set({
-			twoFactorEnabled: enabled,
-			twoFactorFailedAttempts: 0,
-			twoFactorLockedUntil: null,
-			updatedAt: new Date()
-		})
-		.where(where)
-		.returning({ id: clientProfiles.id });
+	return await db.transaction(async (tx) => {
+		const updated = await tx
+			.update(clientProfiles)
+			.set({
+				twoFactorEnabled: enabled,
+				twoFactorFailedAttempts: 0,
+				twoFactorLockedUntil: null,
+				updatedAt: new Date()
+			})
+			.where(where)
+			.returning({ id: clientProfiles.id });
 
-	if (updated.length === 0) return false;
+		if (updated.length === 0) return false;
 
-	// Purge pending codes on BOTH transitions. Disabling obviously discards
-	// them; enabling must too, because a code minted before the factor was
-	// last turned off would otherwise still satisfy the very next sign-in —
-	// including one that survived a failed cleanup on the way out.
-	await db.delete(twoFactorCodes).where(eq(twoFactorCodes.userId, userId));
+		await tx.delete(twoFactorCodes).where(eq(twoFactorCodes.userId, userId));
 
-	return true;
+		return true;
+	});
 }
 
 export interface IssuedTwoFactorCode {

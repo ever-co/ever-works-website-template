@@ -25,6 +25,7 @@
 		"OPEN_USER_MENU": "Open user menu"
 	},
 	"common": {
+		"FAQ": "คำถามที่พบบ่อย",
 		"DISCOVER": "สำรวจ",
 		"HOME": "หน้าแรก",
 		"ABOUT": "เกี่ยวกับเรา",
@@ -470,6 +471,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "คำถามที่พบบ่อย",
 		"ALL_RIGHTS_RESERVED": "สงวนลิขสิทธิ์",
 		"BUILT_WITH": "Built with",
 		"CONNECT_WITH_US": "Connect with us",
@@ -3473,6 +3475,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "ความช่วยเหลือ",
+		"FAQ_META_DESCRIPTION": "คำตอบสำหรับคำถามที่ผู้เข้าชมถามบ่อยที่สุดเกี่ยวกับไดเรกทอรีนี้ ทั้งการเรียกดู การส่งรายการ และการติดต่อเรา",
+		"FAQ_INTRO": "คำตอบสำหรับคำถามที่เราได้รับบ่อยที่สุด หากไม่พบสิ่งที่ต้องการ โปรดติดต่อเรา",
+		"HELP_DESCRIPTION": "ดูคู่มือและหัวข้อการสนับสนุน",
 		"LEGAL_BADGE": "Legal",
 		"LAST_UPDATED": "Last updated:",
 		"RELATED_INFORMATION": "Related Information",

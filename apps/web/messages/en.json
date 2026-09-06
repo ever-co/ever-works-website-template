@@ -25,6 +25,7 @@
 		"OPEN_USER_MENU": "Open user menu"
 	},
 	"common": {
+		"FAQ": "FAQ",
 		"DISCOVER": "Discover",
 		"HOME": "Home",
 		"ABOUT": "About",
@@ -530,6 +531,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "FAQ",
 		"ALL_RIGHTS_RESERVED": "All rights reserved",
 		"BUILT_WITH": "Built with",
 		"CONNECT_WITH_US": "Connect with us",
@@ -3892,6 +3894,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "Help",
+		"FAQ_META_DESCRIPTION": "Answers to the questions visitors ask most often about this directory — browsing, submitting a listing, and getting in touch",
+		"FAQ_INTRO": "Answers to the questions we are asked most often. If you cannot find what you need, get in touch.",
+		"HELP_DESCRIPTION": "Browse guides and support topics",
 		"LEGAL_BADGE": "Legal",
 		"LAST_UPDATED": "Last updated:",
 		"RELATED_INFORMATION": "Related Information",

@@ -68,6 +68,11 @@ jobs:
       NEXT_PUBLIC_APP_URL: http://localhost:3000
       BASE_URL: http://localhost:3000
       CONTENT_WARNINGS_SILENT: 'true'
+      # Tells legal-frontmatter-metadata.spec.ts that the `.content/pages/`
+      # fixtures below are in place, so it can assert the EXACT seeded
+      # frontmatter title/description instead of only the shape of the
+      # metadata. Keep the two in sync: change the fixture, change the spec.
+      E2E_STATIC_PAGES_SEEDED: 'true'
 
       # --- Database (matches the postgres service above) ---
       DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
@@ -408,6 +413,67 @@ jobs:
           updated_at: 2026-01-01 00:00
           YAML
           done
+          # Markdown-backed static info pages. `pages/<slug>.<locale>.md` is
+          # the data-repository convention the template reads through
+          # `fetchPageContent`; seeding the two legal pages here means CI
+          # exercises the real frontmatter -> SEO metadata path
+          # (`legal-frontmatter-metadata.spec.ts`) instead of only the
+          # route's built-in fallback copy.
+          mkdir -p apps/web/.content/pages
+          cat > apps/web/.content/pages/terms-of-service.en.md <<'MD'
+          ---
+          title: CI Fixture Terms of Service
+          description: Terms and conditions for using this CI fixture directory service
+          lastUpdated: '2026-01-01'
+          ---
+
+          ## Acceptance of Terms
+
+          By using this directory you agree to these terms. This copy exists so the
+          end-to-end suite can assert that page content and SEO metadata are read
+          from the data repository rather than from the template fallback.
+
+          ## Use of the Service
+
+          You may browse and submit entries subject to the rules published here.
+          MD
+          cat > apps/web/.content/pages/privacy-policy.en.md <<'MD'
+          ---
+          title: CI Fixture Privacy Policy
+          description: How this CI fixture directory collects, uses and protects your information
+          lastUpdated: '2026-01-01'
+          ---
+
+          ## Information We Collect
+
+          This copy exists so the end-to-end suite can assert that page content and
+          SEO metadata are read from the data repository rather than from the
+          template fallback.
+
+          ## How We Use Information
+
+          Account details are used only to operate the directory.
+          MD
+          # Hostile frontmatter fixture. Every field here is a legal YAML value
+          # that is NOT a string, which is what author-supplied frontmatter can
+          # actually contain. `frontmatter-hostile` is a slug no other spec
+          # visits, so it exercises `pages/[slug]` without changing what the
+          # rest of the suite sees.
+          cat > apps/web/.content/pages/frontmatter-hostile.en.md <<'MD'
+          ---
+          title:
+            nested: not a string
+          description:
+            nested: not a string either
+          lastUpdated: 2026
+          ---
+
+          ## Hostile Frontmatter
+
+          The frontmatter above parses to mappings and a number rather than to
+          strings. The route must fall back to its slug-derived title and emit
+          no metadata, instead of rendering `[object Object]` or crashing.
+          MD
           # The runtime's hasUsableContent() check requires a `.git`
           # directory inside `.content/` when DATA_REPOSITORY is set. We
           # don't actually want CI to clone the real data repo (it

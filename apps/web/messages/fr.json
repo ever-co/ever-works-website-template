@@ -25,6 +25,7 @@
 		"OPEN_USER_MENU": "Ouvrir le menu utilisateur"
 	},
 	"common": {
+		"FAQ": "FAQ",
 		"DISCOVER": "Découvrir",
 		"HOME": "Accueil",
 		"ABOUT": "À propos",
@@ -471,6 +472,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "FAQ",
 		"ALL_RIGHTS_RESERVED": "Tous droits réservés",
 		"BUILT_WITH": "Construit avec",
 		"CONNECT_WITH_US": "Connectez-vous avec nous",
@@ -3625,6 +3627,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "Aide",
+		"FAQ_META_DESCRIPTION": "Réponses aux questions que les visiteurs posent le plus souvent sur cet annuaire : navigation, soumission d'une fiche et prise de contact",
+		"FAQ_INTRO": "Réponses aux questions qui nous sont le plus souvent posées. Si vous ne trouvez pas ce que vous cherchez, contactez-nous.",
+		"HELP_DESCRIPTION": "Parcourir les guides et les rubriques d’aide",
 		"LEGAL_BADGE": "Légal",
 		"LAST_UPDATED": "Dernière mise à jour :",
 		"RELATED_INFORMATION": "Informations Connexes",

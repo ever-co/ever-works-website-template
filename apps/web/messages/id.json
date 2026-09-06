@@ -25,6 +25,7 @@
 		"OPEN_USER_MENU": "Buka menu pengguna"
 	},
 	"common": {
+		"FAQ": "FAQ",
 		"DISCOVER": "Jelajahi",
 		"HOME": "Beranda",
 		"ABOUT": "Tentang",
@@ -496,6 +497,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "FAQ",
 		"ALL_RIGHTS_RESERVED": "Hak cipta dilindungi",
 		"BUILT_WITH": "Dibangun dengan",
 		"CONNECT_WITH_US": "Terhubung dengan kami",
@@ -3585,6 +3587,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "Bantuan",
+		"FAQ_META_DESCRIPTION": "Jawaban atas pertanyaan yang paling sering diajukan pengunjung tentang direktori ini: menjelajah, mengirim entri, dan menghubungi kami",
+		"FAQ_INTRO": "Jawaban atas pertanyaan yang paling sering kami terima. Jika tidak menemukan yang Anda cari, hubungi kami.",
+		"HELP_DESCRIPTION": "Jelajahi panduan dan topik dukungan",
 		"LEGAL_BADGE": "Hukum",
 		"LAST_UPDATED": "Terakhir diperbarui:",
 		"RELATED_INFORMATION": "Informasi Terkait",

@@ -17,6 +17,7 @@ export default function robots(): MetadataRoute.Robots {
 		'/pricing',
 		'/help',
 		'/about',
+		'/faq',
 		'/llms.txt',
 		'/llms-full.txt',
 		'/items.json',

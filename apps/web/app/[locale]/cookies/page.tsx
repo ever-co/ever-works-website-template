@@ -6,10 +6,12 @@ import Link from 'next/link';
 import { PageContainer } from '@/components/ui/container';
 import { MDX } from '@/components/mdx';
 import { getCachedPageContent } from '@/lib/content';
+import { resolveStaticPageBody } from '@/lib/default-page-content';
 import { getBaseUrl } from '@/lib/utils/url-cleaner';
 import { generateHreflangAlternates, getLocalizedUrl } from '@/lib/seo/hreflang';
 import { Locale, DEFAULT_LOCALE } from '@/lib/constants';
 import { BreadcrumbJsonLd } from '@/components/seo/breadcrumb-json-ld';
+import { frontmatterString } from '@/lib/seo/frontmatter';
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -29,7 +31,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     alternates: {
       canonical: getLocalizedUrl('/cookies', locale as Locale),
       languages: generateHreflangAlternates('/cookies'),
-      types: { 'text/markdown': `${appUrl}${getLocalizedUrl('/cookies', locale as Locale)}.md` }
+      types: { 'text/markdown': `${getLocalizedUrl('/cookies', locale as Locale)}.md` }
     }
   };
 }
@@ -65,14 +67,23 @@ export default async function CookiesPage({ params }: PageProps) {
   const pageData = await getCachedPageContent('cookies', locale);
 
   // Use default content if no MDX file exists
-  const content = pageData?.content || DEFAULT_COOKIE_CONTENT;
+  // Same emptiness rule as this page's `/cookies.md` mirror
+  // (`lib/seo/markdown-mirror.ts#renderStaticPageMarkdown`), which calls the
+  // same helper. A body of nothing but blank lines is truthy, so a bare `||`
+  // left this page blank while the alternate it advertises to crawlers served
+  // the built-in default.
+  const content = resolveStaticPageBody(pageData?.content, DEFAULT_COOKIE_CONTENT);
   const metadata = pageData?.metadata || {};
   const tCommon = await getTranslations({ locale, namespace: 'common' });
   const tFooter = await getTranslations({ locale, namespace: 'footer' });
   const tPages = await getTranslations({ locale, namespace: 'pages' });
 
-  const title = (metadata.title as string) || tFooter('COOKIES');
-  const lastUpdated = metadata.lastUpdated as string | undefined;
+  // Same non-empty-string rule as the legal routes and the `.md` mirror.
+  // A bare cast handed React whatever the YAML parsed to, so a `title:`
+  // written as a mapping crashed the route with "Objects are not valid as a
+  // React child" and a numeric one rendered a heading the <title> never had.
+  const title = frontmatterString(metadata, 'title') ?? tFooter('COOKIES');
+  const lastUpdated = frontmatterString(metadata, 'lastUpdated');
   const localePrefix = locale === DEFAULT_LOCALE ? '' : `/${locale}`;
 
   return (

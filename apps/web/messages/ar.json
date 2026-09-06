@@ -25,6 +25,7 @@
 		"OPEN_USER_MENU": "Open user menu"
 	},
 	"common": {
+		"FAQ": "الأسئلة الشائعة",
 		"DISCOVER": "اكتشف",
 		"HOME": "الرئيسية",
 		"ABOUT": "عن الموقع",
@@ -469,6 +470,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "الأسئلة الشائعة",
 		"ALL_RIGHTS_RESERVED": "جميع الحقوق محفوظة",
 		"BUILT_WITH": "تم البناء باستخدام",
 		"CONNECT_WITH_US": "تواصل معنا",
@@ -3556,6 +3558,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "مساعدة",
+		"FAQ_META_DESCRIPTION": "إجابات عن أكثر الأسئلة التي يطرحها الزوار حول هذا الدليل: التصفح وإضافة إدراج والتواصل معنا",
+		"FAQ_INTRO": "إجابات عن الأسئلة الأكثر تكرارًا. إذا لم تجد ما تبحث عنه، تواصل معنا.",
+		"HELP_DESCRIPTION": "تصفّح الأدلة ومواضيع الدعم",
 		"LEGAL_BADGE": "قانوني",
 		"LAST_UPDATED": "آخر تحديث:",
 		"RELATED_INFORMATION": "معلومات ذات صلة",

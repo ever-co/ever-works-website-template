@@ -25,6 +25,7 @@
 		"OPEN_USER_MENU": "Open user menu"
 	},
 	"common": {
+		"FAQ": "FAQ",
 		"DISCOVER": "Odkryj",
 		"HOME": "Strona główna",
 		"ABOUT": "O nas",
@@ -470,6 +471,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "FAQ",
 		"ALL_RIGHTS_RESERVED": "Wszelkie prawa zastrzeżone",
 		"BUILT_WITH": "Built with",
 		"CONNECT_WITH_US": "Connect with us",
@@ -3534,6 +3536,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "Pomoc",
+		"FAQ_META_DESCRIPTION": "Odpowiedzi na pytania, które odwiedzający najczęściej zadają o tym katalogu: przeglądanie, zgłaszanie wpisu i kontakt",
+		"FAQ_INTRO": "Odpowiedzi na najczęściej zadawane nam pytania. Jeśli nie znajdziesz tego, czego szukasz, napisz do nas.",
+		"HELP_DESCRIPTION": "Przeglądaj poradniki i tematy pomocy",
 		"LEGAL_BADGE": "Legal",
 		"LAST_UPDATED": "Last updated:",
 		"RELATED_INFORMATION": "Related Information",

@@ -42,13 +42,14 @@ Guides for managing content, users, and site settings through the built-in dashb
 
 Guides related to content management, data utilities, and URL handling.
 
-| Guide                                                   | Description                                                              |
-| ------------------------------------------------------- | ------------------------------------------------------------------------ |
-| [Slug Utilities](/docs/guides/slug-utilities)           | URL slug generation, validation, and conflict resolution                 |
-| [URL Utilities](/docs/guides/url-utilities)             | URL construction helpers, query parameter management, and canonical URLs |
-| [Filter Sync](/docs/guides/filter-sync)                 | How filter state is synchronized between URL parameters and the UI       |
-| [Pagination Patterns](/docs/guides/pagination-patterns) | Server-side and client-side pagination implementations                   |
-| [Currency Formatting](/docs/guides/currency-formatting) | Locale-aware currency display and detection                              |
+| Guide                                                   | Description                                                                |
+| ------------------------------------------------------- | -------------------------------------------------------------------------- |
+| [Slug Utilities](/docs/guides/slug-utilities)           | URL slug generation, validation, and conflict resolution                   |
+| [Static Page Content](/docs/guides/static-page-content) | Terms, Privacy, About and Cookies copy: the data repository `pages/` files |
+| [URL Utilities](/docs/guides/url-utilities)             | URL construction helpers, query parameter management, and canonical URLs   |
+| [Filter Sync](/docs/guides/filter-sync)                 | How filter state is synchronized between URL parameters and the UI         |
+| [Pagination Patterns](/docs/guides/pagination-patterns) | Server-side and client-side pagination implementations                     |
+| [Currency Formatting](/docs/guides/currency-formatting) | Locale-aware currency display and detection                                |
 
 ## Email & Notifications
 

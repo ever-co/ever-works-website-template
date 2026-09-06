@@ -25,6 +25,7 @@
 		"OPEN_USER_MENU": "Open user menu"
 	},
 	"common": {
+		"FAQ": "よくある質問",
 		"DISCOVER": "発見",
 		"HOME": "ホーム",
 		"ABOUT": "概要",
@@ -470,6 +471,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "よくある質問",
 		"ALL_RIGHTS_RESERVED": "全著作権所有",
 		"BUILT_WITH": "Built with",
 		"CONNECT_WITH_US": "Connect with us",
@@ -3534,6 +3536,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "ヘルプ",
+		"FAQ_META_DESCRIPTION": "このディレクトリについて訪問者からよく寄せられる質問への回答（閲覧方法、掲載の申請、お問い合わせ）",
+		"FAQ_INTRO": "よくお寄せいただく質問への回答です。お探しの内容が見つからない場合はお問い合わせください。",
+		"HELP_DESCRIPTION": "ガイドとサポート記事を見る",
 		"LEGAL_BADGE": "Legal",
 		"LAST_UPDATED": "Last updated:",
 		"RELATED_INFORMATION": "Related Information",

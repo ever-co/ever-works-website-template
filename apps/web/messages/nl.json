@@ -25,6 +25,7 @@
 		"OPEN_USER_MENU": "Open user menu"
 	},
 	"common": {
+		"FAQ": "Veelgestelde vragen",
 		"DISCOVER": "Ontdek",
 		"HOME": "Home",
 		"ABOUT": "Over ons",
@@ -470,6 +471,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "Veelgestelde vragen",
 		"ALL_RIGHTS_RESERVED": "Alle rechten voorbehouden",
 		"BUILT_WITH": "Built with",
 		"CONNECT_WITH_US": "Connect with us",
@@ -3534,6 +3536,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "Help",
+		"FAQ_META_DESCRIPTION": "Antwoorden op de vragen die bezoekers het vaakst stellen over deze directory: bladeren, een vermelding indienen en contact opnemen",
+		"FAQ_INTRO": "Antwoorden op de vragen die ons het vaakst worden gesteld. Vind je niet wat je zoekt? Neem contact met ons op.",
+		"HELP_DESCRIPTION": "Bekijk handleidingen en supportonderwerpen",
 		"LEGAL_BADGE": "Legal",
 		"LAST_UPDATED": "Last updated:",
 		"RELATED_INFORMATION": "Related Information",

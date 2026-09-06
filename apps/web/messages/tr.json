@@ -25,6 +25,7 @@
 		"OPEN_USER_MENU": "Kullanıcı menüsünü aç"
 	},
 	"common": {
+		"FAQ": "SSS",
 		"DISCOVER": "Keşfet",
 		"HOME": "Ana Sayfa",
 		"ABOUT": "Hakkında",
@@ -496,6 +497,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "SSS",
 		"ALL_RIGHTS_RESERVED": "Tüm hakları saklıdır",
 		"BUILT_WITH": "İle oluşturuldu",
 		"CONNECT_WITH_US": "Bizimle iletişime geçin",
@@ -3584,6 +3586,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "Yardım",
+		"FAQ_META_DESCRIPTION": "Ziyaretçilerin bu dizin hakkında en sık sorduğu soruların yanıtları: gezinme, kayıt gönderme ve bize ulaşma",
+		"FAQ_INTRO": "Bize en sık sorulan soruların yanıtları. Aradığınızı bulamazsanız bizimle iletişime geçin.",
+		"HELP_DESCRIPTION": "Kılavuzlara ve destek konularına göz atın",
 		"LEGAL_BADGE": "Yasal",
 		"LAST_UPDATED": "Son güncelleme:",
 		"RELATED_INFORMATION": "İlgili Bilgiler",

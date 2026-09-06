@@ -9,6 +9,7 @@ const MD_MIRROR_TESTS: Array<{ path: string; expectMd: boolean }> = [
 	// Static info pages — wired via /_static-md catch-all.
 	{ path: '/about.md', expectMd: true },
 	{ path: '/help.md', expectMd: true },
+	{ path: '/faq.md', expectMd: true },
 	{ path: '/pricing.md', expectMd: true },
 	{ path: '/privacy-policy.md', expectMd: true },
 	{ path: '/terms-of-service.md', expectMd: true },

@@ -25,6 +25,7 @@
 		"OPEN_USER_MENU": "Open user menu"
 	},
 	"common": {
+		"FAQ": "Часті запитання",
 		"DISCOVER": "Огляд",
 		"HOME": "Головна",
 		"ABOUT": "Про нас",
@@ -470,6 +471,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "Часті запитання",
 		"ALL_RIGHTS_RESERVED": "Усі права захищені",
 		"BUILT_WITH": "Built with",
 		"CONNECT_WITH_US": "Connect with us",
@@ -3536,6 +3538,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "Довідка",
+		"FAQ_META_DESCRIPTION": "Відповіді на запитання, які відвідувачі ставлять про цей каталог найчастіше: як шукати, як додати запис і як зв’язатися з нами",
+		"FAQ_INTRO": "Відповіді на запитання, які нам ставлять найчастіше. Якщо потрібної відповіді немає, напишіть нам.",
+		"HELP_DESCRIPTION": "Посібники та розділи підтримки",
 		"LEGAL_BADGE": "Legal",
 		"LAST_UPDATED": "Last updated:",
 		"RELATED_INFORMATION": "Related Information",

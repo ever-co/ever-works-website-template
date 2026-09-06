@@ -1,5 +1,12 @@
 import { MetadataRoute } from 'next';
-import { getCachedComparisons, getCachedItems } from '@/lib/content';
+import {
+	getCachedAllPostSummaries,
+	getCachedComparisons,
+	getCachedItems,
+	getCachedPostTaxonomies
+} from '@/lib/content';
+import type { PostSummary } from '@/types/post';
+import { buildCategoryHref, buildPostHref, buildTagHref } from '@/lib/blog/urls';
 
 // Types
 interface RouteConfig {
@@ -125,6 +132,25 @@ const validateSlug = (slug: string): boolean => {
 	return Boolean(slug && slug.length > 0 && slug.length < 200 && /^[a-zA-Z0-9\-_]+$/.test(slug));
 };
 
+/** Unicode control characters, which cannot appear in a real post filename. */
+const CONTROL_CHARACTERS = /\p{Cc}/u;
+
+/**
+ * Whether a blog post slug may be advertised in the sitemap.
+ *
+ * Deliberately NOT `validateSlug()`. Post slugs are filenames from the data
+ * repository, and a filename may legally hold a space, an accent or a `?` —
+ * `buildPostHref()` exists to percent-encode exactly that into one safe path
+ * segment. Rejecting anything outside `[a-zA-Z0-9-_]` therefore dropped those
+ * posts from the sitemap while the listing still linked to them and the feed
+ * still announced them, making the one surface whose whole job is
+ * discoverability the only one that hid them. Encoding is what makes the URL
+ * safe here, so this rejects only what could not be a post at all.
+ */
+const validatePostSlug = (slug: string): boolean => {
+	return Boolean(slug) && slug.length < 200 && !CONTROL_CHARACTERS.test(slug);
+};
+
 /**
  * Converts an icon URL to an absolute URL for sitemap image entries.
  * Uses the URL constructor for robust resolution of relative paths,
@@ -158,6 +184,29 @@ const generateStaticRoutes = (baseUrl: string): SitemapEntry[] => {
 	}));
 };
 
+/**
+ * The blog listing route, in the default locale and every prefixed one.
+ *
+ * Deliberately NOT a `STATIC_ROUTES` entry: the blog only exists when the data
+ * repository actually ships posts, and a sitemap that advertises `/blog` on a
+ * directory with none sends crawlers to an empty-state page. Emitted only when
+ * `generateDynamicRoutes()` found at least one post.
+ */
+const generateBlogListingRoutes = (baseUrl: string): SitemapEntry[] => [
+	{
+		url: `${baseUrl}/blog`,
+		lastModified: new Date(),
+		changeFrequency: DEFAULT_CHANGE_FREQUENCIES.WEEKLY,
+		priority: DEFAULT_PRIORITIES.MAIN
+	},
+	...PREFIXED_LOCALES.map((locale) => ({
+		url: `${baseUrl}/${locale}/blog`,
+		lastModified: new Date(),
+		changeFrequency: DEFAULT_CHANGE_FREQUENCIES.WEEKLY,
+		priority: DEFAULT_PRIORITIES.MAIN
+	}))
+];
+
 const generatePaginationRoutes = (baseUrl: string): SitemapEntry[] => {
 	return PAGINATION_ROUTES.map((route) => ({
 		url: `${baseUrl}${route}`,
@@ -167,8 +216,11 @@ const generatePaginationRoutes = (baseUrl: string): SitemapEntry[] => {
 	}));
 };
 
+/** Locales that carry a URL prefix (the default locale is served unprefixed). */
+const PREFIXED_LOCALES = ['fr', 'es', 'de', 'ar', 'zh'];
+
 const generateLocaleRoutes = (baseUrl: string): SitemapEntry[] => {
-	const locales = ['en', 'fr', 'es', 'de', 'ar', 'zh'];
+	const locales = ['en', ...PREFIXED_LOCALES];
 	const routes: SitemapEntry[] = [];
 
 	locales.forEach((locale) => {
@@ -188,14 +240,36 @@ const generateLocaleRoutes = (baseUrl: string): SitemapEntry[] => {
 	return routes;
 };
 
-const generateDynamicRoutes = async (baseUrl: string): Promise<SitemapEntry[]> => {
+/**
+ * Every published post.
+ *
+ * Uses the unpaginated loader rather than walking `getCachedPosts()` page by
+ * page: that loader re-reads and re-parses the entire posts directory on every
+ * call, so paging through it would cost O(posts x pages) and would also need
+ * an arbitrary page cap that silently truncates a large blog. One pass, no cap,
+ * every post.
+ */
+const fetchAllPostsForSitemap = async (): Promise<PostSummary[]> => {
 	try {
-		const [{ items, categories, tags, collections }, { comparisons }] = await Promise.all([
+		return await getCachedAllPostSummaries();
+	} catch {
+		// A directory without a posts folder simply contributes no blog URLs.
+		return [];
+	}
+};
+
+const generateDynamicRoutes = async (baseUrl: string): Promise<{ entries: SitemapEntry[]; hasPosts: boolean }> => {
+	try {
+		const [{ items, categories, tags, collections }, { comparisons }, posts, postTaxonomies] = await Promise.all([
 			getCachedItems(),
-			getCachedComparisons()
+			getCachedComparisons(),
+			// The blog is optional: a data repository without a posts folder
+			// resolves to an empty list rather than failing the sitemap.
+			fetchAllPostsForSitemap(),
+			getCachedPostTaxonomies().catch(() => ({ categories: [], tags: [] }))
 		]);
 
-		return [
+		const entries: SitemapEntry[] = [
 			// Items - validate and sanitize slugs, include images for items with icon_url
 			...items
 				.filter((item) => item.slug && validateSlug(item.slug))
@@ -245,11 +319,64 @@ const generateDynamicRoutes = async (baseUrl: string): Promise<SitemapEntry[]> =
 					lastModified: new Date(comparison.generated_at),
 					changeFrequency: DEFAULT_CHANGE_FREQUENCIES.WEEKLY,
 					priority: DEFAULT_PRIORITIES.SECONDARY
+				})),
+			// Blog posts (Spec 050)
+			...posts
+				.filter((post) => validatePostSlug(post.slug))
+				.map((post) => {
+					const lastModified = post.date ? new Date(post.date) : new Date();
+					const entry: SitemapEntry = {
+						// NOT `sanitizeSlug()`: it lowercases, and the post loader looks
+						// slugs up against filenames case-sensitively, so a post file with
+						// an uppercase letter would be advertised at a URL that 404s.
+						// `buildPostHref()` is the same builder the in-app links use, so
+						// the sitemap can never advertise a different URL than the site
+						// links to.
+						url: `${baseUrl}${buildPostHref(post.slug)}`,
+						lastModified: Number.isNaN(lastModified.getTime()) ? new Date() : lastModified,
+						changeFrequency: DEFAULT_CHANGE_FREQUENCIES.MONTHLY,
+						priority: DEFAULT_PRIORITIES.SECONDARY
+					};
+
+					const absoluteImageUrl = toAbsoluteImageUrl(post.image, baseUrl);
+					if (absoluteImageUrl) {
+						entry.images = [absoluteImageUrl];
+					}
+
+					return entry;
+				}),
+			// Blog taxonomy archives — only terms that actually have posts, so
+			// the sitemap never advertises an empty archive. As with post slugs,
+			// the validated term id is used verbatim: the archive routes match it
+			// exactly, so any rewriting here would advertise a URL that 404s.
+			...postTaxonomies.categories
+				.filter((category) => category.count > 0 && validateSlug(category.id))
+				.map((category) => ({
+					url: `${baseUrl}${buildCategoryHref(category.id)}`,
+					lastModified: new Date(),
+					changeFrequency: DEFAULT_CHANGE_FREQUENCIES.WEEKLY,
+					priority: DEFAULT_PRIORITIES.TERTIARY
+				})),
+			...postTaxonomies.tags
+				.filter((tag) => tag.count > 0 && validateSlug(tag.id))
+				.map((tag) => ({
+					url: `${baseUrl}${buildTagHref(tag.id)}`,
+					lastModified: new Date(),
+					changeFrequency: DEFAULT_CHANGE_FREQUENCIES.WEEKLY,
+					priority: DEFAULT_PRIORITIES.TERTIARY
 				}))
 		];
+
+		// The blog listing URL rides along here rather than in STATIC_ROUTES so
+		// it is advertised only when the data repository actually ships posts.
+		const hasPosts = posts.length > 0;
+		return {
+			entries: hasPosts ? [...entries, ...generateBlogListingRoutes(baseUrl)] : entries,
+			hasPosts
+		};
 	} catch (error) {
 		console.error('Failed to generate dynamic routes:', error);
-		return [];
+		return { entries: [], hasPosts: false };
 	}
 };
 
@@ -265,7 +392,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 			generateDynamicRoutes(baseUrl)
 		]);
 
-		return [...staticRoutes, ...dynamicRoutes, ...paginationRoutes, ...localeRoutes];
+		return [...staticRoutes, ...dynamicRoutes.entries, ...paginationRoutes, ...localeRoutes];
 	} catch (error) {
 		console.error('Error generating sitemap:', error);
 		// Return basic sitemap with static routes in case of error

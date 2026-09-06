@@ -9,6 +9,7 @@ sidebar_position: 99
 
 ## 2026-09-04
 
+- `spec-050`: added the blog reader surface for generated directory sites — `/blog` listing with configurable pagination and search, `/blog/[slug]` post pages, category and tag archives, `/blog/rss.xml`, sitemap entries and 21-locale strings, all reading `.content/posts/` through the existing `lib/content.ts` pipeline ([spec 050](spec/050-blog-pages/spec.md), EW-25..EW-29).
 - `spec-048` `apps/web/lib/seo/{frontmatter,static-page-metadata}.ts` `apps/web/app/[locale]/{terms-of-service,privacy-policy}`: the two legal routes now build their SEO metadata from the data repository’s Markdown frontmatter (`title` / `description`) through the new `buildStaticPageMetadata()` helper, with the i18n strings kept as the fallback; both routes gain a `loading.tsx`; the `<h1>`, the "last updated" chip and `renderStaticPageMarkdown()` now share one non-empty-string frontmatter reader with the `<head>`; the doubled base URL in the `text/markdown` alternate is fixed here and in `about`, `cookies`, `items/[slug]` and `pages/[slug]`; and the data-repository file layout is documented in the new `docs/guides/static-page-content.md` ([spec 048](spec/048-legal-pages-frontmatter-seo/spec.md), EW-17, PR #1045).
 - `apps/web-e2e`: added `public/md-alternate-link-absolute-url.spec.ts`, the
   regression guard for the doubled-origin `text/markdown` alternate fixed in
@@ -68,8 +69,7 @@ why** at a higher level than per-commit diffs.
 
 ## 2026-08-23 — Chore: force LF for container scripts (.gitattributes)
 
-- infra: `docker-entrypoint.sh`, `*.sh` and the Dockerfiles are now `text eol=lf` in `.gitattributes`. A Windows checkout (`core.autocrlf=true`) produced `#!/bin/sh
-` and the built site image died with `exec /usr/local/bin/docker-entrypoint.sh: no such file or directory` (2026-08-23, local image build while the CI runner pool was stalled). No runtime change for CI-built images. (PR: pending)
+- infra: `docker-entrypoint.sh`, `*.sh` and the Dockerfiles are now `text eol=lf` in `.gitattributes`. A Windows checkout (`core.autocrlf=true`) produced a `#!/bin/sh\r` shebang and the built site image died with `exec /usr/local/bin/docker-entrypoint.sh: no such file or directory` (2026-08-23, local image build while the CI runner pool was stalled). No runtime change for CI-built images. (PR: pending)
 
 ## 2026-08-22
 

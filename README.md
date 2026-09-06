@@ -344,10 +344,54 @@ The `apps/web/.content` folder acts as a Git-based CMS, synchronized with the re
 
 ### Folder Structure:
 
-- **posts/**: Markdown files for blog articles
-    - Each post has a frontmatter (title, date, author, etc.)
-    - Supports MDX for interactive content
-    - Organized by date and category
+- **posts/**: Markdown files for blog articles, published at `/blog` (see [spec 050](docs/spec/050-blog-pages/spec.md))
+    - One file per post: `<slug>.<locale>.md` (for example `hello-world.en.md`), or `<slug>.md` for a locale-neutral post. The slug is the URL: `/blog/hello-world`.
+    - Rendered through the same MDX pipeline as static pages, so interactive content works.
+    - Optional `posts/authors/<author-slug>.md` files supply an author's display name, avatar and profile URL.
+    - Optional `posts/categories.yml` and `posts/tags.yml` declare canonical taxonomy names and ordering; without them, categories and tags are derived from post frontmatter.
+    - `.content/blog/posts/` and `.content/blog/` are accepted as fallback locations.
+
+    Recognised frontmatter:
+
+    | Key                                           | Purpose                                                                        |
+    | --------------------------------------------- | ------------------------------------------------------------------------------ |
+    | `title`                                       | Post title. Falls back to a humanized slug.                                    |
+    | `description` / `excerpt` / `summary`         | Listing excerpt. Derived from the body when omitted.                           |
+    | `date` / `publishedAt` / `published_at`       | Publication date. Posts sort newest first; undated posts sort last.            |
+    | `author`                                      | Author name, resolved against `posts/authors/<slug>.md` when that file exists. |
+    | `category` / `categories`                     | One category or a list. Each gets a `/blog/category/<slug>` archive.           |
+    | `tag` / `tags`                                | One tag or a list. Each gets a `/blog/tag/<slug>` archive.                     |
+    | `image` / `heroImage` / `cover` / `thumbnail` | Featured image, shown on the card and above the post body.                     |
+    | `draft: true`, `published: false`, `status`   | Hides the post from every blog surface.                                        |
+    | `reading_time` / `readingTime`                | Overrides the estimate computed from the word count.                           |
+
+    Example:
+
+    ```markdown
+    ---
+    title: Introducing scheduled exports
+    description: Export your directory on a schedule, with no scripting required.
+    author: Ada Lovelace
+    date: 2026-03-01
+    category: Product Updates
+    tags:
+        - release
+        - exports
+    image: /assets/scheduled-exports.png
+    ---
+
+    Post body in Markdown...
+    ```
+
+    The Blog navigation entry and the `/blog` routes appear only when the data repository actually ships posts; a repository without a `posts/` folder renders a graceful empty state instead. Posts per page is configured in `works.yml`:
+
+    ```yaml
+    blog:
+        pagination:
+            per_page: 9
+    ```
+
+    A blog-only RSS feed is served at `/blog/rss.xml`, alongside the site-wide `/rss.xml`.
 
 - **categories/**: Content organization
     - YAML files for category configuration

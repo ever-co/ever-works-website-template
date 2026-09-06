@@ -7,6 +7,10 @@ sidebar_position: 99
 
 # Documentation & Specs Change Log
 
+## 2026-09-04
+
+- `spec-048` `apps/web/lib/seo/{frontmatter,static-page-metadata}.ts` `apps/web/app/[locale]/{terms-of-service,privacy-policy}`: the two legal routes now build their SEO metadata from the data repository’s Markdown frontmatter (`title` / `description`) through the new `buildStaticPageMetadata()` helper, with the i18n strings kept as the fallback; both routes gain a `loading.tsx`; the `<h1>`, the "last updated" chip and `renderStaticPageMarkdown()` now share one non-empty-string frontmatter reader with the `<head>`; the doubled base URL in the `text/markdown` alternate is fixed here and in `about`, `cookies`, `items/[slug]` and `pages/[slug]`; and the data-repository file layout is documented in the new `docs/guides/static-page-content.md` ([spec 048](spec/048-legal-pages-frontmatter-seo/spec.md), EW-17, PR #1045).
+
 ## 2026-09-03
 
 - `spec-049`: added the visitor-facing FAQ page at `/faq` — content from the data repository (`pages/faq.<locale>.md`) with a built-in fallback FAQ, `FAQPage` JSON-LD generated from that content, footer + More-menu entries, sitemap / robots / `llms.txt` / `/faq.md` mirror wiring, i18n keys in all 21 locales, and Playwright coverage ([spec 049](049-faq-page/spec.md), EW-47, PR #1044).
@@ -18,7 +22,7 @@ sidebar_position: 99
 - `spec-046`: third review round — `/faq` and the `/faq.md` mirror it advertises now share one emptiness rule (`resolveStaticPageBody`). A `faq.<locale>.md` whose frontmatter is followed by a blank line loads as `content: '\n\n'`, which is truthy, so the page rendered an empty body — losing its `FAQPage` rich result — while the mirror served the built-in FAQ. `/about`, `/cookies`, `/privacy-policy` and `/terms-of-service` resolve through the same helper. Adds `apps/web/lib/seo/__tests__/static-page-body.spec.ts` and an e2e cross-check that every question `/faq` marks up appears in `/faq.md` ([spec 049](049-faq-page/spec.md), PR #1044).
 - `spec-046`: EW-131 — the optional `pricing:` block of `.works/works.yml` is now documented field by field and validated on read: new `docs/configuration/works-yml-pricing.md` + complete `docs/configuration/examples/works-pricing.example.yml`, new `apps/web/lib/config/schemas/works-pricing.schema.ts` called from `getConfig()`, `provider` accepts `stripe`/`lemonsqueezy`/`polar`/`solidgate`/`manual` and `PRO` aliases `STANDARD`; a malformed block is logged per field and falls back to the built-in plans instead of throwing. `provider: manual` is carried through provider resolution rather than erased, so a site that declares it never starts an in-site checkout — distinct from omitting `provider`, which keeps the Stripe default ([spec 046](spec/046-works-yml-pricing-config/spec.md), PR #1043).
 - `docs/payment`: `payment.md` "Configure Pricing Plans" and `configuration/payment-config.md` now point at the full `works.yml` pricing reference and document `provider: manual` + the `PRO` alias ([spec 046](spec/046-works-yml-pricing-config/spec.md), PR #1043).
-- `questions`: added Q-046a (should `provider: manual` render its own pricing surface?) and Q-046b (should a malformed `pricing:` block ever be fatal?), both with chosen defaults ([spec 046](spec/046-works-yml-pricing-config/spec.md), PR #1043).
+- `questions`: added Q-048a (should `provider: manual` render its own pricing surface?) and Q-048b (should a malformed `pricing:` block ever be fatal?), both with chosen defaults ([spec 046](spec/046-works-yml-pricing-config/spec.md), PR #1043).
 
 ## 2026-08-25
 

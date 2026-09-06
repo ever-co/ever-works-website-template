@@ -121,6 +121,46 @@ Each locale maps to its ISO 639-1 hreflang value. Most use the same code, but so
 
 Located at `lib/seo/listing-metadata.ts`, this module generates metadata for listing pages including category pages, search results, and filtered views with appropriate title templates, descriptions, and canonical URLs.
 
+## Static Page Metadata (from Markdown frontmatter)
+
+The Markdown-backed static info pages read their body from the data
+repository's `pages/<slug>.<locale>.md` file. Their SEO metadata comes from the
+**frontmatter of that same file**, so a directory that publishes its own legal
+copy also gets its own search-result snippet:
+
+```markdown
+---
+title: Terms of Service
+description: Terms and conditions for using the Awesome Chairs directory
+lastUpdated: '2026-01-15'
+---
+
+## Acceptance of Terms
+
+...
+```
+
+`lib/seo/static-page-metadata.ts` exposes `buildStaticPageMetadata()`, which
+resolves each field **frontmatter → i18n fallback**:
+
+| Rendered as                                                          | Source                                                        |
+| -------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `<title>`                                                            | frontmatter `title` → i18n label, suffixed with the site name |
+| `<meta name="description">`, `og:description`, `twitter:description` | frontmatter `description` → i18n `*_META_DESCRIPTION`         |
+| `<h1>` and the `.md` mirror heading                                  | frontmatter `title` → i18n label                              |
+| `og:title`, `og:url`, `og:site_name`, `twitter:card`                 | resolved title / canonical URL / site name (Spec 042)         |
+
+A Work whose data repository has no `pages/` directory keeps the template's
+translated title and description — the frontmatter is an override, never a
+requirement. `/terms-of-service` and `/privacy-policy` use this helper today
+(see [Spec 046](../spec/048-legal-pages-frontmatter-seo/spec.md)); the generic
+`/pages/[slug]` route has always read the frontmatter directly.
+
+The data-repository file layout these pages read — the `pages/` directory, the
+`<slug>.<locale>.md` naming convention, the frontmatter keys and the
+missing-file fallbacks — is documented in
+[Static Page Content](../guides/static-page-content.md).
+
 ## OpenGraph & Twitter Cards
 
 The template generates OpenGraph and Twitter Card metadata through Next.js Metadata API in page components:

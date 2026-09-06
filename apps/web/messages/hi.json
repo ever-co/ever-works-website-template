@@ -25,6 +25,7 @@
 		"OPEN_USER_MENU": "Open user menu"
 	},
 	"common": {
+		"FAQ": "अक्सर पूछे जाने वाले प्रश्न",
 		"DISCOVER": "खोजें",
 		"HOME": "होम",
 		"ABOUT": "हमारे बारे में",
@@ -470,6 +471,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "अक्सर पूछे जाने वाले प्रश्न",
 		"ALL_RIGHTS_RESERVED": "सर्वाधिकार सुरक्षित",
 		"BUILT_WITH": "Built with",
 		"CONNECT_WITH_US": "Connect with us",
@@ -3473,6 +3475,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "सहायता",
+		"FAQ_META_DESCRIPTION": "इस डायरेक्टरी के बारे में विज़िटर द्वारा सबसे अधिक पूछे जाने वाले प्रश्नों के उत्तर: ब्राउज़ करना, लिस्टिंग भेजना और संपर्क करना",
+		"FAQ_INTRO": "हमसे सबसे अधिक पूछे जाने वाले प्रश्नों के उत्तर। यदि आपको अपनी बात यहाँ न मिले तो हमसे संपर्क करें।",
+		"HELP_DESCRIPTION": "गाइड और सहायता विषय देखें",
 		"LEGAL_BADGE": "Legal",
 		"LAST_UPDATED": "Last updated:",
 		"RELATED_INFORMATION": "Related Information",

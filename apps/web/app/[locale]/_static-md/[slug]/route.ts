@@ -1,7 +1,7 @@
 /**
  * Internal handler for the static-page `.md` mirrors:
  *   /<locale>/about.md, /help.md, /pricing.md,
- *   /privacy-policy.md, /terms-of-service.md, /cookies.md
+ *   /privacy-policy.md, /terms-of-service.md, /cookies.md, /faq.md
  *
  * The rewrite in next.config.ts dispatches each of those public URLs
  * to `/<locale>/_static-md/<slug>` for unified rendering.
@@ -11,6 +11,7 @@ import { NextResponse } from 'next/server';
 import { getCachedPageContent } from '@/lib/content';
 import { getBaseUrl } from '@/lib/utils/url-cleaner';
 import { renderStaticPageMarkdown, MARKDOWN_RESPONSE_HEADERS } from '@/lib/seo/markdown-mirror';
+import { DEFAULT_FAQ_CONTENT } from '@/lib/default-page-content';
 
 const ALLOWED_STATIC_SLUGS = new Set([
 	'about',
@@ -18,7 +19,8 @@ const ALLOWED_STATIC_SLUGS = new Set([
 	'pricing',
 	'privacy-policy',
 	'terms-of-service',
-	'cookies'
+	'cookies',
+	'faq'
 ] as const);
 type AllowedSlug = typeof ALLOWED_STATIC_SLUGS extends Set<infer T> ? T : never;
 
@@ -28,7 +30,8 @@ const TITLES: Record<AllowedSlug, string> = {
 	pricing: 'Pricing',
 	'privacy-policy': 'Privacy Policy',
 	'terms-of-service': 'Terms of Service',
-	cookies: 'Cookies'
+	cookies: 'Cookies',
+	faq: 'FAQ'
 };
 
 const DEFAULT_BODIES: Record<AllowedSlug, string> = {
@@ -41,7 +44,12 @@ const DEFAULT_BODIES: Record<AllowedSlug, string> = {
 	'terms-of-service':
 		"No content yet. Add a `terms-of-service.en.md` file to your content repository's `pages/` directory to customize this page.",
 	cookies:
-		"No content yet. Add a `cookies.en.md` file to your content repository's `pages/` directory to customize this page."
+		"No content yet. Add a `cookies.en.md` file to your content repository's `pages/` directory to customize this page.",
+	// Unlike the other slugs the FAQ default is real content, not a
+	// placeholder: the mirror must say the same thing as the HTML page at
+	// /faq, which renders this same constant when the data repository ships
+	// no `faq.<locale>.md`.
+	faq: DEFAULT_FAQ_CONTENT
 };
 
 export const revalidate = 3600;

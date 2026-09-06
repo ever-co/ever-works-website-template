@@ -4,6 +4,7 @@ const LOCALES = ['en', 'fr', 'es', 'de'];
 const PATHS = [
 	'/about',
 	'/help',
+	'/faq',
 	'/docs',
 	'/privacy-policy',
 	'/terms-of-service',

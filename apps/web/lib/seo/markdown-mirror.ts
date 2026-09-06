@@ -16,6 +16,7 @@
  * plus the absolute base URL of the site, and return text. No I/O.
  */
 
+import { resolveStaticPageBody } from '@/lib/default-page-content';
 import type { ItemData } from '@/lib/content';
 import type { Collection } from '@/types/collection';
 import type { ComparisonData } from '@/types/comparison';
@@ -270,7 +271,14 @@ export function renderStaticPageMarkdown(
 	const description = frontmatterString(pageData?.metadata, 'description') ?? '';
 	const lastUpdated = frontmatterString(pageData?.metadata, 'lastUpdated') ?? '';
 
-	const body = (pageData?.content ?? options.defaultContent ?? '').trim();
+	// Emptiness is decided by `resolveStaticPageBody`, the single rule this
+	// mirror shares with the HTML pages it mirrors (`/faq`, `/about`,
+	// `/cookies`, …). Keeping the rule in one place is the point: a mirror that
+	// calls a page "empty" when the page does not — or the reverse — serves a
+	// `text/markdown` alternate that says something different from the page
+	// advertising it, which is what shipped here twice with two hand-written
+	// fallback expressions.
+	const body = resolveStaticPageBody(pageData?.content, options.defaultContent ?? '').trim();
 
 	const lines: string[] = [];
 	lines.push(`# ${title}`);

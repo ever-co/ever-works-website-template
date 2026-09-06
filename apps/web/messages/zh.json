@@ -25,6 +25,7 @@
 		"OPEN_USER_MENU": "Open user menu"
 	},
 	"common": {
+		"FAQ": "常见问题",
 		"DISCOVER": "发现",
 		"HOME": "首页",
 		"ABOUT": "关于",
@@ -469,6 +470,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "常见问题",
 		"ALL_RIGHTS_RESERVED": "版权所有",
 		"BUILT_WITH": "构建于",
 		"CONNECT_WITH_US": "与我们联系",
@@ -3566,6 +3568,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "帮助",
+		"FAQ_META_DESCRIPTION": "访客关于本目录最常提出的问题解答：如何浏览、如何提交条目以及如何联系我们",
+		"FAQ_INTRO": "以下是我们最常被问到的问题。如果没有找到你需要的答案，欢迎联系我们。",
+		"HELP_DESCRIPTION": "浏览指南与支持主题",
 		"LEGAL_BADGE": "法律",
 		"LAST_UPDATED": "最后更新：",
 		"RELATED_INFORMATION": "相关信息",

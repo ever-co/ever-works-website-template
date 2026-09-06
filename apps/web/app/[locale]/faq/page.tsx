@@ -6,61 +6,71 @@ import Link from 'next/link';
 import { PageContainer } from '@/components/ui/container';
 import { MDX } from '@/components/mdx';
 import { getCachedPageContent } from '@/lib/content';
-import { resolveStaticPageBody } from '@/lib/default-page-content';
-import { buildStaticPageMetadata } from '@/lib/seo/static-page-metadata';
-import { frontmatterString } from '@/lib/seo/frontmatter';
-import { DEFAULT_LOCALE } from '@/lib/constants';
+import { getBaseUrl } from '@/lib/utils/url-cleaner';
+import { generateHreflangAlternates, getLocalizedUrl } from '@/lib/seo/hreflang';
+import { Locale, DEFAULT_LOCALE } from '@/lib/constants';
 import { BreadcrumbJsonLd } from '@/components/seo/breadcrumb-json-ld';
+import { FaqJsonLd } from '@/components/seo/faq-json-ld';
+import { extractFaqEntries } from '@/lib/seo/faq-parser';
+import { DEFAULT_FAQ_CONTENT, resolveStaticPageBody } from '@/lib/default-page-content';
+import { getSiteName } from '@/lib/seo/site-identity';
 
 interface PageProps {
   params: Promise<{ locale: string }>;
 }
 
-// Default terms of service content when no MDX file exists in .content/pages/
-const DEFAULT_TERMS_CONTENT = `No content yet. Add a \`terms-of-service.en.md\` file to your content repository's \`pages/\` directory to customize this page.`;
+const appUrl = getBaseUrl();
 
-/**
- * SEO metadata comes from the Markdown frontmatter (`title` / `description` in
- * `pages/terms-of-service.<locale>.md`) so a directory that customised its
- * legal copy also gets its own SERP snippet. The i18n strings stay as the
- * fallback for Works whose data repository has no `pages/` content.
- */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { locale } = await params;
   const tFooter = await getTranslations({ locale, namespace: 'footer' });
   const tPages = await getTranslations({ locale, namespace: 'pages' });
 
-  return buildStaticPageMetadata({
-    slug: 'terms-of-service',
-    path: '/terms-of-service',
-    locale,
-    fallbackTitle: tFooter('TERMS_OF_SERVICE'),
-    fallbackDescription: tPages('TERMS_OF_SERVICE_META_DESCRIPTION')
-  });
+  // Include the site name so the rendered <title> clears the SEO 10-char
+  // floor enforced by `each-page-document-title-length.spec.ts` — the
+  // translated label is "FAQ" in most locales. Same reasoning as /about.
+  return {
+    metadataBase: new URL(appUrl),
+    title: `${tFooter('FAQ')} | ${await getSiteName()}`,
+    description: tPages('FAQ_META_DESCRIPTION'),
+    alternates: {
+      canonical: getLocalizedUrl('/faq', locale as Locale),
+      languages: generateHreflangAlternates('/faq'),
+      // getLocalizedUrl already returns an absolute URL, so it is NOT prefixed
+      // with appUrl here — /help and /pricing get this right; /about, /cookies,
+      // /privacy-policy and /terms-of-service currently double the origin.
+      types: { 'text/markdown': `${getLocalizedUrl('/faq', locale as Locale)}.md` }
+    }
+  };
 }
 
-export default async function TermsOfServicePage({ params }: PageProps) {
-  const { locale} = await params;
-  const pageData = await getCachedPageContent('terms-of-service', locale);
+export default async function FaqPage({ params }: PageProps) {
+  const { locale } = await params;
+  const pageData = await getCachedPageContent('faq', locale);
 
-  // Use default content if no MDX file exists
-  // Same emptiness rule as this page's `/terms-of-service.md` mirror
-  // (`lib/seo/markdown-mirror.ts#renderStaticPageMarkdown`), which calls the
-  // same helper. A body of nothing but blank lines is truthy, so a bare `||`
-  // left this page blank while the alternate it advertises to crawlers served
-  // the built-in default.
-  const content = resolveStaticPageBody(pageData?.content, DEFAULT_TERMS_CONTENT);
+  // Use the built-in FAQ when the data repository ships no `faq.<locale>.md`,
+  // so a freshly generated directory has a working FAQ page on day one.
+  //
+  // Shared with the `/faq.md` mirror this page advertises as its
+  // `text/markdown` alternate: `renderStaticPageMarkdown` calls the same
+  // helper, so the two can never disagree about whether a body counts as
+  // empty. A frontmatter-only `faq.<locale>.md` used to render the built-in
+  // FAQ here while the mirror emitted no body at all; a body of nothing but
+  // blank lines then did the reverse, blanking this page (and its FAQPage
+  // rich result with it) while the mirror still served ten questions.
+  const content = resolveStaticPageBody(pageData?.content, DEFAULT_FAQ_CONTENT);
   const metadata = pageData?.metadata || {};
   const tCommon = await getTranslations({ locale, namespace: 'common' });
   const tFooter = await getTranslations({ locale, namespace: 'footer' });
   const tPages = await getTranslations({ locale, namespace: 'pages' });
 
-  // Same non-empty-string rule as `generateMetadata`: frontmatter is
-  // author-supplied YAML, so `title:` can parse to a number or a mapping.
-  // A bare cast would hand React a non-string child and crash the route.
-  const title = frontmatterString(metadata, 'title') ?? tFooter('TERMS_OF_SERVICE');
-  const lastUpdated = frontmatterString(metadata, 'lastUpdated');
+  const title = (metadata.title as string) || tFooter('FAQ');
+  const lastUpdated = metadata.lastUpdated as string | undefined;
   const localePrefix = locale === DEFAULT_LOCALE ? '' : `/${locale}`;
+
+  // Structured data is the main SEO payoff of an FAQ page. Renders nothing
+  // when the content yields no question/answer pairs.
+  const faqEntries = extractFaqEntries(content, metadata);
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-white to-slate-100 dark:from-[#0a0a0a] dark:via-[#0a0a0a] dark:to-[#0a0a0a] overflow-hidden">
@@ -70,11 +80,18 @@ export default async function TermsOfServicePage({ params }: PageProps) {
           { name: title }
         ]}
       />
+      <FaqJsonLd
+        entries={faqEntries}
+        url={getLocalizedUrl('/faq', locale as Locale)}
+        name={title}
+        description={tPages('FAQ_META_DESCRIPTION')}
+      />
+
       {/* Animated Floating Blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-10 w-72 h-72 bg-green-500/10 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute top-40 left-20 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl animate-float-delayed"></div>
-        <div className="absolute bottom-20 right-1/3 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl animate-float-slow"></div>
+        <div className="absolute top-20 left-10 w-72 h-72 bg-sky-500/10 rounded-full blur-3xl animate-float"></div>
+        <div className="absolute top-40 right-20 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-float-delayed"></div>
+        <div className="absolute bottom-20 left-1/3 w-80 h-80 bg-violet-500/10 rounded-full blur-3xl animate-float-slow"></div>
       </div>
 
       <PageContainer className="relative z-10 max-w-7xl mx-auto px-4 py-12">
@@ -128,8 +145,8 @@ export default async function TermsOfServicePage({ params }: PageProps) {
         {/* Hero Section */}
         <div className="mb-12 animate-fade-in">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/80 dark:bg-white/3 backdrop-blur-xs border border-slate-200 dark:border-white/6 rounded-full text-sm font-medium text-slate-700 dark:text-slate-300 mb-6">
-            <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-            {tPages('LEGAL_BADGE')}
+            <span className="w-2 h-2 bg-sky-500 rounded-full animate-pulse"></span>
+            {tPages('FAQ_BADGE')}
           </div>
 
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-slate-900 dark:text-white mb-4 leading-tight">
@@ -138,8 +155,12 @@ export default async function TermsOfServicePage({ params }: PageProps) {
             </span>
           </h1>
 
+          <p className="max-w-3xl text-base sm:text-lg text-slate-600 dark:text-slate-400">
+            {tPages('FAQ_INTRO')}
+          </p>
+
           {lastUpdated && (
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-white/5 rounded-lg">
+            <div className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-white/5 rounded-lg">
               <svg
                 className="w-4 h-4 text-slate-600 dark:text-slate-400"
                 fill="none"
@@ -165,9 +186,8 @@ export default async function TermsOfServicePage({ params }: PageProps) {
 
         {/* Main Content Card */}
         <div className="bg-white/90 dark:bg-white/3 backdrop-blur-xl rounded-2xl border border-slate-200 dark:border-white/6 shadow-2xl overflow-hidden mb-12 animate-fade-in">
-          {/* Content */}
           <div className="px-6 sm:px-8 lg:px-12 py-8 lg:py-12">
-            <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-slate-900 dark:prose-headings:text-white prose-headings:font-bold prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:bg-linear-to-r prose-h2:from-theme-primary-600 prose-h2:to-theme-primary-500 dark:prose-h2:from-theme-primary-400 dark:prose-h2:to-theme-primary-500 prose-h2:bg-clip-text prose-h2:text-transparent prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-4 prose-p:text-slate-700 dark:prose-p:text-slate-300 prose-p:leading-relaxed prose-p:text-base prose-a:text-theme-primary-600 dark:prose-a:text-theme-primary-400 prose-a:font-medium prose-a:no-underline prose-a:hover:underline prose-strong:text-slate-900 dark:prose-strong:text-white prose-strong:font-semibold prose-ul:text-slate-700 dark:prose-ul:text-slate-300 prose-ol:text-slate-700 dark:prose-ol:text-slate-300 prose-li:my-2 prose-code:text-theme-primary-600 dark:prose-code:text-theme-primary-400 prose-code:bg-slate-100 dark:prose-code:bg-slate-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-sm prose-code:font-mono prose-code:text-sm">
+            <div className="prose prose-slate dark:prose-invert max-w-none prose-headings:text-slate-900 dark:prose-headings:text-white prose-headings:font-bold prose-h2:text-2xl prose-h2:mt-12 prose-h2:mb-4 prose-h2:bg-linear-to-r prose-h2:from-theme-primary-600 prose-h2:to-theme-primary-500 dark:prose-h2:from-theme-primary-400 dark:prose-h2:to-theme-primary-500 prose-h2:bg-clip-text prose-h2:text-transparent prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-4 prose-p:text-slate-700 dark:prose-p:text-slate-300 prose-p:leading-relaxed prose-p:text-base prose-a:text-theme-primary-600 dark:prose-a:text-theme-primary-400 prose-a:font-medium prose-a:no-underline prose-a:hover:underline prose-strong:text-slate-900 dark:prose-strong:text-white prose-strong:font-semibold prose-ul:text-slate-700 dark:prose-ul:text-slate-300 prose-ol:text-slate-700 dark:prose-ol:text-slate-300 prose-li:my-2 prose-code:text-theme-primary-600 dark:prose-code:text-theme-primary-400 prose-code:bg-slate-100 dark:prose-code:bg-slate-800 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-sm prose-code:font-mono prose-code:text-sm">
               <MDX source={content} />
             </div>
           </div>
@@ -180,18 +200,18 @@ export default async function TermsOfServicePage({ params }: PageProps) {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Link
-              href={`/${locale}/privacy-policy`}
+              href={`/${locale}/help`}
               className="group flex items-center gap-4 p-6 bg-white/80 dark:bg-white/3 backdrop-blur-xs rounded-xl border border-slate-200 dark:border-white/6 hover:border-theme-primary-500 dark:hover:border-theme-primary-500 transition-all duration-300 hover:shadow-lg hover:scale-105"
             >
-              <div className="w-12 h-12 bg-linear-to-r from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center text-white text-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                🔒
+              <div className="w-12 h-12 bg-linear-to-r from-sky-500 to-cyan-500 rounded-lg flex items-center justify-center text-white text-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                💬
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-slate-900 dark:text-white mb-1 group-hover:text-theme-primary-600 dark:group-hover:text-theme-primary-400 transition-colors">
-                  {tFooter('PRIVACY_POLICY')}
+                  {tFooter('HELP')}
                 </h3>
                 <p className="text-sm text-slate-600 dark:text-slate-400">
-                  {tPages('PRIVACY_POLICY_DESCRIPTION')}
+                  {tPages('HELP_DESCRIPTION')}
                 </p>
               </div>
               <svg
@@ -215,8 +235,8 @@ export default async function TermsOfServicePage({ params }: PageProps) {
               href={`/${locale}/about`}
               className="group flex items-center gap-4 p-6 bg-white/80 dark:bg-white/3 backdrop-blur-xs rounded-xl border border-slate-200 dark:border-white/6 hover:border-theme-primary-500 dark:hover:border-theme-primary-500 transition-all duration-300 hover:shadow-lg hover:scale-105"
             >
-              <div className="w-12 h-12 bg-linear-to-r from-orange-500 to-red-500 rounded-lg flex items-center justify-center text-white text-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
-                ℹ️
+              <div className="w-12 h-12 bg-linear-to-r from-violet-500 to-purple-500 rounded-lg flex items-center justify-center text-white text-xl shadow-lg group-hover:scale-110 transition-transform duration-300">
+                🏢
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-slate-900 dark:text-white mb-1 group-hover:text-theme-primary-600 dark:group-hover:text-theme-primary-400 transition-colors">

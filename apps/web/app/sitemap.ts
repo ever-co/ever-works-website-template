@@ -83,6 +83,11 @@ const STATIC_ROUTES: RouteConfig[] = [
 		changeFrequency: DEFAULT_CHANGE_FREQUENCIES.WEEKLY
 	},
 	{
+		path: '/faq',
+		priority: DEFAULT_PRIORITIES.SECONDARY,
+		changeFrequency: DEFAULT_CHANGE_FREQUENCIES.WEEKLY
+	},
+	{
 		path: '/privacy-policy',
 		priority: DEFAULT_PRIORITIES.LOW,
 		changeFrequency: DEFAULT_CHANGE_FREQUENCIES.MONTHLY

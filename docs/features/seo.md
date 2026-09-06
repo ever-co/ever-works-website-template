@@ -210,6 +210,7 @@ How it works:
 - The internal route handler reuses the same cached content layer (`getCachedItem`, `getCachedItems`, `getCachedComparisons`, `getCachedPageContent`) the HTML pages use, then delegates rendering to a helper from `lib/seo/markdown-mirror.ts`.
 - Responses set `Content-Type: text/markdown` and `X-Robots-Tag: noindex` so search engines index the canonical HTML, not the mirror — which is also what keeps the internal `/<locale>/…/md` URLs out of search results.
 - An unknown slug 404s, matching the HTML page it mirrors, rather than rendering an empty document.
+- The category and tag mirrors also read `settings.categories_enabled` / `settings.tags_enabled` from `.works/works.yml`: a site that switches a facet off 404s its HTML listing, and the mirror answers the same rather than publishing a withdrawn surface to agents.
 
 ### `BreadcrumbList` JSON-LD on every page
 

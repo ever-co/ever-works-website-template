@@ -572,7 +572,9 @@ confirm, override, or refine.
   live in `_`-prefixed *private* folders, which the App Router excludes from
   routing — so every mirror URL 404'd. Renaming the segment (`_md` → `md`,
   `_static-md` → `static-md`) is what makes them routable at all, and it also
-  makes the internal paths (`/en/items/<slug>/md`) directly requestable.
+  makes the internal paths directly requestable: measured `/items/<slug>/md`
+  and `/static-md/about` → `200 text/markdown`, and `/en/items/<slug>/md` →
+  `307` to the unprefixed form (`localePrefix: 'as-needed'`).
 - **Options.**
   - **Leave them reachable.** The handlers already send
     `X-Robots-Tag: noindex`, they are absent from the sitemap and nothing

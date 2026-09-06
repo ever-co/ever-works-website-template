@@ -232,6 +232,31 @@ test.describe('Markdown mirror routes', () => {
 		await expectMarkdownMirror(request, `/tags/${encodeURIComponent(tag!)}.md`);
 	});
 
+	// The category and tag surfaces can be switched off for a whole site
+	// (`settings.categories_enabled` / `settings.tags_enabled` in
+	// `.works/works.yml`), and the HTML listings `notFound()` when they are.
+	// A mirror that kept serving the listing would publish a surface the site
+	// has withdrawn, so it has to answer like the page it mirrors whichever
+	// way the switch is set. Measured against a build without the gate:
+	// `/categories/<c>` 404 `text/html` while `/categories/<c>.md` 200
+	// `text/markdown`.
+	for (const [family, facet] of [
+		['categories', 'categories'],
+		['tags', 'tags']
+	] as const) {
+		test(`/${family}/<slug>.md answers like the page it mirrors`, async ({ request }) => {
+			const value = await firstFacet(request, facet);
+			test.skip(value === null, `this content repository has no ${facet}`);
+			const encoded = encodeURIComponent(value!);
+			const page = await request.get(`/${family}/${encoded}`);
+			const mirror = await request.get(`/${family}/${encoded}.md`);
+			expect(
+				mirror.status(),
+				`/${family}/${encoded}.md must answer like /${family}/${encoded}`
+			).toBe(page.status());
+		});
+	}
+
 	test('/pages/<slug>.md serves the CMS page as Markdown', async ({ request }) => {
 		const slug = await discoverCmsPageSlug(request);
 		test.skip(slug === null, 'this content repository publishes no /pages/<slug> documents');

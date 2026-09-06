@@ -79,6 +79,14 @@ Each task ends in a verification step. `[x]` = done in PR #1050.
 - [x] `spec.md`, `plan.md`, this file, the `docs/spec/README.md` row, the
       `docs/log.md` entry, `docs/questions.md` Q-047a / Q-047b, and the
       correction to `docs/features/seo.md`.
+- **Verification.** `docs/spec/README.md` has exactly one row per spec number
+      and its `047-…/{spec,plan,tasks}.md` links resolve; the `docs/log.md`
+      entry names `spec-047` + PR #1050; `docs/questions.md` carries Q-047a and
+      Q-047b under a single `## Spec 047` heading; every `Spec 047` mention
+      outside this directory (`docs/features/seo.md`, `next.config.ts`,
+      `md-mirror-routes.spec.ts`) points at `047-md-mirror-route-reachability`.
+      Checked with `grep -rn "046-md-mirror\|Spec 046" apps docs` returning
+      nothing for this feature.
 
 ## T10 — Renumber 046 → 047 after the merge collision
 
@@ -93,3 +101,18 @@ Each task ends in a verification step. `[x]` = done in PR #1050.
       `Q-047a` / `Q-047b` once (mirrors); the T1/T8 mirror probe was re-run on
       the merged head (production build, cold `.next`) — every mirror family
       `200 text/markdown` in the default and a prefixed locale.
+
+## T11 — Mirror a switched-off facet surface as a 404
+
+- [x] `settings.categories_enabled` / `settings.tags_enabled` withdraw the
+      category / tag listings and the HTML pages `notFound()`, but the mirrors
+      never read the switch. Gate both handlers on it.
+- [x] Extend `md-mirror-routes.spec.ts` with a mirror-answers-like-its-page
+      assertion for both families (passes either way the switch is set).
+- **Verification.** Mutation-checked against the build without the gate, with
+      `categories_enabled: false` / `tags_enabled: false` in the local
+      `.works/works.yml`: `/categories/<id>` `404 text/html` vs
+      `/categories/<id>.md` `200 text/markdown`, `/tags/<id>` `404` vs
+      `/tags/<id>.md` `200` — the two new specs failed (`Expected: 404
+      Received: 200`). With the gate they pass, and with the switches back on
+      every mirror still serves `200 text/markdown`.

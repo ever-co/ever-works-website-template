@@ -61,6 +61,8 @@ would have fixed only the locale-prefixed half.
   crawlers were told about and stay exactly as they are. Only the internal
   segment moves.
 - An unknown slug is a hard `404`, matching the HTML page it mirrors.
+- A mirror answers like the page it mirrors — including when the whole
+  category / tag surface is switched off for the site.
 - The e2e guard asserts the real contract so this cannot rot silently again.
 
 ### Non-goals
@@ -122,6 +124,16 @@ envelope (`{"error":"Not found"}`), which is what lets the guard tell "the
 handler rejected this slug" apart from "the route does not exist" — the latter
 being Next.js' HTML 404 and exactly the failure mode this spec fixes.
 
+**404 when the facet surface is switched off.** `settings.categories_enabled`
+and `settings.tags_enabled` in the data repository's `.works/works.yml` let a
+site withdraw its category / tag listings, and the HTML pages `notFound()`
+when they do — but the mirrors did not read the switch. Measured against a
+build without the gate, with `categories_enabled: false`:
+`/categories/<real id>` → `404 text/html` while `/categories/<real id>.md` →
+`200 text/markdown`, i.e. the mirror kept publishing a surface the site had
+withdrawn, to exactly the agents the mirrors exist for. Both handlers now read
+the same switch their pages read and answer with the handler's JSON 404.
+
 ## 5. Acceptance
 
 Against `next build && next start`:
@@ -138,6 +150,9 @@ Against `next build && next start`:
   `/comparisons/<unknown>.md`, `/categories/<unknown>.md`,
   `/tags/<unknown>.md` → `404 application/json`, from the handler.
 - `/zz/about.md` (unsupported locale) → `404`, never `text/markdown`.
+- With `settings.categories_enabled: false` (resp. `tags_enabled: false`),
+  `/categories/<id>.md` (resp. `/tags/<id>.md`) answers with the same status
+  as `/categories/<id>` (resp. `/tags/<id>`) — `404`, not a listing.
 - The `text/markdown` alternate href advertised by `/help` and `/pricing`
   resolves to `200 text/markdown`.
 

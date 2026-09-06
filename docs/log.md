@@ -26,9 +26,19 @@ sidebar_position: 99
   that names the canonical page it mirrors — across the static info pages, a
   discovered item / category / tag, a non-default locale, the unknown-slug 404s,
   and the advertised alternate href actually resolving (PR #1050).
+- `spec-047`: the category and tag mirrors now also read
+  `settings.categories_enabled` / `settings.tags_enabled` from
+  `.works/works.yml`. A site that switches a facet off gets `notFound()` on the
+  HTML listing but was still served the full listing at `<path>.md` — measured
+  `404 text/html` for `/categories/<id>` against `200 text/markdown` for
+  `/categories/<id>.md` — so the mirror published a surface the site had
+  withdrawn (PR #1050).
 - `questions`: added Q-047a (internal `/md` segment left publicly reachable
   behind `noindex`) and Q-047b (doubled origin still present on the item and CMS
   page `text/markdown` alternates) (PR #1050).
+- `spec-047`: renumbered from `spec-046` after PR #1043 merged to `develop`
+  under that number; the `Q-046a` / `Q-046b` ids it defines are the pricing
+  spec's, and this spec's are now `Q-047a` / `Q-047b` (PR #1050).
 
 ## 2026-09-03
 

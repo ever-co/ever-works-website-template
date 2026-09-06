@@ -51,10 +51,13 @@ const LOCALE_PREFIXES = ['', '/fr'];
 
 const MD_ALTERNATE_SELECTOR = 'link[rel="alternate"][type="text/markdown"]';
 
-// Item-slug discovery reads the listing endpoint, which builds its page from
-// the whole git-CMS catalogue and is slow when cold. Give it a budget of its
-// own rather than letting it eat the default action timeout.
-const ITEM_DISCOVERY_TIMEOUT = 45_000;
+// Item-slug discovery reads the listing endpoint, and the item detail route
+// itself renders from the whole git-CMS catalogue. Both are slow when cold —
+// slower than the suite defaults (30s action, 60s navigation) allow — so they
+// get budgets of their own. Together these stay under the tripled test
+// timeout that `test.slow()` buys those two tests.
+const ITEM_DISCOVERY_TIMEOUT = 30_000;
+const ITEM_NAVIGATION_TIMEOUT = 120_000;
 
 /**
  * Everything wrong with ONE advertised markdown-alternate href, as a list
@@ -153,8 +156,8 @@ async function expectWellFormedMarkdownAlternate(page: Page, pagePath: string, e
  * out of this guard; only 404/410 count as "this deployment does not serve
  * it".
  */
-async function pageIsServed(page: Page, pagePath: string): Promise<boolean> {
-	const response = await page.goto(pagePath, { waitUntil: 'domcontentloaded' });
+async function pageIsServed(page: Page, pagePath: string, navigationTimeout?: number): Promise<boolean> {
+	const response = await page.goto(pagePath, { waitUntil: 'domcontentloaded', timeout: navigationTimeout });
 	expect(response, pagePath).not.toBeNull();
 	const status = response!.status();
 	expect(status, `${pagePath} must not 5xx`).toBeLessThan(500);
@@ -185,17 +188,22 @@ test.describe('Markdown alternate link is a single absolute URL', () => {
 			page
 		}) => {
 			// Slug discovery and the item detail route both read the whole
-			// git-CMS catalogue, which is slow when cold — measured at ~54s for
-			// this pair against a local dev server, against a 60s default
-			// budget. Triple it so a cold cache cannot turn a passing shape
-			// assertion into a timeout.
+			// git-CMS catalogue, which is slow when cold. Against a local dev
+			// server a first, uncompiled `/items/<slug>` blew straight through
+			// the suite's 60s navigation timeout. Triple the test budget and
+			// give the navigation its own, so a cold compile cannot turn a
+			// passing shape assertion into a timeout. CI runs these against a
+			// production build where the route is already compiled.
 			test.slow();
 
 			const slug = await discoverItemSlug(page);
 			test.skip(slug === null, 'This deployment publishes no items');
 
 			const itemPath = `${prefix}/items/${slug}`;
-			test.skip(!(await pageIsServed(page, itemPath)), `${itemPath} is not served by this deployment`);
+			test.skip(
+				!(await pageIsServed(page, itemPath, ITEM_NAVIGATION_TIMEOUT)),
+				`${itemPath} is not served by this deployment`
+			);
 			await expectWellFormedMarkdownAlternate(page, itemPath, `${itemPath}.md`);
 		});
 	}

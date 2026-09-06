@@ -7,7 +7,7 @@ import { serverClient, apiUtils } from '@/lib/api/server-api-client';
 import { useConfig } from '@/app/[locale]/config';
 import { PaymentProvider } from '@/lib/constants';
 import { useSelectedCheckoutProvider } from './use-selected-checkout-provider';
-import { usePaymentProvider } from '@/lib/utils/payment-provider';
+import { resolveGatewayProvider, usePaymentProvider } from '@/lib/utils/payment-provider';
 
 export interface AutoRenewalStatus {
 	subscriptionId: string;
@@ -209,8 +209,12 @@ export function useAutoRenewal(options: UseAutoRenewalOptions): UseAutoRenewalRe
 
 	const { getActiveProvider } = useSelectedCheckoutProvider();
 
-	// Determine payment provider: User selection takes precedence over config
-	const paymentProvider = usePaymentProvider(getActiveProvider, config.pricing);
+	// Determine payment provider: User selection takes precedence over config.
+	// Auto-renewal acts on a subscription some gateway already created, so a
+	// works.yml `provider: manual` carries no information here and the
+	// pre-spec-046 Stripe default is kept.
+	const configuredProvider = usePaymentProvider(getActiveProvider, config.pricing);
+	const paymentProvider = resolveGatewayProvider(configuredProvider);
 
 	// ===================== Query =====================
 

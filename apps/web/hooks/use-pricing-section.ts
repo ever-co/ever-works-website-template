@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useTheme } from 'next-themes';
-import { PaymentFlow, PaymentInterval, PaymentPlan, PaymentProvider } from '@/lib/constants';
+import { PaymentFlow, PaymentInterval, PaymentPlan, PaymentProvider, type PricingProvider } from '@/lib/constants';
 import { usePaymentFlow } from '@/hooks/use-payment-flow';
 import { useCreateCheckoutSession } from '@/hooks/use-create-checkout';
 import { useCurrentUser } from '@/hooks/use-current-user';
@@ -17,7 +17,7 @@ import { useSelectedCheckoutProvider } from './use-selected-checkout-provider';
 import { useCurrencyContext } from '@/components/context/currency-provider';
 import { getLemonSqueezyPriceConfig } from '@/lib/config/billing/lemonsqueezy.config';
 import { getPolarPriceConfig } from '@/lib/config/billing/polar.config';
-import { usePaymentProvider } from '@/lib/utils/payment-provider';
+import { isManualPaymentProvider, usePaymentProvider } from '@/lib/utils/payment-provider';
 import { getCurrencySymbol, formatAmountWithSymbol } from '@/lib/utils/currency-format';
 import { useSetupIntent } from './use-setup-intent';
 import { useSubscription } from './use-subscription';
@@ -84,7 +84,13 @@ export interface UsePricingSectionReturn extends UsePricingSectionState, UsePric
 	FREE: any;
 	STANDARD: any;
 	PREMIUM: any;
-	provider?: PaymentProvider;
+	/**
+	 * Resolved pricing provider. `manual` (spec 046) means `works.yml` declared
+	 * that checkout happens outside this site — see {@link isManualCheckout}.
+	 */
+	provider?: PricingProvider;
+	/** `works.yml` declared `pricing.provider: manual` — no in-site checkout (spec 046). */
+	isManualCheckout: boolean;
 	freePlanFeatures: any[];
 	standardPlanFeatures: any[];
 	premiumPlanFeatures: any[];
@@ -224,6 +230,11 @@ export function usePricingSection(params: UsePricingSectionParams = {}): UsePric
 	// Determine payment provider: User selection takes precedence over config
 	const paymentProvider = usePaymentProvider(getActiveProvider, config.pricing);
 
+	// `works.yml` declared `pricing.provider: manual` (spec 046): plans are
+	// rendered, but this site never starts a checkout — payment is collected
+	// outside it. Every gateway branch below is gated on this.
+	const isManualCheckout = isManualPaymentProvider(paymentProvider);
+
 	// Fetch dynamic products from Stripe if enabled (runtime flag from /api/payment/public-config, spec 044)
 	const stripeDynamicPricingEnabled = useStripeDynamicPricingEnabled();
 	const isDynamicPricingEnabled = paymentProvider === PaymentProvider.STRIPE && stripeDynamicPricingEnabled;
@@ -361,6 +372,17 @@ export function usePricingSection(params: UsePricingSectionParams = {}): UsePric
 	 */
 	const handleCheckout = useCallback(
 		async (plan: PricingConfig) => {
+			if (isManualCheckout) {
+				// `provider: manual` — the operator opted out of in-site checkout,
+				// so return before the sign-in prompt and before any gateway
+				// branch below (spec 046, Q-046a).
+				console.warn(
+					'[PRICING] works.yml sets pricing.provider: manual — no in-site checkout is started for ' +
+						`plan "${plan.id}". Payment must be collected outside this site.`
+				);
+				return;
+			}
+
 			if (!user?.id) {
 				loginModal.onOpen('Please sign in to continue with your purchase.');
 				return;
@@ -492,6 +514,7 @@ export function usePricingSection(params: UsePricingSectionParams = {}): UsePric
 			user,
 			cancelCurrentProcess,
 			loginModal,
+			isManualCheckout,
 			paymentProvider,
 			lemonsqueezyHook,
 			stripeHook,
@@ -579,6 +602,8 @@ export function usePricingSection(params: UsePricingSectionParams = {}): UsePric
 		isLoading,
 		error,
 		provider: paymentProvider,
+		/** `works.yml` declared `pricing.provider: manual` — no in-site checkout (spec 046). */
+		isManualCheckout,
 		isSuccess,
 		t,
 		tBilling,

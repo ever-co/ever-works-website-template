@@ -192,6 +192,26 @@ pricing:
         - "API access"
 ```
 
+`provider` sets the site's default. It accepts `stripe`, `lemonsqueezy`,
+`polar`, `solidgate` or `manual` — with `manual`, prices are displayed but the
+site starts no checkout of its own, so payment is collected outside the
+template. That is different from omitting `provider`, which falls back to
+Stripe. Both statements describe the default: a signed-in user who has picked a
+provider under Settings gets that one instead.
+Plan keys are `FREE`, `STANDARD` and `PREMIUM`; `PRO` is accepted as an alias
+for `STANDARD`.
+
+The block above is the short form. Every field — trial configuration, Polar
+and LemonSqueezy IDs, `isActive` / `isFeatured` / `disabled`, `envKey` — is
+documented in
+[works.yml Pricing Configuration](../configuration/works-yml-pricing.md), with
+a complete copy-ready file at
+`docs/configuration/examples/works-pricing.example.yml`.
+
+The block is validated when the config is read. A malformed one is never
+fatal: each problem is logged as `pricing.<path>: <message>` and the template
+falls back to its built-in plans.
+
 ### Step 3: Set Up Webhooks
 
 Each provider has a dedicated webhook endpoint:

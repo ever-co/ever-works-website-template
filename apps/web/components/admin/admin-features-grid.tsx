@@ -11,6 +11,8 @@ import {
     Star,
     Flag,
     Megaphone,
+    ShieldAlert,
+    Receipt,
 } from 'lucide-react';
 import { AdminFeatureCard } from './admin-feature-card';
 import { AdminFeature } from './types';
@@ -85,6 +87,20 @@ const ADMIN_FEATURES: AdminFeature[] = [
         description: 'Review and resolve reported content.',
         href: '/admin/reports',
         emoji: '🚩',
+    },
+    {
+        icon: ShieldAlert,
+        title: 'Billing Issues',
+        description: 'Resolve failed payments, disputes and refunds.',
+        href: '/admin/billing-issues',
+        emoji: '🧾',
+    },
+    {
+        icon: Receipt,
+        title: 'Payment Reports',
+        description: 'Filter and export revenue and payment reports.',
+        href: '/admin/payment-reports',
+        emoji: '📈',
     },
     {
         icon: FileText,

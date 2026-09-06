@@ -566,6 +566,41 @@ confirm, override, or refine.
 
 ## Spec 047 — Markdown mirrors reachable (private-folder routing fix)
 
+## Spec 051 — Admin billing issues
+
+### Q-051-1 Should a refund carry a provider-side idempotency key?
+
+- **Context.** `refundBillingIssue()` takes an atomic claim on the issue row
+  (`billing_issues.refund_claimed_at`, a single conditional UPDATE) before it
+  calls `PaymentProviderInterface.refundPayment`, and deliberately does NOT hand
+  the claim back when the provider call throws — a lost response and a clean
+  rejection are indistinguishable, so releasing it would let a retry submit a
+  second refund for a charge that may already be refunded. The claim instead
+  expires after `REFUND_CLAIM_TTL_MS` (5 minutes) so a crashed request cannot
+  strand the issue forever. That expiry is the one remaining theoretical window:
+  a provider call still in flight when the TTL elapses could be joined by a
+  second claim, and the row-level `onlyWithClaim` guard on the write can stop the
+  second request from _recording_ over the first, but not from _placing_ the call.
+- **Options.**
+    - **Leave it (current).** The window requires a single provider HTTP request to
+      still be open five minutes after it started — longer than every adapter's own
+      SDK timeout and than the serverless function budget the template targets — and
+      it needs a second admin to press refund inside exactly that window. The cost
+      of the alternative reading (never reclaim) is an issue permanently locked by
+      any crashed request.
+    - **Add an idempotency key to the provider seam.** Widen
+      `PaymentProviderInterface.refundPayment(paymentId, amount?)` with an optional
+      idempotency key derived from the billing issue, and thread it through the
+      Stripe, Polar, Solidgate and LemonSqueezy adapters plus `payment-service.ts`.
+      Stripe and Polar both honour one; this closes the window completely rather
+      than narrowing it.
+    - Lengthen `REFUND_CLAIM_TTL_MS`. Cheapest, and strictly worse on the other
+      axis: it narrows the duplicate window only by widening the stranded window.
+- **Default.** **Leave it, and fix it properly in the payment-provider spec.**
+  Spec 051 states it adds no new payment abstraction, and an idempotency
+  parameter is a change to the shared provider interface and all four adapters —
+  it belongs with the seam it changes, not inside an admin feature.
+
 ## Spec 053 — Email two-factor authentication
 
 ### Q-053a Should admin `users` rows be able to enable email 2FA as well?
@@ -597,6 +632,33 @@ confirm, override, or refine.
 - **Status.** `open`.
 
 ---
+
+## Spec 052 — Admin payment reports and export
+
+### Q-052-1 Should the payment report also export PDF?
+
+- **Context.** [EW-117](https://evertech.atlassian.net/browse/EW-117) asks for
+  "tools to filter and export reports (CSV, PDF, etc.)". `apps/web` has no PDF
+  generation dependency — `exceljs` and `papaparse` are the only document
+  libraries in `apps/web/package.json`, and both were already there for the item
+  export. Article VII (reuse before build) and `AGENTS.md` §14 ("ask the user
+  first before adding new dependencies") both point away from pulling a PDF
+  engine in as a side effect of this feature.
+- **Options.**
+    - **CSV + XLSX only (current).** No new dependency. XLSX already covers the
+      "hand it to a stakeholder" case, and a spreadsheet is more useful than a PDF
+      for revenue numbers because the recipient can re-sort and sum it.
+    - Add a client-side PDF library (`jspdf` + `jspdf-autotable`, ~350 KB). Renders
+      in the browser from the rows already loaded, so no server cost — but only the
+      current page of rows, not the full filtered set.
+    - Add a server-side renderer (`@react-pdf/renderer`, or headless Chromium).
+      Full fidelity over the whole filtered set; a heavy dependency, and headless
+      Chromium is not viable in the template's serverless targets.
+- **Default.** **CSV + XLSX only.** `SUPPORTED_EXPORT_FORMATS` in
+  `apps/web/lib/services/payment-report-export.service.ts` is the single place to
+  extend, and `?format=pdf` already returns a 400 naming the supported formats
+  rather than failing obscurely. Revisit if an operator asks for a print-ready
+  statement rather than a data extract.
 
 ### Q-053b Should enabling email 2FA require a verified email address?
 

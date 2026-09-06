@@ -127,6 +127,25 @@ const validateSlug = (slug: string): boolean => {
 	return Boolean(slug && slug.length > 0 && slug.length < 200 && /^[a-zA-Z0-9\-_]+$/.test(slug));
 };
 
+/** Unicode control characters, which cannot appear in a real post filename. */
+const CONTROL_CHARACTERS = /\p{Cc}/u;
+
+/**
+ * Whether a blog post slug may be advertised in the sitemap.
+ *
+ * Deliberately NOT `validateSlug()`. Post slugs are filenames from the data
+ * repository, and a filename may legally hold a space, an accent or a `?` —
+ * `buildPostHref()` exists to percent-encode exactly that into one safe path
+ * segment. Rejecting anything outside `[a-zA-Z0-9-_]` therefore dropped those
+ * posts from the sitemap while the listing still linked to them and the feed
+ * still announced them, making the one surface whose whole job is
+ * discoverability the only one that hid them. Encoding is what makes the URL
+ * safe here, so this rejects only what could not be a post at all.
+ */
+const validatePostSlug = (slug: string): boolean => {
+	return Boolean(slug) && slug.length < 200 && !CONTROL_CHARACTERS.test(slug);
+};
+
 /**
  * Converts an icon URL to an absolute URL for sitemap image entries.
  * Uses the URL constructor for robust resolution of relative paths,
@@ -298,7 +317,7 @@ const generateDynamicRoutes = async (baseUrl: string): Promise<{ entries: Sitema
 				})),
 			// Blog posts (Spec 050)
 			...posts
-				.filter((post) => post.slug && validateSlug(post.slug))
+				.filter((post) => validatePostSlug(post.slug))
 				.map((post) => {
 					const lastModified = post.date ? new Date(post.date) : new Date();
 					const entry: SitemapEntry = {

@@ -16,6 +16,16 @@ const UNKNOWN_ROUTES = [
 	'/blog/tag/zzqx-tag-that-cannot-exist-zzqx'
 ];
 
+/** Undo the XML entity escaping the feed applies to a URL. */
+function unescapeXml(value: string): string {
+	return value
+		.replace(/&amp;/g, '&')
+		.replace(/&lt;/g, '<')
+		.replace(/&gt;/g, '>')
+		.replace(/&quot;/g, '"')
+		.replace(/&apos;/g, "'");
+}
+
 /** Navigate to the listing and return the href of the first post link, if any. */
 async function firstPostHref(page: import('@playwright/test').Page): Promise<string | null> {
 	await page.goto('/blog', { waitUntil: 'domcontentloaded', timeout: PAGE_READY_TIMEOUT });
@@ -104,6 +114,55 @@ test.describe('Public: Blog post detail', () => {
 		const response = await page.goto(href!, { waitUntil: 'domcontentloaded', timeout: PAGE_READY_TIMEOUT });
 		expect(response?.status() ?? 0).toBeLessThan(400);
 		await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible();
+	});
+
+	// A post slug is its filename, and a filename may legally contain a space or
+	// a non-ASCII character. `buildPostHref()` percent-encodes it, so four
+	// surfaces have to agree on the same encoded URL: the in-app link, the feed,
+	// the sitemap and the post route itself. They did not — the listing and the
+	// feed advertised `/blog/<encoded>` while the route answered 404, because a
+	// page component is handed the RAW path segment (only `generateMetadata()`
+	// gets the decoded one), and the sitemap dropped such posts entirely on an
+	// ASCII-only slug filter. The CI fixture seeds exactly such a post
+	// (`épsilon release notes`), so this pins all three halves at once.
+	//
+	// The feed is the source of URLs deliberately: it is unpaginated, so this
+	// covers every post rather than whichever ones land on listing page 1.
+	test('every post the feed announces resolves and is listed in the sitemap', async ({ request }) => {
+		const feed = await request.get('/blog/rss.xml');
+		expect(feed.status()).toBeLessThan(400);
+
+		const xml = await feed.text();
+		const postLinks = [...xml.matchAll(/<link>([^<]*\/blog\/[^<]*)<\/link>/g)].map((match) =>
+			unescapeXml(match[1])
+		);
+		test.skip(postLinks.length === 0, 'No dated posts in the content fixture');
+
+		const sitemap = await (await request.get('/sitemap.xml')).text();
+
+		for (const link of postLinks) {
+			// Compare paths, not absolute URLs: the feed and the sitemap are built
+			// from the configured site URL, which need not equal the test baseURL.
+			// `URL.pathname` preserves the percent-encoding, which is the point.
+			const path = new URL(link).pathname;
+
+			const response = await request.get(path);
+			expect(response.status(), `${path} is announced in the feed and must resolve`).toBe(200);
+			expect(sitemap, `${path} is announced in the feed and must be in the sitemap`).toContain(path);
+		}
+	});
+
+	test('every post card links to a page that resolves', async ({ page, request }) => {
+		await page.goto('/blog', { waitUntil: 'domcontentloaded', timeout: PAGE_READY_TIMEOUT });
+		const hrefs = await page
+			.locator('[data-testid="blog-post-grid"] article h2 a')
+			.evaluateAll((links) => links.map((link) => link.getAttribute('href') ?? ''));
+		test.skip(hrefs.length === 0, 'No posts in the content fixture');
+
+		for (const href of hrefs) {
+			const response = await request.get(href);
+			expect(response.status(), `${href} is linked from a post card and must resolve`).toBe(200);
+		}
 	});
 
 	test('a tag archive renders when the fixture has tags', async ({ page }) => {

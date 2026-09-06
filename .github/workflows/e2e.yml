@@ -299,12 +299,18 @@ jobs:
             name: E2E Collection
             description: Placeholder collection for CI
           YAML
-          # Blog posts (Spec 050). Three published posts, one per category
-          # (Product Updates / Tutorials / Industry Insights) across three
-          # tags, plus one draft that must stay hidden — enough for the blog
-          # listing, search, taxonomy and pagination specs to run their
+          # Blog posts (Spec 050). Four published posts across three
+          # categories (Product Updates / Tutorials / Industry Insights) and
+          # three tags, plus one draft that must stay hidden — enough for the
+          # blog listing, search, taxonomy and pagination specs to run their
           # data-dependent branches instead of skipping. Newest first:
-          # alpha (Mar) > beta (Feb) > gamma (Jan).
+          # alpha (Mar) > beta (Feb) > gamma (Jan) > epsilon (2025).
+          #
+          # `epsilon` deliberately carries a filename that is neither ASCII nor
+          # space-free. Its slug is the filename, so its URL only works if the
+          # in-app link, the feed, the sitemap and the post route all agree on
+          # the percent-encoded form. It reuses an existing category so the
+          # taxonomy fixture still has exactly three.
           cat > apps/web/.content/posts/alpha-release-notes.en.md <<'MD'
           ---
           title: Alpha release notes
@@ -345,6 +351,19 @@ jobs:
           ---
 
           Industry notes body copy, long enough to produce a reading time.
+          MD
+          cat > "apps/web/.content/posts/épsilon release notes.en.md" <<'MD'
+          ---
+          title: Epsilon release notes
+          description: A post whose filename is neither ASCII nor space-free.
+          author: E2E Author
+          publishedAt: 2025-11-05 09:00
+          category: Product Updates
+          tags:
+            - release
+          ---
+
+          Epsilon notes body copy, long enough to produce a reading time.
           MD
           cat > apps/web/.content/posts/delta-draft.en.md <<'MD'
           ---

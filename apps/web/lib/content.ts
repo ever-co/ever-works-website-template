@@ -2938,6 +2938,34 @@ export async function fetchAllPostSummaries(locale: string = 'en'): Promise<Post
 }
 
 /**
+ * The slug as it arrived, plus its percent-decoded form when that differs.
+ *
+ * `buildPostHref()` encodes the slug as ONE path segment, because a post
+ * filename may legally contain a space, an accent or a `?`. The value that
+ * reaches a route is not consistently decoded, though: a page component is
+ * handed the RAW segment while `generateMetadata()` is handed the decoded one.
+ * Looking the raw segment up against an index keyed by filename therefore
+ * missed, and `/blog/caf%C3%A9-notes` answered 404 on the very URL the
+ * listing, the feed and the sitemap all advertise.
+ *
+ * Order matters: the value as given is tried FIRST, so a filename that really
+ * does contain a literal `%` still resolves at its own (double-encoded) URL.
+ * `decodeURIComponent` throws on a malformed sequence, which is simply a miss.
+ * The decoded value is only ever a lookup key — the file that gets read comes
+ * from the matched index entry, never from the URL — so it cannot reach the
+ * filesystem.
+ */
+function postSlugCandidates(slug: string): string[] {
+	try {
+		const decoded = decodeURIComponent(slug);
+		if (decoded !== slug) return [slug, decoded];
+	} catch {
+		// Not a valid percent-encoding; the raw value is all there is to try.
+	}
+	return [slug];
+}
+
+/**
  * Fetch a single post (frontmatter + Markdown body), or `null` when absent.
  *
  * NOTE on the logging below: `slug` arrives from the URL, and Node treats the
@@ -2958,9 +2986,15 @@ export async function fetchPost(slug: string, locale: string = 'en'): Promise<Po
 		const sanitizedSlug = sanitizeFilename(slug);
 		const lang = validateLanguageCode(locale) ? locale : 'en';
 		const index = await readPostFileIndex(postsDir);
-		const ref = pickPostFileForLocale(index.get(sanitizedSlug) ?? [], lang);
-		if (!ref) return null;
-		return await parsePostFile(postsDir, sanitizedSlug, ref, new Map());
+
+		for (const candidate of postSlugCandidates(sanitizedSlug)) {
+			const ref = pickPostFileForLocale(index.get(candidate) ?? [], lang);
+			// `candidate`, not the URL segment: a post's own `slug` feeds its
+			// canonical URL and its JSON-LD, and must be the indexed value.
+			if (ref) return await parsePostFile(postsDir, candidate, ref, new Map());
+		}
+
+		return null;
 	} catch (error) {
 		console.error('[CONTENT] Failed to load post:', slug, error);
 		return null;
@@ -2977,7 +3011,13 @@ export async function fetchAdjacentPosts(
 	locale: string = 'en'
 ): Promise<{ previous: PostSummary | null; next: PostSummary | null }> {
 	const posts = await loadAllPosts(locale);
-	const index = posts.findIndex((post) => post.slug === slug);
+	// Same raw-vs-decoded segment problem as `fetchPost()`: without this the
+	// prev / next links silently vanish on a post with an encoded slug.
+	let index = -1;
+	for (const candidate of postSlugCandidates(slug)) {
+		index = posts.findIndex((post) => post.slug === candidate);
+		if (index !== -1) break;
+	}
 	if (index === -1) return { previous: null, next: null };
 	return {
 		previous: index > 0 ? toPostSummary(posts[index - 1]) : null,

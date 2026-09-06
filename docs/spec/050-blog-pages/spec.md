@@ -212,6 +212,18 @@ None. The blog is a reader surface over the existing Git content adapter.
   string, so a slug taken from the URL must never be interpolated into it — a
   `%s` in the slug would swallow the following argument. Slugs and filenames
   are passed as their own arguments throughout the posts loader.
+- **A post slug is a filename, so every surface must agree on one encoded
+  form.** `.content/posts/` filenames may legally contain a space, an accent or
+  a `?`, and the slug is the filename verbatim. `buildPostHref()` percent-
+  encodes it as a single path segment and the listing, the post page, the feed
+  and the sitemap all build their URLs through it, so they cannot drift apart.
+  Two halves of that contract were broken and are now pinned by the e2e suite:
+  a page component is handed the **raw** path segment (only `generateMetadata()`
+  receives the decoded one), so the loader tries the segment as given and then
+  its decoded form, or such a post 404s at the very URL it is advertised under;
+  and the sitemap filtered post slugs through the site-wide ASCII-only
+  `validateSlug()`, which silently dropped exactly those posts from the one
+  surface whose whole job is discoverability.
 - **A `loading.tsx` turns `notFound()` into a soft 404 for every route beneath
   it.** A segment with a `loading.tsx` is streamed, so Next flushes the shell
   with a 200 before the page component runs and a later `notFound()` can only
@@ -229,9 +241,12 @@ None. The blog is a reader surface over the existing Git content adapter.
 Playwright specs `apps/web-e2e/tests/public/blog.spec.ts` and
 `blog-detail-public.spec.ts` cover route reachability, metadata, the empty
 state, search plus highlighting plus clear, pagination, chips, the RSS feed and
-the sitemap entry. Data-dependent assertions skip when the fixture has no posts,
-and the CI content fixture in `.github/workflows/e2e.yml` seeds three published
-posts plus a draft so those branches actually run.
+the sitemap entry, and assert that every post the feed announces both resolves
+and appears in the sitemap. Data-dependent assertions skip when the fixture has
+no posts, and the CI content fixture in `.github/workflows/e2e.yml` seeds four
+published posts plus a draft so those branches actually run — one of the four
+carries a filename that is neither ASCII nor space-free, which is what makes
+the URL-encoding contract above testable.
 
 ## 13. References
 

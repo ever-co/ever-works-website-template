@@ -1,10 +1,10 @@
 ---
-id: plan-047-email-two-factor-auth
+id: plan-053-email-two-factor-auth
 title: Plan 046 — Email two-factor authentication
 sidebar_label: 046 Plan
 ---
 
-# Implementation Plan — `047-email-two-factor-auth`
+# Implementation Plan — `053-email-two-factor-auth`
 
 > **Spec:** [`spec.md`](./spec.md)
 

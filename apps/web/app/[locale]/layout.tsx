@@ -121,7 +121,8 @@ export default async function RootLayout({
 	const companiesEnabled = getCompaniesEnabled();
 	const surveysEnabled = getSurveysEnabled();
 
-	const { hasCategories, hasTags, hasCollections, hasComparisons } = await getCachedContentSignals(locale);
+	const { hasCategories, hasTags, hasCollections, hasComparisons, hasPosts } =
+		await getCachedContentSignals(locale);
 
 	const hasGlobalSurveys = false;
 
@@ -201,6 +202,7 @@ export default async function RootLayout({
 						hasTags={hasTags}
 						hasCollections={hasCollections}
 						hasComparisons={hasComparisons}
+						hasPosts={hasPosts}
 						hasGlobalSurveys={hasGlobalSurveys}
 						headerSettings={headerSettings}
 						footerSettings={footerSettings}

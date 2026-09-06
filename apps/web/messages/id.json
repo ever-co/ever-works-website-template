@@ -43,6 +43,7 @@
 		"OPEN_USER_MENU": "Buka menu pengguna"
 	},
 	"common": {
+		"FAQ": "FAQ",
 		"DISCOVER": "Jelajahi",
 		"HOME": "Beranda",
 		"ABOUT": "Tentang",
@@ -514,6 +515,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "FAQ",
 		"ALL_RIGHTS_RESERVED": "Hak cipta dilindungi",
 		"BUILT_WITH": "Dibangun dengan",
 		"CONNECT_WITH_US": "Terhubung dengan kami",
@@ -3615,6 +3617,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "Bantuan",
+		"FAQ_META_DESCRIPTION": "Jawaban atas pertanyaan yang paling sering diajukan pengunjung tentang direktori ini: menjelajah, mengirim entri, dan menghubungi kami",
+		"FAQ_INTRO": "Jawaban atas pertanyaan yang paling sering kami terima. Jika tidak menemukan yang Anda cari, hubungi kami.",
+		"HELP_DESCRIPTION": "Jelajahi panduan dan topik dukungan",
 		"LEGAL_BADGE": "Hukum",
 		"LAST_UPDATED": "Terakhir diperbarui:",
 		"RELATED_INFORMATION": "Informasi Terkait",
@@ -4075,6 +4081,38 @@
 		"NAV_ARTICLE": "Artikel",
 		"FALLBACK_TITLE": "Perbandingan",
 		"VS": "vs"
+	},
+	"blog": {
+		"BADGE_TEXT": "Blog",
+		"TITLE": "Artikel terbaru",
+		"DESCRIPTION": "Berita, panduan, dan pembaruan produk yang diterbitkan dari repositori data.",
+		"EMPTY_TITLE": "Belum ada artikel",
+		"EMPTY_DESCRIPTION": "Belum ada artikel blog yang diterbitkan di direktori ini. Silakan kembali lagi nanti.",
+		"READ_MORE": "Baca selengkapnya",
+		"BY_AUTHOR": "Oleh {author}",
+		"READING_TIME": "Baca {minutes} menit",
+		"SEARCH_PLACEHOLDER": "Cari artikel…",
+		"SEARCH_LABEL": "Cari artikel blog",
+		"CLEAR_SEARCH": "Hapus pencarian",
+		"RESULTS_COUNT": "{count} hasil untuk “{query}”",
+		"FILTERED_COUNT": "{count} artikel",
+		"NO_RESULTS_TITLE": "Tidak ada artikel yang cocok",
+		"NO_RESULTS_DESCRIPTION": "Coba kata kunci yang lebih sedikit atau berbeda, atau jelajahi kategori di atas.",
+		"CATEGORIES": "Kategori",
+		"TAGS": "Tag",
+		"ALL": "Semua",
+		"PREVIOUS": "Sebelumnya",
+		"NEXT": "Berikutnya",
+		"PAGE_OF": "Halaman {page} dari {totalPages}",
+		"PAGINATION_LABEL": "Penomoran halaman blog",
+		"CATEGORY_TITLE": "Artikel dalam {name}",
+		"CATEGORY_DESCRIPTION": "Semua artikel blog dalam kategori {name}.",
+		"TAG_TITLE": "Artikel bertag {name}",
+		"TAG_DESCRIPTION": "Semua artikel blog dengan tag {name}.",
+		"BACK_TO_BLOG": "Kembali ke blog",
+		"POST_NAVIGATION": "Navigasi artikel",
+		"PREVIOUS_POST": "Artikel sebelumnya",
+		"NEXT_POST": "Artikel berikutnya"
 	},
 	"usersDirectory": {
 		"HERO_TITLE": "Komunitas",

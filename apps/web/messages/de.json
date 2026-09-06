@@ -43,6 +43,7 @@
 		"OPEN_USER_MENU": "Open user menu"
 	},
 	"common": {
+		"FAQ": "FAQ",
 		"DISCOVER": "Entdecken",
 		"HOME": "Startseite",
 		"ABOUT": "Über uns",
@@ -488,6 +489,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "FAQ",
 		"ALL_RIGHTS_RESERVED": "Alle Rechte vorbehalten",
 		"BUILT_WITH": "Erstellt mit",
 		"CONNECT_WITH_US": "Verbinden Sie sich mit uns",
@@ -3598,6 +3600,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "Hilfe",
+		"FAQ_META_DESCRIPTION": "Antworten auf die Fragen, die Besucher zu diesem Verzeichnis am häufigsten stellen: Suchen, Einträge einreichen und Kontakt aufnehmen",
+		"FAQ_INTRO": "Antworten auf die Fragen, die uns am häufigsten gestellt werden. Wenn Sie nicht finden, was Sie suchen, melden Sie sich bei uns.",
+		"HELP_DESCRIPTION": "Anleitungen und Support-Themen durchsuchen",
 		"LEGAL_BADGE": "Rechtliches",
 		"LAST_UPDATED": "Zuletzt aktualisiert:",
 		"RELATED_INFORMATION": "Verwandte Informationen",
@@ -3966,6 +3972,38 @@
 		"NAV_ARTICLE": "Artikel",
 		"FALLBACK_TITLE": "Vergleich",
 		"VS": "vs"
+	},
+	"blog": {
+		"BADGE_TEXT": "Blog",
+		"TITLE": "Neueste Beiträge",
+		"DESCRIPTION": "Neuigkeiten, Anleitungen und Produkt-Updates aus dem Daten-Repository.",
+		"EMPTY_TITLE": "Noch keine Beiträge",
+		"EMPTY_DESCRIPTION": "In diesem Verzeichnis wurden noch keine Blogbeiträge veröffentlicht. Schauen Sie bald wieder vorbei.",
+		"READ_MORE": "Weiterlesen",
+		"BY_AUTHOR": "Von {author}",
+		"READING_TIME": "{minutes} Min. Lesezeit",
+		"SEARCH_PLACEHOLDER": "Beiträge durchsuchen…",
+		"SEARCH_LABEL": "Blogbeiträge durchsuchen",
+		"CLEAR_SEARCH": "Suche zurücksetzen",
+		"RESULTS_COUNT": "{count, plural, one {{count} Ergebnis für „{query}“} other {{count} Ergebnisse für „{query}“}}",
+		"FILTERED_COUNT": "{count, plural, one {{count} Beitrag} other {{count} Beiträge}}",
+		"NO_RESULTS_TITLE": "Keine passenden Beiträge",
+		"NO_RESULTS_DESCRIPTION": "Versuchen Sie weniger oder andere Suchbegriffe oder stöbern Sie in den Kategorien oben.",
+		"CATEGORIES": "Kategorien",
+		"TAGS": "Schlagwörter",
+		"ALL": "Alle",
+		"PREVIOUS": "Zurück",
+		"NEXT": "Weiter",
+		"PAGE_OF": "Seite {page} von {totalPages}",
+		"PAGINATION_LABEL": "Blog-Seitennavigation",
+		"CATEGORY_TITLE": "Beiträge in {name}",
+		"CATEGORY_DESCRIPTION": "Alle Blogbeiträge in der Kategorie {name}.",
+		"TAG_TITLE": "Beiträge mit dem Schlagwort {name}",
+		"TAG_DESCRIPTION": "Alle Blogbeiträge mit dem Schlagwort {name}.",
+		"BACK_TO_BLOG": "Zurück zum Blog",
+		"POST_NAVIGATION": "Beitragsnavigation",
+		"PREVIOUS_POST": "Vorheriger Beitrag",
+		"NEXT_POST": "Nächster Beitrag"
 	},
 	"ai_chat": {
 		"LAUNCHER_LABEL": "Chat öffnen",

@@ -39,6 +39,7 @@ interface SettingsContextValue {
 	hasTags: boolean;
 	hasCollections: boolean;
 	hasComparisons: boolean;
+	hasPosts: boolean;
 	hasGlobalSurveys: boolean;
 	// Header settings
 	headerSettings: HeaderSettings;
@@ -59,6 +60,7 @@ interface SettingsProviderProps extends PropsWithChildren {
 	hasTags: boolean;
 	hasCollections: boolean;
 	hasComparisons: boolean;
+	hasPosts: boolean;
 	hasGlobalSurveys: boolean;
 	headerSettings: HeaderSettings;
 	footerSettings: FooterSettings;
@@ -75,6 +77,7 @@ export function SettingsProvider({
 	hasTags,
 	hasCollections,
 	hasComparisons,
+	hasPosts,
 	hasGlobalSurveys,
 	headerSettings,
 	footerSettings,
@@ -97,6 +100,7 @@ export function SettingsProvider({
 				hasTags,
 				hasCollections,
 				hasComparisons,
+				hasPosts,
 				hasGlobalSurveys,
 				headerSettings,
 				footerSettings,
@@ -121,6 +125,10 @@ export function useSettings(): SettingsContextValue {
 			hasTags: true,
 			hasCollections: true,
 			hasComparisons: true,
+			// Fallback for components rendered outside the provider. Blog is
+			// opt-in on content, so default it OFF here: showing a Blog link
+			// on a site with no posts is worse than briefly hiding one.
+			hasPosts: false,
 			hasGlobalSurveys: false,
 			headerSettings: DEFAULT_HEADER_SETTINGS,
 			footerSettings: DEFAULT_FOOTER_SETTINGS,

@@ -43,6 +43,7 @@
 		"OPEN_USER_MENU": "Abrir menú de usuario"
 	},
 	"common": {
+		"FAQ": "Preguntas frecuentes",
 		"DISCOVER": "Descubrir",
 		"HOME": "Inicio",
 		"ABOUT": "Acerca de",
@@ -489,6 +490,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "Preguntas frecuentes",
 		"ALL_RIGHTS_RESERVED": "Todos los derechos reservados",
 		"BUILT_WITH": "Construido con",
 		"CONNECT_WITH_US": "Conéctate con nosotros",
@@ -3587,6 +3589,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "Ayuda",
+		"FAQ_META_DESCRIPTION": "Respuestas a las preguntas que los visitantes hacen con más frecuencia sobre este directorio: navegación, envío de fichas y contacto",
+		"FAQ_INTRO": "Respuestas a las preguntas que nos hacen con más frecuencia. Si no encuentras lo que buscas, ponte en contacto con nosotros.",
+		"HELP_DESCRIPTION": "Consulta las guías y los temas de soporte",
 		"LEGAL_BADGE": "Legal",
 		"LAST_UPDATED": "Última actualización:",
 		"RELATED_INFORMATION": "Información Relacionada",
@@ -3955,6 +3961,38 @@
 		"NAV_ARTICLE": "Artículo",
 		"FALLBACK_TITLE": "Comparación",
 		"VS": "vs"
+	},
+	"blog": {
+		"BADGE_TEXT": "Blog",
+		"TITLE": "Últimos artículos",
+		"DESCRIPTION": "Noticias, guías y novedades publicadas desde el repositorio de datos.",
+		"EMPTY_TITLE": "Todavía no hay artículos",
+		"EMPTY_DESCRIPTION": "Aún no se ha publicado ningún artículo en este directorio. Vuelve pronto.",
+		"READ_MORE": "Leer más",
+		"BY_AUTHOR": "Por {author}",
+		"READING_TIME": "{minutes} min de lectura",
+		"SEARCH_PLACEHOLDER": "Buscar artículos…",
+		"SEARCH_LABEL": "Buscar artículos del blog",
+		"CLEAR_SEARCH": "Borrar búsqueda",
+		"RESULTS_COUNT": "{count, plural, one {{count} resultado para «{query}»} other {{count} resultados para «{query}»}}",
+		"FILTERED_COUNT": "{count, plural, one {{count} artículo} other {{count} artículos}}",
+		"NO_RESULTS_TITLE": "No hay artículos coincidentes",
+		"NO_RESULTS_DESCRIPTION": "Prueba con menos palabras o con otras distintas, o explora las categorías de arriba.",
+		"CATEGORIES": "Categorías",
+		"TAGS": "Etiquetas",
+		"ALL": "Todo",
+		"PREVIOUS": "Anterior",
+		"NEXT": "Siguiente",
+		"PAGE_OF": "Página {page} de {totalPages}",
+		"PAGINATION_LABEL": "Paginación del blog",
+		"CATEGORY_TITLE": "Artículos en {name}",
+		"CATEGORY_DESCRIPTION": "Todos los artículos del blog archivados en {name}.",
+		"TAG_TITLE": "Artículos etiquetados con {name}",
+		"TAG_DESCRIPTION": "Todos los artículos del blog etiquetados con {name}.",
+		"BACK_TO_BLOG": "Volver al blog",
+		"POST_NAVIGATION": "Navegación entre artículos",
+		"PREVIOUS_POST": "Artículo anterior",
+		"NEXT_POST": "Artículo siguiente"
 	},
 	"ai_chat": {
 		"LAUNCHER_LABEL": "Abrir chat",

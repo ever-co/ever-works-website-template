@@ -43,6 +43,7 @@
 		"OPEN_USER_MENU": "Kullanıcı menüsünü aç"
 	},
 	"common": {
+		"FAQ": "SSS",
 		"DISCOVER": "Keşfet",
 		"HOME": "Ana Sayfa",
 		"ABOUT": "Hakkında",
@@ -514,6 +515,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "SSS",
 		"ALL_RIGHTS_RESERVED": "Tüm hakları saklıdır",
 		"BUILT_WITH": "İle oluşturuldu",
 		"CONNECT_WITH_US": "Bizimle iletişime geçin",
@@ -3614,6 +3616,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "Yardım",
+		"FAQ_META_DESCRIPTION": "Ziyaretçilerin bu dizin hakkında en sık sorduğu soruların yanıtları: gezinme, kayıt gönderme ve bize ulaşma",
+		"FAQ_INTRO": "Bize en sık sorulan soruların yanıtları. Aradığınızı bulamazsanız bizimle iletişime geçin.",
+		"HELP_DESCRIPTION": "Kılavuzlara ve destek konularına göz atın",
 		"LEGAL_BADGE": "Yasal",
 		"LAST_UPDATED": "Son güncelleme:",
 		"RELATED_INFORMATION": "İlgili Bilgiler",
@@ -4074,6 +4080,38 @@
 		"NAV_ARTICLE": "Makale",
 		"FALLBACK_TITLE": "Karşılaştırma",
 		"VS": "vs"
+	},
+	"blog": {
+		"BADGE_TEXT": "Blog",
+		"TITLE": "Son yazılar",
+		"DESCRIPTION": "Veri deposundan yayımlanan haberler, rehberler ve ürün güncellemeleri.",
+		"EMPTY_TITLE": "Henüz yazı yok",
+		"EMPTY_DESCRIPTION": "Bu dizinde henüz blog yazısı yayımlanmadı. Lütfen daha sonra tekrar bakın.",
+		"READ_MORE": "Devamını oku",
+		"BY_AUTHOR": "Yazan: {author}",
+		"READING_TIME": "{minutes} dk okuma",
+		"SEARCH_PLACEHOLDER": "Yazılarda ara…",
+		"SEARCH_LABEL": "Blog yazılarında ara",
+		"CLEAR_SEARCH": "Aramayı temizle",
+		"RESULTS_COUNT": "“{query}” için {count} sonuç",
+		"FILTERED_COUNT": "{count} yazı",
+		"NO_RESULTS_TITLE": "Eşleşen yazı yok",
+		"NO_RESULTS_DESCRIPTION": "Daha az veya farklı anahtar kelime deneyin ya da yukarıdaki kategorilere göz atın.",
+		"CATEGORIES": "Kategoriler",
+		"TAGS": "Etiketler",
+		"ALL": "Tümü",
+		"PREVIOUS": "Önceki",
+		"NEXT": "Sonraki",
+		"PAGE_OF": "Sayfa {page} / {totalPages}",
+		"PAGINATION_LABEL": "Blog sayfalandırması",
+		"CATEGORY_TITLE": "{name} kategorisindeki yazılar",
+		"CATEGORY_DESCRIPTION": "{name} kategorisindeki tüm blog yazıları.",
+		"TAG_TITLE": "{name} etiketli yazılar",
+		"TAG_DESCRIPTION": "{name} etiketine sahip tüm blog yazıları.",
+		"BACK_TO_BLOG": "Blog'a dön",
+		"POST_NAVIGATION": "Yazı gezinmesi",
+		"PREVIOUS_POST": "Önceki yazı",
+		"NEXT_POST": "Sonraki yazı"
 	},
 	"usersDirectory": {
 		"HERO_TITLE": "Topluluk",

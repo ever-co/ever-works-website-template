@@ -1,10 +1,10 @@
 ---
-id: spec-047-email-two-factor-auth
+id: spec-053-email-two-factor-auth
 title: Spec 047 — Email two-factor authentication
 sidebar_label: 046 Email 2FA
 ---
 
-# Feature spec — `047-email-two-factor-auth`
+# Feature spec — `053-email-two-factor-auth`
 
 ## 1. Summary
 

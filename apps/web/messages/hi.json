@@ -43,6 +43,7 @@
 		"OPEN_USER_MENU": "Open user menu"
 	},
 	"common": {
+		"FAQ": "अक्सर पूछे जाने वाले प्रश्न",
 		"DISCOVER": "खोजें",
 		"HOME": "होम",
 		"ABOUT": "हमारे बारे में",
@@ -488,6 +489,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "अक्सर पूछे जाने वाले प्रश्न",
 		"ALL_RIGHTS_RESERVED": "सर्वाधिकार सुरक्षित",
 		"BUILT_WITH": "Built with",
 		"CONNECT_WITH_US": "Connect with us",
@@ -3503,6 +3505,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "सहायता",
+		"FAQ_META_DESCRIPTION": "इस डायरेक्टरी के बारे में विज़िटर द्वारा सबसे अधिक पूछे जाने वाले प्रश्नों के उत्तर: ब्राउज़ करना, लिस्टिंग भेजना और संपर्क करना",
+		"FAQ_INTRO": "हमसे सबसे अधिक पूछे जाने वाले प्रश्नों के उत्तर। यदि आपको अपनी बात यहाँ न मिले तो हमसे संपर्क करें।",
+		"HELP_DESCRIPTION": "गाइड और सहायता विषय देखें",
 		"LEGAL_BADGE": "Legal",
 		"LAST_UPDATED": "Last updated:",
 		"RELATED_INFORMATION": "Related Information",
@@ -3787,6 +3793,38 @@
 		"NAV_ARTICLE": "लेख",
 		"FALLBACK_TITLE": "तुलना",
 		"VS": "बनाम"
+	},
+	"blog": {
+		"BADGE_TEXT": "ब्लॉग",
+		"TITLE": "नवीनतम लेख",
+		"DESCRIPTION": "डेटा रिपॉज़िटरी से प्रकाशित समाचार, गाइड और उत्पाद अपडेट।",
+		"EMPTY_TITLE": "अभी कोई लेख नहीं",
+		"EMPTY_DESCRIPTION": "इस डायरेक्टरी में अभी तक कोई ब्लॉग लेख प्रकाशित नहीं हुआ है। जल्द ही दोबारा देखें।",
+		"READ_MORE": "और पढ़ें",
+		"BY_AUTHOR": "लेखक: {author}",
+		"READING_TIME": "{minutes} मिनट का पठन",
+		"SEARCH_PLACEHOLDER": "लेख खोजें…",
+		"SEARCH_LABEL": "ब्लॉग लेख खोजें",
+		"CLEAR_SEARCH": "खोज साफ़ करें",
+		"RESULTS_COUNT": "“{query}” के लिए {count} परिणाम",
+		"FILTERED_COUNT": "{count} लेख",
+		"NO_RESULTS_TITLE": "कोई मेल खाता लेख नहीं",
+		"NO_RESULTS_DESCRIPTION": "कम या अलग कीवर्ड आज़माएँ, या ऊपर दी गई श्रेणियाँ देखें।",
+		"CATEGORIES": "श्रेणियाँ",
+		"TAGS": "टैग",
+		"ALL": "सभी",
+		"PREVIOUS": "पिछला",
+		"NEXT": "अगला",
+		"PAGE_OF": "पृष्ठ {page} / {totalPages}",
+		"PAGINATION_LABEL": "ब्लॉग पेजिनेशन",
+		"CATEGORY_TITLE": "{name} श्रेणी के लेख",
+		"CATEGORY_DESCRIPTION": "{name} श्रेणी के सभी ब्लॉग लेख।",
+		"TAG_TITLE": "{name} टैग वाले लेख",
+		"TAG_DESCRIPTION": "{name} टैग वाले सभी ब्लॉग लेख।",
+		"BACK_TO_BLOG": "ब्लॉग पर वापस जाएँ",
+		"POST_NAVIGATION": "लेख नेविगेशन",
+		"PREVIOUS_POST": "पिछला लेख",
+		"NEXT_POST": "अगला लेख"
 	},
 	"usersDirectory": {
 		"HERO_TITLE": "समुदाय",

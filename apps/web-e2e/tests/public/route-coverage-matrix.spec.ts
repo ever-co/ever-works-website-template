@@ -20,6 +20,7 @@ const PUBLIC_ROUTES_MATRIX: Array<{ path: string; name: string; allowRedirect?: 
 	{ path: '/', name: 'Home' },
 	{ path: '/about', name: 'About' },
 	{ path: '/help', name: 'Help' },
+	{ path: '/faq', name: 'FAQ' },
 	{ path: '/docs', name: 'Docs landing' },
 	{ path: '/privacy-policy', name: 'Privacy Policy' },
 	{ path: '/terms-of-service', name: 'Terms of Service' },

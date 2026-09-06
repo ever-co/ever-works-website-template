@@ -525,7 +525,7 @@ confirm, override, or refine.
 
 ## Spec 046 — Provider-aware pricing configuration in works.yml
 
-### Q-048a Should `provider: manual` render a distinct pricing surface?
+### Q-046a Should `provider: manual` render a distinct pricing surface?
 
 - **Context.** EW-131 asks `works.yml` to accept `provider: manual` —
   "show the prices, take payment elsewhere". Spec 046 accepts the value and
@@ -547,7 +547,7 @@ confirm, override, or refine.
 - **Owner.** Template maintainers.
 - **Status.** `open`.
 
-### Q-048b Should a malformed `pricing:` block ever be fatal?
+### Q-046b Should a malformed `pricing:` block ever be fatal?
 
 - **Context.** Spec 046 logs each problem and falls back to the built-in
   plans. `getConfig()` runs on every render, so throwing would take a whole
@@ -564,9 +564,11 @@ confirm, override, or refine.
 
 ---
 
-## Spec 047 — Email two-factor authentication
+## Spec 047 — Markdown mirrors reachable (private-folder routing fix)
 
-### Q-047a Should admin `users` rows be able to enable email 2FA as well?
+## Spec 053 — Email two-factor authentication
+
+### Q-053a Should admin `users` rows be able to enable email 2FA as well?
 
 - **Context.** Spec 047 stores `two_factor_enabled`, the failed-attempt
   counter and the lock timestamp on `client_profiles`, and surfaces the
@@ -577,17 +579,17 @@ confirm, override, or refine.
   higher-value target, so the asymmetry is worth an explicit decision rather
   than an accident of where the column happened to live.
 - **Options.**
-  - **Client profiles only (current).** One storage location, one settings
-    surface, no schema change to `users`. Admin accounts in this template are
-    few and typically operator-managed.
-  - Mirror the three columns onto `users`, add an admin-side settings card,
-    and branch on whichever row exists. Broader protection, but it doubles the
-    storage location for the same concept and needs a second settings surface
-    under `/admin`.
-  - Move the columns to `users` for **everyone** and read through the account
-    rather than the profile. Cleanest long-term shape, but it is a migration of
-    a column that already ships on `client_profiles` and is read by three admin
-    query projections and the admin advanced search.
+    - **Client profiles only (current).** One storage location, one settings
+      surface, no schema change to `users`. Admin accounts in this template are
+      few and typically operator-managed.
+    - Mirror the three columns onto `users`, add an admin-side settings card,
+      and branch on whichever row exists. Broader protection, but it doubles the
+      storage location for the same concept and needs a second settings surface
+      under `/admin`.
+    - Move the columns to `users` for **everyone** and read through the account
+      rather than the profile. Cleanest long-term shape, but it is a migration of
+      a column that already ships on `client_profiles` and is read by three admin
+      query projections and the admin advanced search.
 - **Default.** **Client profiles only.** Revisit together with any future
   second factor (TOTP / WebAuthn), which would want a single `user`-level
   factor registry anyway — that is the right moment to pay the migration.
@@ -596,7 +598,7 @@ confirm, override, or refine.
 
 ---
 
-### Q-047b Should enabling email 2FA require a verified email address?
+### Q-053b Should enabling email 2FA require a verified email address?
 
 - **Context.** Spec 047 lets any credentials account switch on email 2FA. If
   the address on file is wrong or unreachable, the member locks themselves
@@ -605,17 +607,17 @@ confirm, override, or refine.
   column defaults to `false` and the sign-up flow never flips it, so the
   guard would refuse essentially every account on a default deployment.
 - **Options.**
-  - **Allow, and guard only the unrecoverable case (current).** Enabling is
-    refused with `503` `EMAIL_NOT_CONFIGURED` when the deployment has no mail
-    provider at all — the case where a code could *never* arrive — and the
-    operator unlock is documented in
-    [Email Two-Factor Authentication](authentication/two-factor-auth.md).
-  - Require `email_verified`, and make the sign-up flow actually set it.
-    Correct, but it is a change to registration and to every existing row,
-    which belongs in its own spec.
-  - Confirm the factor at enable time: send a code and require it before the
-    switch sticks. Proves deliverability without touching registration, at the
-    cost of an extra route and an extra UI step.
+    - **Allow, and guard only the unrecoverable case (current).** Enabling is
+      refused with `503` `EMAIL_NOT_CONFIGURED` when the deployment has no mail
+      provider at all — the case where a code could _never_ arrive — and the
+      operator unlock is documented in
+      [Email Two-Factor Authentication](authentication/two-factor-auth.md).
+    - Require `email_verified`, and make the sign-up flow actually set it.
+      Correct, but it is a change to registration and to every existing row,
+      which belongs in its own spec.
+    - Confirm the factor at enable time: send a code and require it before the
+      switch sticks. Proves deliverability without touching registration, at the
+      cost of an extra route and an extra UI step.
 - **Default.** **Allow, guarding only the unrecoverable case.** Revisit
   together with any work that makes email verification mandatory at sign-up;
   the enable-time confirmation is the natural follow-up if lockouts show up in
@@ -625,7 +627,7 @@ confirm, override, or refine.
 
 ---
 
-### Q-047c How should a session-free `/api` route resolve the tenant on a host-routed multi-tenant deployment?
+### Q-053c How should a session-free `/api` route resolve the tenant on a host-routed multi-tenant deployment?
 
 - **Context.** `POST /api/auth/2fa/resend` runs mid-login, so it has no
   session, and Next middleware does not run for `/api` — the
@@ -637,16 +639,16 @@ confirm, override, or refine.
   the repo, not of this one; the primary issuing path, the sign-in server
   action, runs behind middleware and is tenant-correct.
 - **Options.**
-  - **Leave it (current).** The sign-in flow always works; only the "send a
-    new code" convenience is affected, and only on host-routed multi-tenant
-    deployments.
-  - Resolve the tenant from the request's own `Host` header inside the route
-    and thread it into the account / profile lookups. Needs a tenant argument
-    on `getClientAccountByEmail`, `verifyClientPassword` and
-    `getClientProfileByUserId`, which every other caller shares.
-  - Make the resend button re-submit the sign-in server action without a
-    code, so the issuing path is always the tenant-correct one, and keep the
-    route for programmatic callers.
+    - **Leave it (current).** The sign-in flow always works; only the "send a
+      new code" convenience is affected, and only on host-routed multi-tenant
+      deployments.
+    - Resolve the tenant from the request's own `Host` header inside the route
+      and thread it into the account / profile lookups. Needs a tenant argument
+      on `getClientAccountByEmail`, `verifyClientPassword` and
+      `getClientProfileByUserId`, which every other caller shares.
+    - Make the resend button re-submit the sign-in server action without a
+      code, so the issuing path is always the tenant-correct one, and keep the
+      route for programmatic callers.
 - **Default.** ~~Leave it~~ — **resolved at the resolver**, which turned out
   to be a fourth option none of the three above described: `getTenantId()`'s
   header step now falls back to the request's own `Host` when
@@ -663,11 +665,54 @@ confirm, override, or refine.
 
 ## How to add a question
 
-1. Pick the next available `Q-NNN…` id under the relevant spec.
-2. Use the format above.
-3. Always include a **Default**; never block on a question.
-4. Append a line to [`log.md`](log.md):
-   `YYYY-MM-DD questions: added Q-NNN — short summary`.
+### Q-047a Should the internal mirror segment stay reachable as a public URL?
+
+- **Context.** The `.md` mirrors are served by route handlers that used to
+  live in `_`-prefixed _private_ folders, which the App Router excludes from
+  routing — so every mirror URL 404'd. Renaming the segment (`_md` → `md`,
+  `_static-md` → `static-md`) is what makes them routable at all, and it also
+  makes the internal paths directly requestable: measured `/items/<slug>/md`
+  and `/static-md/about` → `200 text/markdown`, and `/en/items/<slug>/md` →
+  `307` to the unprefixed form (`localePrefix: 'as-needed'`).
+- **Options.**
+    - **Leave them reachable.** The handlers already send
+      `X-Robots-Tag: noindex`, they are absent from the sitemap and nothing
+      links to them, so the exposure is a duplicate of content already public
+      at the `.md` URL.
+    - Add a `Disallow: /*/md$` + `/*/static-md/` pair to `robots.ts`, or gate
+      the handlers on an internal header set by the rewrite.
+- **Default.** **Leave them reachable.** `noindex` already answers the only
+  concern (crawlers indexing the mirror instead of the canonical HTML), and a
+  header gate would make the handlers untestable except through the rewrite.
+- **Owner.** Template maintainers.
+- **Status.** `open`.
+
+### Q-047b Should the doubled origin in the item / CMS-page `text/markdown` alternates be fixed here?
+
+- **Context.** `getLocalizedUrl()` already returns an absolute URL, so
+  `` `${appUrl}${getLocalizedUrl(…)}.md` `` emits
+  `http://hosthttp://host/…md`. PR #1046 fixes the four static info pages
+  (`/about`, `/cookies`, `/privacy-policy`, `/terms-of-service`); the same
+  doubling remains on `app/[locale]/items/[slug]/page.tsx` and
+  `app/[locale]/pages/[slug]/page.tsx`.
+- **Options.**
+    - **Leave to the owning PR / a follow-up.** Spec 047 is about
+      reachability; touching the same four-file blast radius as PR #1046 while
+      it is open invites a conflict, and the two remaining pages are the same
+      one-line change.
+    - Fix all six in this PR.
+- **Default.** **Leave to a follow-up**, tracked here. Spec 047's e2e guard
+  deliberately checks alternate-href _resolution_ on `/help` and `/pricing`
+  only — the two pages whose href is already origin-correct — so it neither
+  duplicates nor collides with `md-alternate-link-absolute-url.spec.ts`.
+- **Outcome.** Answered by [spec 048](spec/048-legal-pages-frontmatter-seo/spec.md)
+  (PR #1045), which fixed the doubling on `about`, `cookies`,
+  `items/[slug]` and `pages/[slug]` alongside the two legal routes. Nothing
+  is left for this spec to do here.
+- **Owner.** Template maintainers.
+- **Status.** `answered`.
+
+---
 
 ## Spec 048 — Legal page SEO metadata from Markdown frontmatter
 
@@ -707,3 +752,36 @@ confirm, override, or refine.
       and a docs/data migration for no rendering gain.
 - **Default.** **Keep `.md`** — the requirement is "MDX rendering with
   frontmatter", which is satisfied.
+
+## Spec 049 — Visitor-facing FAQ page
+
+### Q-049a Should the FAQ render as an accordion rather than plain prose?
+
+- **Context.** Spec 046 renders `pages/faq.<locale>.md` through the shared
+  `MDX` component, exactly like `/about`, `/cookies` and the legal pages, so a
+  long FAQ is a long scrolling page. Directory Kit (the reference the Jira
+  ticket names) uses collapsible question rows. An accordion would shorten the
+  page and make scanning easier, but it needs a client component, and the
+  answers must stay in the server-rendered HTML for the `FAQPage` rich result
+  and the `.md` mirror to keep working.
+- **Options.**
+    - **Plain prose (current).** Zero client JS, identical to every other static
+      info page, and the operator controls the look through the data repo's
+      Markdown. Content and structured data come from exactly one source.
+    - A client accordion that hydrates over the same server-rendered headings
+      and answers (`<details>`/`<summary>` would even do it without JS). Nicer
+      for long FAQs; a second rendering path to keep consistent with the parser's
+      heading rules, and a first client component on an otherwise static page.
+- **Default.** **Plain prose.** Revisit if a Work ships an FAQ long enough that
+  scanning it becomes the complaint. `<details>`-based progressive enhancement
+  is the cheapest upgrade path and would not break the parser or the mirror.
+
+---
+
+## How to add a question
+
+1. Pick the next available `Q-NNN…` id under the relevant spec.
+2. Use the format above.
+3. Always include a **Default**; never block on a question.
+4. Append a line to [`log.md`](log.md):
+   `YYYY-MM-DD questions: added Q-NNN — short summary`.

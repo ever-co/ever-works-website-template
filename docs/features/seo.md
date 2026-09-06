@@ -58,13 +58,32 @@ Generates:
 
 Used for site-wide brand identity on the homepage and about pages.
 
+### FAQPage Schema
+
+`generateFaqPageSchema()` builds the `FAQPage` block rendered on `/faq` by
+`components/seo/faq-json-ld.tsx`. Its question/answer pairs are extracted from
+the page's own content by `lib/seo/faq-parser.ts`, so the rich result always
+matches what a visitor reads:
+
+- Every `##`--`######` heading in `pages/faq.<locale>.md` becomes a `Question`,
+  and the prose beneath it becomes the `acceptedAnswer`. `#` (H1) is the
+  document title and is ignored, and a heading immediately followed by another
+  heading is treated as a section grouping rather than a question.
+- A `faqs: [{ question, answer }]` array in the file's frontmatter is
+  authoritative whenever it is present -- the headings are not consulted at
+  all, so `faqs: []` opts a page out of the rich result while keeping its
+  prose.
+- Nothing is emitted when no question/answer pair can be extracted -- an
+  `FAQPage` with an empty `mainEntity` is invalid structured data.
+
+See [Spec 046](../spec/049-faq-page/spec.md) for the full content contract.
+
 ### Other Schema Types
 
 The module provides generators for:
 
 - **WebSite** -- Site-level metadata with search action
 - **BreadcrumbList** -- Navigation breadcrumbs
-- **FAQPage** -- FAQ sections with question/answer pairs
 - **ItemList** -- Category and collection listing pages
 
 ## Hreflang Tags
@@ -241,16 +260,19 @@ Every public page also serves a clean Markdown twin at the same path with `.md` 
 - `/collections/<slug>.md`
 - `/comparisons/<slug>.md`
 - `/pages/<slug>.md`
-- `/about.md`, `/help.md`, `/pricing.md`, `/privacy-policy.md`, `/terms-of-service.md`, `/cookies.md`
+- `/about.md`, `/help.md`, `/faq.md`, `/pricing.md`, `/privacy-policy.md`, `/terms-of-service.md`, `/cookies.md`
 
 Each HTML page advertises its mirror via `<link rel="alternate" type="text/markdown" href="…">`.
 
 How it works:
 
 - `lib/seo/markdown-mirror.ts` exports renderers (`renderItemMarkdown`, `renderCategoryMarkdown`, etc.) that take normalized data and return a Markdown string. They are pure functions with no I/O.
-- `next.config.ts` contains `rewrites` that map every `/path.md` URL to an internal `/path/_md` route handler (one per page type, plus a catch-all under `_static-md` for the static info pages).
+- `next.config.ts` contains `rewrites` that map every `/path.md` URL to an internal `/<locale>/path/md` route handler (one per page type, plus a catch-all under `/<locale>/static-md` for the static info pages). The unprefixed URLs (`/about.md`) rewrite to the default locale's handler explicitly, because `proxy.ts` — which is what adds the locale segment for normal pages — skips every path containing a dot.
+- The internal segment must not start with an underscore: the App Router treats `_foo` as a private folder and removes it from the route table entirely. See [Spec 047](../spec/047-md-mirror-route-reachability/spec.md).
 - The internal route handler reuses the same cached content layer (`getCachedItem`, `getCachedItems`, `getCachedComparisons`, `getCachedPageContent`) the HTML pages use, then delegates rendering to a helper from `lib/seo/markdown-mirror.ts`.
-- Responses set `Content-Type: text/markdown` and `X-Robots-Tag: noindex` so search engines index the canonical HTML, not the mirror.
+- Responses set `Content-Type: text/markdown` and `X-Robots-Tag: noindex` so search engines index the canonical HTML, not the mirror — which is also what keeps the internal `/<locale>/…/md` URLs out of search results.
+- An unknown slug 404s, matching the HTML page it mirrors, rather than rendering an empty document.
+- The category and tag mirrors also read `settings.categories_enabled` / `settings.tags_enabled` from `.works/works.yml`: a site that switches a facet off 404s its HTML listing, and the mirror answers the same rather than publishing a withdrawn surface to agents.
 
 ### `BreadcrumbList` JSON-LD on every page
 

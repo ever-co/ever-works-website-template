@@ -202,6 +202,63 @@ export function generateWebSiteSchema(locale: string, overrides?: { name?: strin
 	};
 }
 
+export interface FaqEntry {
+	question: string;
+	answer: string;
+}
+
+export interface FaqPageSchemaInput {
+	entries: ReadonlyArray<FaqEntry>;
+	url?: string;
+	name?: string;
+	description?: string;
+}
+
+/**
+ * Generate FAQPage schema for pages that answer a list of common questions.
+ *
+ * Google's FAQPage rich result requires at least one `Question` whose
+ * `acceptedAnswer` carries non-empty text, so entries missing either half
+ * are dropped and `null` is returned when nothing usable survives. Callers
+ * must therefore null-check before serialising.
+ *
+ * @see https://developers.google.com/search/docs/appearance/structured-data/faqpage
+ */
+export function generateFaqPageSchema(input: FaqPageSchemaInput) {
+	const entries = input.entries.filter((entry) => entry.question.trim().length > 0 && entry.answer.trim().length > 0);
+
+	if (entries.length === 0) {
+		return null;
+	}
+
+	const schema: Record<string, unknown> = {
+		'@context': 'https://schema.org',
+		'@type': 'FAQPage',
+		mainEntity: entries.map((entry) => ({
+			'@type': 'Question',
+			name: entry.question.trim(),
+			acceptedAnswer: {
+				'@type': 'Answer',
+				text: entry.answer.trim()
+			}
+		}))
+	};
+
+	if (input.name) {
+		schema.name = input.name;
+	}
+
+	if (input.description) {
+		schema.description = input.description;
+	}
+
+	if (input.url) {
+		schema.url = input.url;
+	}
+
+	return schema;
+}
+
 export interface BreadcrumbItem {
 	name: string;
 	url: string;

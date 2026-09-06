@@ -43,6 +43,7 @@
 		"OPEN_USER_MENU": "Open user menu"
 	},
 	"common": {
+		"FAQ": "Veelgestelde vragen",
 		"DISCOVER": "Ontdek",
 		"HOME": "Home",
 		"ABOUT": "Over ons",
@@ -488,6 +489,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "Veelgestelde vragen",
 		"ALL_RIGHTS_RESERVED": "Alle rechten voorbehouden",
 		"BUILT_WITH": "Built with",
 		"CONNECT_WITH_US": "Connect with us",
@@ -3564,6 +3566,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "Help",
+		"FAQ_META_DESCRIPTION": "Antwoorden op de vragen die bezoekers het vaakst stellen over deze directory: bladeren, een vermelding indienen en contact opnemen",
+		"FAQ_INTRO": "Antwoorden op de vragen die ons het vaakst worden gesteld. Vind je niet wat je zoekt? Neem contact met ons op.",
+		"HELP_DESCRIPTION": "Bekijk handleidingen en supportonderwerpen",
 		"LEGAL_BADGE": "Legal",
 		"LAST_UPDATED": "Last updated:",
 		"RELATED_INFORMATION": "Related Information",
@@ -3928,6 +3934,38 @@
 		"NAV_ARTICLE": "Artikel",
 		"FALLBACK_TITLE": "Vergelijking",
 		"VS": "vs"
+	},
+	"blog": {
+		"BADGE_TEXT": "Blog",
+		"TITLE": "Nieuwste artikelen",
+		"DESCRIPTION": "Nieuws, handleidingen en productupdates gepubliceerd vanuit de datarepository.",
+		"EMPTY_TITLE": "Nog geen artikelen",
+		"EMPTY_DESCRIPTION": "Er zijn nog geen blogartikelen gepubliceerd in deze directory. Kom binnenkort terug.",
+		"READ_MORE": "Lees meer",
+		"BY_AUTHOR": "Door {author}",
+		"READING_TIME": "{minutes} min leestijd",
+		"SEARCH_PLACEHOLDER": "Artikelen zoeken…",
+		"SEARCH_LABEL": "Blogartikelen zoeken",
+		"CLEAR_SEARCH": "Zoekopdracht wissen",
+		"RESULTS_COUNT": "{count, plural, one {{count} resultaat voor “{query}”} other {{count} resultaten voor “{query}”}}",
+		"FILTERED_COUNT": "{count, plural, one {{count} artikel} other {{count} artikelen}}",
+		"NO_RESULTS_TITLE": "Geen overeenkomende artikelen",
+		"NO_RESULTS_DESCRIPTION": "Probeer minder of andere zoekwoorden, of blader door de categorieën hierboven.",
+		"CATEGORIES": "Categorieën",
+		"TAGS": "Tags",
+		"ALL": "Alles",
+		"PREVIOUS": "Vorige",
+		"NEXT": "Volgende",
+		"PAGE_OF": "Pagina {page} van {totalPages}",
+		"PAGINATION_LABEL": "Blogpaginering",
+		"CATEGORY_TITLE": "Artikelen in {name}",
+		"CATEGORY_DESCRIPTION": "Alle blogartikelen in de categorie {name}.",
+		"TAG_TITLE": "Artikelen met tag {name}",
+		"TAG_DESCRIPTION": "Alle blogartikelen met de tag {name}.",
+		"BACK_TO_BLOG": "Terug naar blog",
+		"POST_NAVIGATION": "Artikelnavigatie",
+		"PREVIOUS_POST": "Vorig artikel",
+		"NEXT_POST": "Volgend artikel"
 	},
 	"usersDirectory": {
 		"HERO_TITLE": "Gemeenschap",

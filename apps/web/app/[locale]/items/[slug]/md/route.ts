@@ -1,7 +1,7 @@
 /**
  * Internal handler for the `/items/<slug>.md` Markdown mirror.
  *
- * Reachable directly at `/<locale>/items/<slug>/_md`, but the public
+ * Reachable directly at `/<locale>/items/<slug>/md`, but the public
  * URL is `/<locale>/items/<slug>.md` via the rewrite in next.config.ts.
  * Returns the same item content as the HTML page, formatted as
  * Markdown for consumption by AI agents.

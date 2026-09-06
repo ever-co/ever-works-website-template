@@ -11,7 +11,7 @@ Client accounts that registered with an email address and a password can add a
 second sign-in step: a six-digit code emailed to the account address on every
 sign-in. It is off by default and each member turns it on for themselves.
 
-Specification: [Spec 047](../spec/047-email-two-factor-auth/spec.md).
+Specification: [Spec 053](../spec/053-email-two-factor-auth/spec.md).
 
 ## For members
 

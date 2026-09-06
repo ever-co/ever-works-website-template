@@ -4,9 +4,19 @@ import { memo, useCallback, useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { BookOpen, HelpCircle, FileText, Code, Building, Mail, LucideIcon } from "lucide-react";
+import {
+  BookOpen,
+  HelpCircle,
+  MessageCircleQuestion,
+  FileText,
+  Code,
+  Building,
+  Mail,
+  LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ChevronDown } from "./index";
+import { useBlogExists } from "@/hooks/use-blog-exists";
 
 interface MoreMenuItem {
   key: string;
@@ -36,6 +46,13 @@ const MENU_ITEMS_CONFIG: Array<{
       translationKey: "HELP",
       isExternal: false,
       icon: HelpCircle,
+    },
+    {
+      key: "faq",
+      href: "/faq",
+      translationKey: "FAQ",
+      isExternal: false,
+      icon: MessageCircleQuestion,
     },
     {
       key: "docs",
@@ -139,7 +156,16 @@ function MoreMenuComponent({ inline = false, onItemClick }: MoreMenuProps) {
   const [isHovered, setIsHovered] = useState(false);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const menuItems: MoreMenuItem[] = MENU_ITEMS_CONFIG.map((item) => ({
+  // When the site ships its own posts the Blog entry is promoted to the main
+  // navigation and points at the local /blog route, so drop the external
+  // blog.ever.works shortcut here to avoid two "Blog" links with different
+  // destinations. Sites without posts keep the external link unchanged.
+  const { data: blogData } = useBlogExists();
+  const hasLocalBlog = blogData?.exists ?? false;
+
+  const menuItems: MoreMenuItem[] = MENU_ITEMS_CONFIG.filter(
+    (item) => !(item.key === "blog" && hasLocalBlog)
+  ).map((item) => ({
     key: item.key,
     label: t(item.translationKey as keyof IntlMessages["common"]),
     href: item.href,

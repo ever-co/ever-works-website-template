@@ -43,6 +43,7 @@
 		"OPEN_USER_MENU": "Open user menu"
 	},
 	"common": {
+		"FAQ": "FAQ",
 		"DISCOVER": "Discover",
 		"HOME": "Home",
 		"ABOUT": "About",
@@ -548,6 +549,7 @@
 		"COMMENTS_PLACEHOLDER": "Add a comment..."
 	},
 	"footer": {
+		"FAQ": "FAQ",
 		"ALL_RIGHTS_RESERVED": "All rights reserved",
 		"BUILT_WITH": "Built with",
 		"CONNECT_WITH_US": "Connect with us",
@@ -3922,6 +3924,10 @@
 		}
 	},
 	"pages": {
+		"FAQ_BADGE": "Help",
+		"FAQ_META_DESCRIPTION": "Answers to the questions visitors ask most often about this directory — browsing, submitting a listing, and getting in touch",
+		"FAQ_INTRO": "Answers to the questions we are asked most often. If you cannot find what you need, get in touch.",
+		"HELP_DESCRIPTION": "Browse guides and support topics",
 		"LEGAL_BADGE": "Legal",
 		"LAST_UPDATED": "Last updated:",
 		"RELATED_INFORMATION": "Related Information",
@@ -4560,6 +4566,38 @@
 		"NAV_ARTICLE": "Article",
 		"FALLBACK_TITLE": "Comparison",
 		"VS": "vs"
+	},
+	"blog": {
+		"BADGE_TEXT": "Blog",
+		"TITLE": "Latest articles",
+		"DESCRIPTION": "News, guides and product updates published from the data repository.",
+		"EMPTY_TITLE": "No posts yet",
+		"EMPTY_DESCRIPTION": "No blog posts have been published in this directory yet. Please check back soon.",
+		"READ_MORE": "Read more",
+		"BY_AUTHOR": "By {author}",
+		"READING_TIME": "{minutes} min read",
+		"SEARCH_PLACEHOLDER": "Search posts…",
+		"SEARCH_LABEL": "Search blog posts",
+		"CLEAR_SEARCH": "Clear search",
+		"RESULTS_COUNT": "{count, plural, one {{count} result for “{query}”} other {{count} results for “{query}”}}",
+		"FILTERED_COUNT": "{count, plural, one {{count} post} other {{count} posts}}",
+		"NO_RESULTS_TITLE": "No matching posts",
+		"NO_RESULTS_DESCRIPTION": "Try fewer or different keywords, or browse the categories above.",
+		"CATEGORIES": "Categories",
+		"TAGS": "Tags",
+		"ALL": "All",
+		"PREVIOUS": "Previous",
+		"NEXT": "Next",
+		"PAGE_OF": "Page {page} of {totalPages}",
+		"PAGINATION_LABEL": "Blog pagination",
+		"CATEGORY_TITLE": "Posts in {name}",
+		"CATEGORY_DESCRIPTION": "All blog posts filed under {name}.",
+		"TAG_TITLE": "Posts tagged {name}",
+		"TAG_DESCRIPTION": "All blog posts tagged {name}.",
+		"BACK_TO_BLOG": "Back to blog",
+		"POST_NAVIGATION": "Post navigation",
+		"PREVIOUS_POST": "Previous post",
+		"NEXT_POST": "Next post"
 	},
 	"ai_chat": {
 		"LAUNCHER_LABEL": "Open chat",

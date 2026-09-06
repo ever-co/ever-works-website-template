@@ -4,6 +4,7 @@ import { db } from '@/lib/db/drizzle';
 import { users, sessions, clientProfiles } from '@/lib/db/schema';
 import { eq, and, count, gt } from 'drizzle-orm';
 import { getTenantId } from '@/lib/auth/tenant';
+import { getTwoFactorAccountState } from '@/lib/auth/two-factor';
 
 /**
  * @swagger
@@ -59,6 +60,12 @@ export async function GET() {
 			.from(sessions)
 			.where(and(eq(sessions.userId, userId), gt(sessions.expires, new Date())));
 
+		// Spec 046: the 2FA card needs to know whether the toggle may be used at
+		// all (EW-142), and `loginAttemptsCount` / `accountLocked` — previously
+		// hardcoded to 0 / false while the overview rendered them as if real —
+		// now carry the actual 2FA brute-force state (EW-141).
+		const twoFactor = await getTwoFactorAccountState(userId, tenantId);
+
 		return NextResponse.json({
 			success: true,
 			data: {
@@ -66,8 +73,11 @@ export async function GET() {
 				twoFactorEnabled: profile?.twoFactorEnabled ?? false,
 				lastPasswordChange: user.passwordHash ? user.updatedAt?.toISOString() ?? null : null,
 				activeSessionsCount,
-				loginAttemptsCount: 0,
-				accountLocked: false,
+				loginAttemptsCount: twoFactor.failedAttempts,
+				accountLocked: twoFactor.locked,
+				accountLockedUntil: twoFactor.lockedUntil?.toISOString() ?? null,
+				canEnableTwoFactor: twoFactor.canEnableTwoFactor,
+				authMethod: twoFactor.authMethod,
 				passwordExpiresAt: null
 			}
 		});

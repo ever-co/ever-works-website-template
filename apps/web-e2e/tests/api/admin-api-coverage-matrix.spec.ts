@@ -6,6 +6,8 @@ import { ADMIN_STATE_FILE } from '../../helpers/test-data';
 // admin calls must succeed (2xx, not 5xx).
 
 const ADMIN_GET_ENDPOINTS: Array<{ path: string; name: string }> = [
+	{ path: '/api/admin/billing-issues', name: 'billing issues list' },
+	{ path: '/api/admin/billing-issues/stats', name: 'billing issues stats' },
 	{ path: '/api/admin/categories', name: 'categories list' },
 	{ path: '/api/admin/categories/all', name: 'categories all' },
 	{ path: '/api/admin/categories/git', name: 'categories git status' },
@@ -25,6 +27,7 @@ const ADMIN_GET_ENDPOINTS: Array<{ path: string; name: string }> = [
 	{ path: '/api/admin/location-index', name: 'location index' },
 	{ path: '/api/admin/navigation', name: 'admin nav config' },
 	{ path: '/api/admin/notifications', name: 'notifications list' },
+	{ path: '/api/admin/payment-reports', name: 'payment reports list' },
 	{ path: '/api/admin/reports', name: 'reports list' },
 	{ path: '/api/admin/reports/stats', name: 'reports stats' }
 ];

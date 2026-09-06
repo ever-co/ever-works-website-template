@@ -157,4 +157,43 @@ function ListingSkeleton({ className }: { className?: string }) {
 	);
 }
 
-export { Skeleton, TableSkeleton, CardSkeleton, GridSkeleton, ItemDetailSkeleton, ListingSkeleton };
+// Skeleton for the Markdown-backed static info pages (about, terms of
+// service, privacy policy, cookies): a badge, a hero title, the "last
+// updated" chip and a long prose body.
+function StaticPageSkeleton({ className }: { className?: string }) {
+	return (
+		<div className={cn('max-w-7xl mx-auto w-full px-4 py-12 space-y-8', className)}>
+			{/* Breadcrumb */}
+			<Skeleton className="h-4 w-48" />
+
+			{/* Badge + hero title + last-updated chip */}
+			<div className="space-y-6">
+				<Skeleton className="h-9 w-32 rounded-full" />
+				<Skeleton className="h-14 w-full max-w-xl" />
+				<Skeleton className="h-9 w-56 rounded-lg" />
+			</div>
+
+			{/* Content card: a few paragraph blocks */}
+			<div className="rounded-2xl border border-slate-200 dark:border-white/6 p-6 sm:p-8 lg:p-12 space-y-8">
+				{Array.from({ length: 4 }).map((_, sectionIndex) => (
+					<div key={`static-page-skeleton-section-${sectionIndex}`} className="space-y-3">
+						<Skeleton className="h-7 w-1/3" />
+						<Skeleton className="h-4 w-full" />
+						<Skeleton className="h-4 w-full" />
+						<Skeleton className="h-4 w-4/5" />
+					</div>
+				))}
+			</div>
+		</div>
+	);
+}
+
+export {
+	Skeleton,
+	TableSkeleton,
+	CardSkeleton,
+	GridSkeleton,
+	ItemDetailSkeleton,
+	ListingSkeleton,
+	StaticPageSkeleton
+};

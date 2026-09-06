@@ -9,6 +9,7 @@ import {
 } from '../db/queries';
 import { ActivityType } from '../db/schema';
 import { AuthErrorCode } from './auth-error-codes';
+import { issueTwoFactorCode, verifyTwoFactorCode } from './two-factor';
 
 // Re-export AuthErrorCode for backwards compatibility
 export { AuthErrorCode } from './auth-error-codes';
@@ -73,12 +74,16 @@ export const credentialsProvider = Credentials({
 	name: AuthProviders.CREDENTIALS,
 	credentials: {
 		email: { type: 'email' },
-		password: { type: 'password' }
+		password: { type: 'password' },
+		// Email 2FA second factor (EW-139). Absent on the first submit; the
+		// sign-in form re-submits with it once the user has the emailed code.
+		code: { type: 'text' }
 	},
 	authorize: async (credentials) => {
 		try {
 			const email = credentials.email as string;
 			const password = credentials.password as string;
+			const twoFactorCode = typeof credentials.code === 'string' ? credentials.code.trim() : '';
 
 			// Check admin user first via role-based check
 			const foundUser = await getUserByEmail(email);
@@ -112,6 +117,52 @@ export const credentialsProvider = Credentials({
 					if (!clientProfile) {
 						throw new Error(AuthErrorCode.PROFILE_NOT_FOUND);
 					}
+
+					// ── Email two-factor gate (EW-139) ────────────────────────────
+					// This is the AUTHORITATIVE check: `authorize` is the only place
+					// a session is minted, so anything that skips the sign-in server
+					// action (a direct `signIn('credentials', …)` call, a scripted
+					// POST) still has to satisfy it. The password being correct is
+					// explicitly not enough past this point.
+					if (clientProfile.twoFactorEnabled) {
+						if (!twoFactorCode) {
+							// First leg: mint + email a code, then stop. No session.
+							const issued = await issueTwoFactorCode({
+								userId: clientProfile.userId,
+								email: clientProfile.email,
+								tenantId: clientProfile.tenantId,
+								userName: clientProfile.displayName || clientProfile.name
+							});
+							throw new Error(
+								issued.throttled
+									? AuthErrorCode.RATE_LIMITED
+									: issued.emailSent
+										? AuthErrorCode.TWO_FACTOR_REQUIRED
+										: AuthErrorCode.TWO_FACTOR_SEND_FAILED
+							);
+						}
+
+						const verification = await verifyTwoFactorCode(clientProfile.userId, twoFactorCode, {
+							tenantId: clientProfile.tenantId
+						});
+
+						if (!verification.ok) {
+							switch (verification.reason) {
+								case 'locked':
+									throw new Error(AuthErrorCode.TWO_FACTOR_LOCKED);
+								case 'expired':
+									throw new Error(AuthErrorCode.TWO_FACTOR_EXPIRED);
+								case 'not_found':
+									// No live code (never issued, already consumed, or
+									// rotated away) — same remedy as an expired one:
+									// ask for a fresh code.
+									throw new Error(AuthErrorCode.TWO_FACTOR_EXPIRED);
+								default:
+									throw new Error(AuthErrorCode.TWO_FACTOR_INVALID);
+							}
+						}
+					}
+
 					const clientUser = {
 						id: clientProfile.userId,
 						clientProfileId: clientProfile.id,

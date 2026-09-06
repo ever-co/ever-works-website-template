@@ -42,6 +42,8 @@ import { WebhookSubscriptionService } from '@/lib/services/webhook-subscription.
 import { sponsorAdService } from '@/lib/services/sponsor-ad.service';
 import { buildPaymentSucceededBaseEmailData } from '@/lib/payment/webhook-email-data';
 import { assertRelayFulfilment } from '@/lib/payment/relay-fulfilment';
+import { openBillingIssueFromFailedPaymentWebhook } from '@/lib/services/billing-issue.service';
+import { PaymentProvider } from '@/lib/constants/payment';
 const webhookSubscriptionService = new WebhookSubscriptionService();
 
 const appUrl = coreConfig.APP_URL || 'https://demo.ever.works';
@@ -517,11 +519,92 @@ async function handleSubscriptionPaymentSucceeded(data: any) {
 	}
 }
 
+/**
+ * Read one property off an unverified webhook payload.
+ *
+ * The payload arrives as JSON over the wire, so its shape is a claim, not a fact —
+ * `unknown` plus these two guards keeps the Spec 051 extraction below honest
+ * without an `any` (AGENTS.md §4) and without pulling a Stripe payload type into
+ * a file that also serves the platform relay.
+ */
+function readField(source: unknown, key: string): unknown {
+	return source && typeof source === 'object' ? (source as Record<string, unknown>)[key] : undefined;
+}
+
+/** A Stripe reference field is either a bare id or an object Stripe expanded. */
+function readReferenceId(value: unknown): string | null {
+	if (typeof value === 'string' && value) return value;
+
+	const id = readField(value, 'id');
+	return typeof id === 'string' && id ? id : null;
+}
+
+/**
+ * Read the provider's own subscription id off a failed-invoice payload (Spec 051).
+ *
+ * Stripe moved the reference from `invoice.subscription` to
+ * `invoice.parent.subscription_details.subscription` in the 2025 API versions and
+ * both shapes reach this app depending on the account's pinned version, so both
+ * are accepted. Each may be a bare id or an expanded object.
+ */
+function extractProviderSubscriptionId(data: unknown): string | null {
+	const parentDetails = readField(readField(data, 'parent'), 'subscription_details');
+	const candidates = [readField(data, 'subscription'), readField(parentDetails, 'subscription')];
+
+	for (const candidate of candidates) {
+		const id = readReferenceId(candidate);
+		if (id) return id;
+	}
+
+	return null;
+}
+
+/**
+ * Read the reference a refund would target off a failed-invoice payload (Spec 051).
+ *
+ * The invoice's `payment_intent` is what a refund actually needs — the template's
+ * Stripe adapter passes whatever it is given as `payment_intent` to
+ * `refunds.create`. The invoice's `charge` is deliberately NOT used as a fallback:
+ * it is a `ch_…` id, and handing it to the adapter would produce a refund call
+ * that always fails while looking like a valid reference to the admin. The invoice
+ * id is the honest fallback — it records something traceable, and the refund
+ * dialog lets an admin paste the real reference before confirming.
+ */
+function extractProviderPaymentId(data: unknown): string | null {
+	const intent = readReferenceId(readField(data, 'payment_intent'));
+	if (intent) return intent;
+
+	const invoiceId = readField(data, 'id');
+	return typeof invoiceId === 'string' && invoiceId ? invoiceId : null;
+}
+
 async function handleSubscriptionPaymentFailed(data: any) {
 	console.log('Subscription payment failed:', data.id);
 
 	try {
 		await webhookSubscriptionService.handleSubscriptionPaymentFailed(data);
+
+		// Spec 051: surface the failure in the admin Billing Issues queue as well as
+		// in the customer email. Best-effort by design — see the helper's contract.
+		//
+		// `data` here is the Stripe invoice. Its subscription reference moved between
+		// API versions (`invoice.subscription` on older ones, `invoice.parent
+		// .subscription_details.subscription` on 2025+), so both shapes are read; a
+		// miss simply means no issue is opened and the next re-scan picks it up.
+		// The refund target is the invoice's payment intent when Stripe expanded one
+		// — `refunds.create` takes a payment intent, not an invoice id — falling back
+		// to the invoice id, which an admin can correct before refunding.
+		await openBillingIssueFromFailedPaymentWebhook({
+			providerSubscriptionId: extractProviderSubscriptionId(data),
+			paymentProvider: PaymentProvider.STRIPE,
+			providerPaymentId: extractProviderPaymentId(data),
+			amount: typeof data.amount_due === 'number' ? data.amount_due : null,
+			currency: data.currency ?? null,
+			reason: data.last_payment_error?.message
+				? `Payment failed: ${data.last_payment_error.message}`
+				: 'Subscription payment failed (provider webhook)'
+		});
+
 		const customerInfo = extractCustomerInfo(data);
 
 		// Extract payment information

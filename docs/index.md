@@ -14,7 +14,7 @@ The Directory Web Template is a modern, full-stack directory website solution bu
 
 - **Modern Tech Stack**: Next.js 16, React 19, TypeScript, Tailwind CSS, HeroUI React
 - **Turborepo Monorepo**: pnpm workspaces with shared configs, web app, e2e tests, and docs
-- **Flexible Authentication**: NextAuth.js v5, Supabase Auth, OAuth providers (Google, GitHub, Facebook, Twitter, Microsoft)
+- **Flexible Authentication**: NextAuth.js v5, Supabase Auth, OAuth providers (Google, GitHub, Facebook, Twitter, Microsoft), and opt-in [email two-factor authentication](authentication/two-factor-auth.md) for password accounts
 - **Payment Integration**: Stripe, LemonSqueezy, Polar, subscription management
 - **Internationalization**: Multiple languages supported with full RTL support via next-intl
 - **Git-based CMS**: Content synchronization from Git repositories with YAML-based structure

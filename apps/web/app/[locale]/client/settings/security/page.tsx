@@ -9,6 +9,7 @@ import { ActiveSessionsCard } from '@/components/settings/security/active-sessio
 import { LoginHistoryCard } from '@/components/settings/security/login-history-card';
 import { ConnectedAccountsCard } from '@/components/settings/security/connected-accounts-card';
 import { SecurityNotificationsCard } from '@/components/settings/security/security-notifications-card';
+import { TwoFactorCard } from '@/components/settings/security/two-factor-card';
 
 export default async function SecuritySettingsPage() {
 	const t = await getTranslations('settings.SECURITY_PAGE');
@@ -47,6 +48,9 @@ export default async function SecuritySettingsPage() {
 
 					{/* Security overview */}
 					<SecurityOverview />
+
+					{/* Two-factor authentication (spec 053) */}
+					<TwoFactorCard />
 
 					{/* Change password form */}
 					<ChangePasswordForm />

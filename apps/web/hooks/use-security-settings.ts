@@ -10,6 +10,17 @@ interface SecuritySettings {
   activeSessionsCount: number;
   loginAttemptsCount: number;
   accountLocked: boolean;
+  /** ISO timestamp the 2FA lockout lifts, when one is in force (spec 053). */
+  accountLockedUntil?: string | null;
+  /**
+   * Whether the account may turn email 2FA on at all — false for
+   * OAuth-only sign-ups (EW-142). Optional so a client running against an
+   * older deployment simply falls back to "not allowed" rather than
+   * crashing.
+   */
+  canEnableTwoFactor?: boolean;
+  /** How the account authenticates today. */
+  authMethod?: "credentials" | "oauth" | "unknown";
   passwordExpiresAt: string | null;
 }
 
@@ -191,6 +202,54 @@ export function useDisconnectProvider() {
       serverClient.delete(`/api/auth/security/connected-accounts/${encodeURIComponent(provider)}`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: SECURITY_QUERY_KEYS.connectedAccounts });
+    },
+  });
+}
+
+/**
+ * Turn email two-factor authentication on (EW-136 / EW-137).
+ *
+ * The route refuses OAuth-only accounts with 403 + `code: 'OAUTH_ACCOUNT'`;
+ * the card disables the switch for those, so reaching that branch means
+ * something bypassed the UI.
+ */
+export function useEnableTwoFactor() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const response = await serverClient.post("/api/auth/security/2fa/enable", {});
+      const body = response.data as any;
+      if (!response.success || !body?.success) {
+        throw new Error(body?.error || response.error || "Failed to enable two-factor authentication");
+      }
+      return body.data as { twoFactorEnabled: boolean };
+    },
+    onSuccess: () => {
+      // `serverClient` memoises GET responses for five minutes, so a bare
+      // React Query invalidation would refetch straight out of that cache and
+      // hand the card back the PRE-mutation body — the switch would flip back.
+      serverClient.clearCache();
+      queryClient.invalidateQueries({ queryKey: SECURITY_QUERY_KEYS.settings });
+    },
+  });
+}
+
+/** Turn email two-factor authentication off (EW-136 / EW-137). */
+export function useDisableTwoFactor() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const response = await serverClient.post("/api/auth/security/2fa/disable", {});
+      const body = response.data as any;
+      if (!response.success || !body?.success) {
+        throw new Error(body?.error || response.error || "Failed to disable two-factor authentication");
+      }
+      return body.data as { twoFactorEnabled: boolean };
+    },
+    onSuccess: () => {
+      // Same five-minute GET cache as the enable mutation above.
+      serverClient.clearCache();
+      queryClient.invalidateQueries({ queryKey: SECURITY_QUERY_KEYS.settings });
     },
   });
 }

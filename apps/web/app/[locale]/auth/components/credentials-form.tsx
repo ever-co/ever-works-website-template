@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { signInAction, signUp } from '../actions';
 import { ActionState } from '@/lib/auth/middleware';
 import { PropsWithChildren, useActionState, useEffect, useRef, useState, useTransition } from 'react';
-import { User, Lock, Mail, Eye, EyeOff } from 'lucide-react';
+import { User, Lock, Mail, Eye, EyeOff, ShieldCheck } from 'lucide-react';
 import { Button, cn } from '@heroui/react';
 import { useConfig } from '../../config';
 import { useTranslations, useLocale } from 'next-intl';
@@ -37,6 +37,7 @@ export function CredentialsForm({
 	const isLogin = type === 'login';
 	const t = useTranslations('auth');
 	const tCred = useTranslations('admin.CREDENTIALS_FORM');
+	const tTwoFactor = useTranslations('auth.TWO_FACTOR');
 	const locale = useLocale();
 	const searchParams = useSearchParams();
 	const rawRedirect = searchParams.get('redirect') || searchParams.get('callbackUrl');
@@ -63,6 +64,19 @@ export function CredentialsForm({
 	const [authSyncError, setAuthSyncError] = useState<string | null>(null);
 	// Store password locally for autoLogin - NEVER returned from server for security
 	const [pendingPassword, setPendingPassword] = useState<string | null>(null);
+	// ── Email 2FA second step (EW-139) ───────────────────────────────────────
+	// The sign-in action answers TWO_FACTOR_REQUIRED after a correct password
+	// when the account has 2FA on; the form then swaps the password step for a
+	// code step and re-submits email + password + code. The password stays in
+	// component state (`pendingPassword`) so the second submit can prove it
+	// again without asking the user to retype it.
+	const [twoFactorStep, setTwoFactorStep] = useState(false);
+	const [twoFactorCode, setTwoFactorCode] = useState('');
+	const [pendingCode, setPendingCode] = useState<string | null>(null);
+	const [twoFactorExpiresAt, setTwoFactorExpiresAt] = useState<number | null>(null);
+	const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
+	const [resendPending, setResendPending] = useState(false);
+	const [resendNotice, setResendNotice] = useState<string | null>(null);
 	// Once-only guard for the auto-login useEffect. Without this, identity-unstable
 	// deps (refreshSession, invalidateAllUserData, tCred) re-fire the effect after a
 	// successful signIn, kicking off a second signIn fetch that gets aborted by the
@@ -91,11 +105,26 @@ export function CredentialsForm({
 				return tCred('SESSION_REFRESH_FAILED');
 			case AuthErrorCode.PAGE_REFRESH_FAILED:
 				return tCred('PAGE_REFRESH_FAILED');
+			case AuthErrorCode.TWO_FACTOR_REQUIRED:
+				return tTwoFactor('CODE_SENT');
+			case AuthErrorCode.TWO_FACTOR_INVALID:
+				return tTwoFactor('INVALID_CODE');
+			case AuthErrorCode.TWO_FACTOR_EXPIRED:
+				return tTwoFactor('EXPIRED_CODE');
+			case AuthErrorCode.TWO_FACTOR_LOCKED:
+				return tTwoFactor('LOCKED');
+			case AuthErrorCode.TWO_FACTOR_SEND_FAILED:
+				return tTwoFactor('SEND_FAILED');
 			case AuthErrorCode.GENERIC_ERROR:
 			default:
 				return tCred('GENERIC_ERROR_MESSAGE');
 		}
 	};
+
+	// TWO_FACTOR_REQUIRED is not a failure — it is "we emailed you a code".
+	// Render it as a neutral notice on the code step, never as a red error.
+	const isTwoFactorPrompt = (errorCode: string | undefined): boolean =>
+		errorCode === AuthErrorCode.TWO_FACTOR_REQUIRED;
 
 	useEffect(() => {
 		if (!state.success) return;
@@ -162,6 +191,10 @@ export function CredentialsForm({
 					const res = await signIn('credentials', {
 						email: autoLoginEmail,
 						password: autoLoginPassword,
+						// `authorize` re-verifies the 2FA code and consumes it —
+						// the server action's check deliberately left it unspent.
+						// Omitted entirely when the account has no 2FA.
+						...(pendingCode ? { code: pendingCode } : {}),
 						redirect: false
 					});
 
@@ -234,6 +267,7 @@ export function CredentialsForm({
 		redirect,
 		callbackUrlProp,
 		pendingPassword,
+		pendingCode,
 		router,
 		onSuccess,
 		locale,
@@ -241,6 +275,38 @@ export function CredentialsForm({
 		refreshSession,
 		tCred
 	]);
+
+	// Enter (or stay on) the 2FA code step whenever the sign-in action reports
+	// that the account needs one. `twoFactorRequired` accompanies both the
+	// initial TWO_FACTOR_REQUIRED prompt and every subsequent
+	// invalid/expired/locked answer, so the user is never bounced back to the
+	// password step by a wrong code.
+	useEffect(() => {
+		if (!state?.twoFactorRequired) return;
+		setTwoFactorStep(true);
+		setResendNotice(null);
+		if (typeof state.twoFactorExpiresAt === 'string') {
+			setTwoFactorExpiresAt(new Date(state.twoFactorExpiresAt).getTime());
+		}
+		// A rejected code must be retyped; keeping it would let the user
+		// re-submit the same wrong value and spend another attempt by accident.
+		if (state.error && state.error !== AuthErrorCode.TWO_FACTOR_REQUIRED) {
+			setTwoFactorCode('');
+		}
+	}, [state?.twoFactorRequired, state?.twoFactorExpiresAt, state?.error]);
+
+	// Countdown for the current code (EW-140). Purely informational — the
+	// server is the one that enforces the 10-minute window.
+	useEffect(() => {
+		if (!twoFactorStep || !twoFactorExpiresAt) {
+			setSecondsLeft(null);
+			return;
+		}
+		const tick = () => setSecondsLeft(Math.max(0, Math.ceil((twoFactorExpiresAt - Date.now()) / 1000)));
+		tick();
+		const id = setInterval(tick, 1000);
+		return () => clearInterval(id);
+	}, [twoFactorStep, twoFactorExpiresAt]);
 
 	useEffect(() => {
 		if (RECAPTCHA_SITE_KEY.value || process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) {
@@ -251,11 +317,14 @@ export function CredentialsForm({
 			return () => clearTimeout(timeout);
 		}
 	}, []);
+	// The reCAPTCHA gate applies to the password step only. Tokens are
+	// single-use, so re-verifying on the 2FA submit would always fail.
 	const isRecaptchaRequired = !!(RECAPTCHA_SITE_KEY.value || process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY);
-	const isRecaptchaBlocking = isRecaptchaRequired && !captchaToken;
+	const isRecaptchaGateActive = isRecaptchaRequired && !(isLogin && twoFactorStep);
+	const isRecaptchaBlocking = isRecaptchaGateActive && !captchaToken;
 
 	const handleFormAction = async (formData: FormData) => {
-		if (isRecaptchaRequired) {
+		if (isRecaptchaGateActive) {
 			if (!captchaToken) {
 				setCaptchaError(tCred('PLEASE_COMPLETE_CAPTCHA'));
 
@@ -279,7 +348,7 @@ export function CredentialsForm({
 			}
 		}
 
-		if (captchaToken) {
+		if (captchaToken && isRecaptchaGateActive) {
 			formData.append('captchaToken', captchaToken);
 		}
 
@@ -291,9 +360,89 @@ export function CredentialsForm({
 			setPendingPassword(passwordValue);
 		}
 
+		// On the 2FA step the password input is no longer rendered, so replay
+		// the value the user already typed and attach the code (EW-139).
+		if (isLogin && twoFactorStep) {
+			if (!passwordValue && pendingPassword) {
+				formData.set('password', pendingPassword);
+			}
+			const code = twoFactorCode.trim();
+			formData.set('code', code);
+			setPendingCode(code);
+			// Clear the input HERE rather than in the response effect: two
+			// consecutive wrong codes produce an identical action state, so the
+			// effect's dependencies do not change and it never re-runs — the
+			// rejected value would sit in the box and could be resubmitted,
+			// spending another attempt on a code already known to be wrong.
+			setTwoFactorCode('');
+		}
+
 		startTransition(() => {
 			formAction(formData);
 		});
+	};
+
+	/**
+	 * Ask for a fresh code (EW-140's "request a new one" path). The endpoint
+	 * re-checks the password because there is no session yet mid-login. Every
+	 * outcome that would reveal whether the address exists, whether the password
+	 * was right or whether 2FA is on shares one generic 200, so it cannot be
+	 * used to probe for accounts. Once the credentials have checked out it does
+	 * report the truth — 429 when a budget is spent, 502 when the code could not
+	 * be emailed — and both are surfaced here rather than being shown as
+	 * "a new code is on its way" over a code that was never sent.
+	 */
+	const handleResendCode = async () => {
+		const emailValue = state?.email || (document.getElementById('email') as HTMLInputElement | null)?.value;
+		// Refuse while a submission (or the auto-login that follows a successful
+		// one) is in flight: issuing a new code rotates away the one currently
+		// being verified, which would turn a correct code into "expired".
+		if (!emailValue || !pendingPassword || resendPending || isResendBlocked) return;
+
+		setResendPending(true);
+		setResendNotice(null);
+		try {
+			const res = await fetch('/api/auth/2fa/resend', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ email: emailValue, password: pendingPassword })
+			});
+			if (res.status === 429) {
+				setResendNotice(tTwoFactor('RESEND_RATE_LIMITED'));
+				return;
+			}
+			const body = await res.json().catch(() => null);
+			if (!res.ok || !body?.success) {
+				setResendNotice(tTwoFactor('RESEND_FAILED'));
+				return;
+			}
+			const minutes = Number(body?.data?.expiresInMinutes) || 10;
+			setTwoFactorExpiresAt(Date.now() + minutes * 60_000);
+			setTwoFactorCode('');
+			setResendNotice(tTwoFactor('RESEND_SUCCESS'));
+		} catch {
+			setResendNotice(tTwoFactor('RESEND_FAILED'));
+		} finally {
+			setResendPending(false);
+		}
+	};
+
+	// A resend must not race a verification in flight — see `handleResendCode`.
+	const isResendBlocked = pending || isPending || isVerifying || !!state?.success;
+
+	/** Abandon the code step and go back to email + password. */
+	const handleBackToPassword = () => {
+		setTwoFactorStep(false);
+		setTwoFactorCode('');
+		setPendingCode(null);
+		setTwoFactorExpiresAt(null);
+		setResendNotice(null);
+		// The token solved for the first password submit has been spent, and the
+		// widget remounts unsolved. Keeping it would let the form submit with a
+		// token the server then rejects, so drop it and make the user solve the
+		// freshly rendered challenge.
+		setCaptchaToken(null);
+		setCaptchaError(null);
 	};
 
 	// Client-side submit when clientMode is true (admin login path)
@@ -433,7 +582,9 @@ export function CredentialsForm({
 						</div>
 					)}
 
-					{/* Email field */}
+					{/* Email field — read-only on the 2FA step so the user can see
+					    which account the code was sent to but cannot change it
+					    without going back. */}
 					<div className="space-y-1.5">
 						<label htmlFor="email" className="block text-xs font-medium text-gray-600 dark:text-gray-400">
 							{t('EMAIL_ADDRESS')}
@@ -446,11 +597,15 @@ export function CredentialsForm({
 							<input
 								id="email"
 								type="email"
-								className="pl-9 pr-4 w-full py-2 text-sm border border-gray-200 dark:border-white/8 rounded-sm bg-white dark:bg-white/5 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-theme-primary focus:ring-1 focus:ring-theme-primary/20 placeholder:text-gray-400 transition-colors"
+								className={cn(
+									'pl-9 pr-4 w-full py-2 text-sm border border-gray-200 dark:border-white/8 rounded-sm bg-white dark:bg-white/5 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-theme-primary focus:ring-1 focus:ring-theme-primary/20 placeholder:text-gray-400 transition-colors',
+									twoFactorStep && 'opacity-70 cursor-not-allowed'
+								)}
 								placeholder={t('ENTER_YOUR_EMAIL')}
 								name="email"
 								defaultValue={state?.email}
 								required
+								readOnly={twoFactorStep}
 								autoComplete="email"
 								aria-describedby="email-error"
 								aria-required="true"
@@ -459,8 +614,9 @@ export function CredentialsForm({
 						</div>
 					</div>
 
-					{/* Password field */}
-					<div className="space-y-1.5">
+					{/* Password field — kept mounted but hidden during the 2FA step
+					    so its value is still submitted with the code. */}
+					<div className={cn('space-y-1.5', twoFactorStep && 'hidden')}>
 						<label
 							htmlFor="password"
 							className="block text-xs font-medium text-gray-600 dark:text-gray-400"
@@ -523,8 +679,92 @@ export function CredentialsForm({
 						)}
 					</div>
 
+					{/* Two-factor code step (EW-139) */}
+					{isLogin && twoFactorStep && (
+						<div className="space-y-1.5" data-testid="two-factor-step">
+							<label
+								htmlFor="twoFactorCode"
+								className="block text-xs font-medium text-gray-600 dark:text-gray-400"
+							>
+								{tTwoFactor('CODE_LABEL')}
+								<span className="text-red-500 ml-1">*</span>
+							</label>
+							<p className="text-xs text-gray-500 dark:text-gray-400">{tTwoFactor('CODE_HELP')}</p>
+							<div className="relative group">
+								<div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
+									<ShieldCheck className="h-4 w-4 text-gray-400 group-focus-within:text-theme-primary transition-colors" />
+								</div>
+								<input
+									id="twoFactorCode"
+									name="twoFactorCodeInput"
+									type="text"
+									inputMode="numeric"
+									pattern="[0-9]*"
+									maxLength={6}
+									autoFocus
+									autoComplete="one-time-code"
+									data-testid="two-factor-code-input"
+									className="pl-9 pr-4 w-full py-2 text-sm tracking-[0.4em] font-mono border border-gray-200 dark:border-white/8 rounded-sm bg-white dark:bg-white/5 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-theme-primary focus:ring-1 focus:ring-theme-primary/20 placeholder:text-gray-400 placeholder:tracking-normal placeholder:font-sans transition-colors"
+									placeholder={tTwoFactor('CODE_PLACEHOLDER')}
+									value={twoFactorCode}
+									onChange={(e) => setTwoFactorCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+									required
+									aria-required="true"
+									aria-invalid={!!state?.error && !isTwoFactorPrompt(state?.error)}
+								/>
+							</div>
+
+							<div className="flex items-center justify-between gap-2 pt-1">
+								<span className="text-xs text-gray-500 dark:text-gray-400">
+									{secondsLeft !== null && secondsLeft > 0
+										? tTwoFactor('EXPIRES_IN', {
+												minutes: Math.floor(secondsLeft / 60),
+												seconds: String(secondsLeft % 60).padStart(2, '0')
+											})
+										: tTwoFactor('EXPIRED_HINT')}
+								</span>
+								<button
+									type="button"
+									onClick={handleResendCode}
+									disabled={resendPending || isResendBlocked}
+									data-testid="two-factor-resend"
+									className="text-xs font-medium text-theme-primary hover:text-theme-primary/80 hover:underline transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+								>
+									{resendPending ? tTwoFactor('RESENDING') : tTwoFactor('RESEND')}
+								</button>
+							</div>
+
+							{resendNotice && (
+								<p className="text-xs text-gray-600 dark:text-gray-300" role="status">
+									{resendNotice}
+								</p>
+							)}
+
+							<button
+								type="button"
+								onClick={handleBackToPassword}
+								data-testid="two-factor-back"
+								className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:underline transition-colors"
+							>
+								{tTwoFactor('BACK')}
+							</button>
+						</div>
+					)}
+
+					{/* Neutral "we emailed you a code" notice — TWO_FACTOR_REQUIRED
+					    travels in `state.error` but is not a failure. */}
+					{isTwoFactorPrompt(state?.error) && !clientError && (
+						<div
+							className="flex items-center gap-2 p-2.5 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 rounded-lg"
+							role="status"
+						>
+							<ShieldCheck className="shrink-0 w-4 h-4 text-blue-500 dark:text-blue-400" />
+							<p className="text-xs text-blue-700 dark:text-blue-300">{tTwoFactor('CODE_SENT')}</p>
+						</div>
+					)}
+
 					{/* Error message */}
-					{(state?.error || clientError) && (
+					{((state?.error && !isTwoFactorPrompt(state?.error)) || clientError) && (
 						<div className="flex items-center gap-2 p-2.5 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-800/50 rounded-lg">
 							<svg
 								className="shrink-0 w-4 h-4 text-red-500 dark:text-red-400"
@@ -538,7 +778,7 @@ export function CredentialsForm({
 									clipRule="evenodd"
 								/>
 							</svg>
-							<p className="text-xs text-red-700 dark:text-red-300">
+							<p className="text-xs text-red-700 dark:text-red-300" data-testid="auth-error">
 								{getTranslatedErrorMessage(clientError || state?.error)}
 							</p>
 						</div>
@@ -589,7 +829,7 @@ export function CredentialsForm({
 					)}
 
 					{/* Forgot password link (login only) */}
-					{isLogin && (
+					{isLogin && !twoFactorStep && (
 						<div className="flex justify-end">
 							<Link
 								href="/auth/forgot-password"
@@ -600,8 +840,11 @@ export function CredentialsForm({
 						</div>
 					)}
 
-					{/* ReCAPTCHA */}
-					{(RECAPTCHA_SITE_KEY.value || process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) && (
+					{/* ReCAPTCHA — hidden on the 2FA step. A reCAPTCHA token is
+					    single-use, so re-verifying the one solved on the password
+					    step would always fail; the human check has already passed
+					    and the code step has its own per-account attempt limit. */}
+					{(RECAPTCHA_SITE_KEY.value || process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY) && !twoFactorStep && (
 						<div className="mb-4">
 							<div className="flex justify-center">
 								<div className="recaptcha-container">

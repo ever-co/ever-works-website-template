@@ -89,6 +89,31 @@ export function resetRateLimit(key: string): void {
 }
 
 /**
+ * Give back ONE consumed slot for a key, without touching its window.
+ *
+ * The counterpart to a `ratelimit()` call used as an atomic *reservation*:
+ * reserve first (so concurrent callers cannot all pass a check-then-act
+ * gap), then refund when the attempt turns out not to have been the kind
+ * the budget is meant to count. Unlike {@link resetRateLimit} this does not
+ * clear the whole bucket, so one caller's refund cannot wipe out another's
+ * recorded attempts.
+ *
+ * No-op when the key has no live entry.
+ */
+export function refundRateLimit(key: string): void {
+  const entry = rateLimitStore.get(key);
+  if (!entry) return;
+
+  if (Date.now() > entry.resetTime) {
+    rateLimitStore.delete(key);
+    return;
+  }
+
+  entry.count = Math.max(0, entry.count - 1);
+  rateLimitStore.set(key, entry);
+}
+
+/**
  * Get current rate limit status without incrementing
  * @param key - The key to check
  * @param limit - Maximum number of requests allowed

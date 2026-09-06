@@ -19,7 +19,25 @@
 		"ENTER_CREDENTIALS": "Enter your credentials to continue",
 		"DISCOVER_AND_CONNECT": "Discover & Connect",
 		"JOIN_NETWORK_DESC": "Join our network of professionals and unlock new opportunities.",
-		"SIGN_IN_AGREEMENT": "By signing in, you agree to our"
+		"SIGN_IN_AGREEMENT": "By signing in, you agree to our",
+		"TWO_FACTOR": {
+			"CODE_LABEL": "Verification code",
+			"CODE_HELP": "Enter the 6-digit code we emailed to you.",
+			"CODE_PLACEHOLDER": "123456",
+			"CODE_SENT": "We sent a verification code to your email address.",
+			"INVALID_CODE": "That code is not correct. Please check your email and try again.",
+			"EXPIRED_CODE": "This code has expired. Request a new one.",
+			"LOCKED": "Too many incorrect codes. Verification is temporarily blocked. Please try again later.",
+			"SEND_FAILED": "We could not send your verification code. Please try again later.",
+			"EXPIRES_IN": "Expires in {minutes}:{seconds}",
+			"EXPIRED_HINT": "This code has expired. Request a new one.",
+			"RESEND": "Send a new code",
+			"RESENDING": "Sending...",
+			"RESEND_SUCCESS": "A new code is on its way.",
+			"RESEND_FAILED": "We could not send a new code. Please try again.",
+			"RESEND_RATE_LIMITED": "Too many code requests. Please wait before trying again.",
+			"BACK": "Use a different account"
+		}
 	},
 	"header": {
 		"OPEN_USER_MENU": "Open user menu"
@@ -755,6 +773,18 @@
 					"SAME_PASSWORD": "New password must be different from current password",
 					"GENERIC_ERROR": "An error occurred while updating your password. Please try again."
 				}
+			},
+			"TWO_FACTOR": {
+				"TITLE": "Two-Factor Authentication",
+				"DESCRIPTION": "Add a second step to sign-in using a code sent to your email",
+				"EMAIL_METHOD": "Email verification code",
+				"ENABLED": "Enabled",
+				"DISABLED": "Disabled",
+				"TOGGLE_LABEL": "Toggle two-factor authentication",
+				"OAUTH_BLOCKED": "You cannot set up two-factor authentication because you signed up with OAuth.",
+				"ENABLED_HINT": "Each sign-in will ask for a code sent to your email address.",
+				"LOAD_ERROR": "Failed to load two-factor authentication settings",
+				"ERROR": "Could not update two-factor authentication. Please try again."
 			}
 		},
 		"THEME_COLORS_PAGE": {

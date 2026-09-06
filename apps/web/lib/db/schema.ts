@@ -236,6 +236,13 @@ export const clientProfiles = pgTable(
 			.notNull()
 			.default('public'),
 		twoFactorEnabled: boolean('two_factor_enabled').default(false),
+		// Rolling counter of consecutive failed 2FA code verifications. Survives
+		// code rotation (a resend does NOT reset it) so an attacker cannot clear
+		// the brute-force budget by asking for a fresh code. Reset to 0 on a
+		// successful verification and when an expired lock is observed.
+		twoFactorFailedAttempts: integer('two_factor_failed_attempts').default(0),
+		// When set and in the future, 2FA code validation is refused outright.
+		twoFactorLockedUntil: timestamp('two_factor_locked_until', { mode: 'date' }),
 		emailVerified: boolean('email_verified').default(false),
 		totalSubmissions: integer('total_submissions').default(0),
 		notes: text('notes'),
@@ -398,6 +405,70 @@ export const passwordResetTokens = pgTable('passwordResetTokens', {
 }, (table) => [
 	index('password_reset_tokens_tenant_id_idx').on(table.tenantId)
 ]);
+
+/**
+ * One-time email 2FA login codes (spec 053).
+ *
+ * **Only a hash of the code is stored** (`codeHash`, hex HMAC-SHA256 of
+ * the plaintext under a server-only key). The plaintext exists solely
+ * inside the request that mints it and inside the email that carries it,
+ * and the key lives in the environment rather than the database — so a
+ * dump alone never yields a usable code, even though the six-digit space
+ * would be trivial to reverse against a bare digest. Verification
+ * re-hashes the submitted code and compares the two digests in constant
+ * time.
+ *
+ * Rotate-on-issue, like `verificationTokens` / `passwordResetTokens`:
+ * issuing a code deletes every earlier unconsumed code for that user, so
+ * at most one code is live at any moment and the newest email is always
+ * the valid one.
+ *
+ * `attempts` counts failed verifications against THIS code. The
+ * user-level brute-force budget lives on
+ * `clientProfiles.twoFactorFailedAttempts` / `twoFactorLockedUntil`
+ * because it must survive code rotation.
+ */
+export const twoFactorCodes = pgTable(
+	'twoFactorCodes',
+	{
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		userId: text('userId')
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		email: text('email').notNull(),
+		// Hex HMAC-SHA256 digest of the 6-digit code, keyed by AUTH_SECRET (or
+		// TWO_FACTOR_CODE_SECRET). Never the code itself, and not reversible
+		// without that key.
+		codeHash: text('code_hash').notNull(),
+		expires: timestamp('expires', { mode: 'date' }).notNull(),
+		attempts: integer('attempts').notNull().default(0),
+		consumedAt: timestamp('consumed_at', { mode: 'date' }),
+		createdAt: timestamp('created_at').notNull().defaultNow(),
+		tenantId: text('tenant_id').references(() => tenant.id, { onDelete: 'cascade' })
+	},
+	(table) => [
+		index('two_factor_codes_user_id_idx').on(table.userId),
+		index('two_factor_codes_expires_idx').on(table.expires),
+		index('two_factor_codes_tenant_id_idx').on(table.tenantId),
+		// "At most one live code per user" is not a convention here, it is the
+		// invariant the whole verification path is written against:
+		// `verifyTwoFactorCode` reads the NEWEST row with `consumed_at IS NULL`
+		// and treats it as *the* code, so a second unconsumed row would leave a
+		// stale code silently valid behind the one the user was just emailed.
+		// `issueTwoFactorCode` upholds it by marking earlier rows consumed inside
+		// a transaction guarded by a per-user advisory lock — but that is a
+		// property of one function, and this is the same statement made where it
+		// cannot be bypassed: any future insert that forgets the rotation, or a
+		// race the lock does not cover, fails loudly instead of quietly leaving
+		// two codes alive. PARTIAL, so consumed rows (kept because the issuance
+		// budget counts them) stay unconstrained.
+		uniqueIndex('two_factor_codes_active_user_idx')
+			.on(table.userId)
+			.where(sql`consumed_at IS NULL`)
+	]
+);
 
 export const newsletterSubscriptions = pgTable('newsletterSubscriptions', {
 	id: text('id')
@@ -722,6 +793,8 @@ export type NewActivityLog = typeof activityLogs.$inferInsert;
 export type NewsletterSubscription = typeof newsletterSubscriptions.$inferSelect;
 export type NewNewsletterSubscription = typeof newsletterSubscriptions.$inferInsert;
 export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+export type TwoFactorCode = typeof twoFactorCodes.$inferSelect;
+export type NewTwoFactorCode = typeof twoFactorCodes.$inferInsert;
 export type Role = typeof roles.$inferSelect;
 export type NewRole = typeof roles.$inferInsert;
 
@@ -765,7 +838,13 @@ export enum ActivityType {
 	/** Admin closed a billing issue without a refund (Spec 051). */
 	ADMIN_BILLING_ISSUE_RESOLVED = 'ADMIN_BILLING_ISSUE_RESOLVED',
 	/** Admin exported a payment report (Spec 052). */
-	ADMIN_PAYMENT_REPORT_EXPORTED = 'ADMIN_PAYMENT_REPORT_EXPORTED'
+	ADMIN_PAYMENT_REPORT_EXPORTED = 'ADMIN_PAYMENT_REPORT_EXPORTED',
+	// Email two-factor authentication (spec 053)
+	TWO_FACTOR_ENABLED = 'TWO_FACTOR_ENABLED',
+	TWO_FACTOR_DISABLED = 'TWO_FACTOR_DISABLED',
+	TWO_FACTOR_CHALLENGE_SENT = 'TWO_FACTOR_CHALLENGE_SENT',
+	TWO_FACTOR_FAILED = 'TWO_FACTOR_FAILED',
+	TWO_FACTOR_LOCKED = 'TWO_FACTOR_LOCKED'
 }
 
 // ######################### Client Profile Types #########################

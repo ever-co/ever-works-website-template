@@ -19,7 +19,25 @@
 		"ENTER_CREDENTIALS": "Enter your credentials to continue",
 		"DISCOVER_AND_CONNECT": "Discover & Connect",
 		"JOIN_NETWORK_DESC": "Join our network of professionals and unlock new opportunities.",
-		"SIGN_IN_AGREEMENT": "By signing in, you agree to our"
+		"SIGN_IN_AGREEMENT": "By signing in, you agree to our",
+		"TWO_FACTOR": {
+			"CODE_LABEL": "Bestätigungscode",
+			"CODE_HELP": "Geben Sie den 6-stelligen Code ein, den wir Ihnen per E-Mail geschickt haben.",
+			"CODE_PLACEHOLDER": "123456",
+			"CODE_SENT": "Wir haben einen Bestätigungscode an Ihre E-Mail-Adresse gesendet.",
+			"INVALID_CODE": "Dieser Code ist nicht korrekt. Bitte prüfen Sie Ihre E-Mails und versuchen Sie es erneut.",
+			"EXPIRED_CODE": "Dieser Code ist abgelaufen. Bitte fordern Sie einen neuen an.",
+			"LOCKED": "Zu viele falsche Codes. Die Bestätigung ist vorübergehend gesperrt. Bitte versuchen Sie es später erneut.",
+			"SEND_FAILED": "Wir konnten Ihren Bestätigungscode nicht senden. Bitte versuchen Sie es später erneut.",
+			"EXPIRES_IN": "Läuft ab in {minutes}:{seconds}",
+			"EXPIRED_HINT": "Dieser Code ist abgelaufen. Bitte fordern Sie einen neuen an.",
+			"RESEND": "Neuen Code senden",
+			"RESENDING": "Wird gesendet...",
+			"RESEND_SUCCESS": "Ein neuer Code ist unterwegs.",
+			"RESEND_FAILED": "Wir konnten keinen neuen Code senden. Bitte versuchen Sie es erneut.",
+			"RESEND_RATE_LIMITED": "Zu viele Code-Anfragen. Bitte warten Sie, bevor Sie es erneut versuchen.",
+			"BACK": "Anderes Konto verwenden"
+		}
 	},
 	"header": {
 		"OPEN_USER_MENU": "Open user menu"
@@ -672,6 +690,18 @@
 					"ONE_NUMBER": "Eine Zahl",
 					"ONE_SPECIAL": "Ein Sonderzeichen"
 				}
+			},
+			"TWO_FACTOR": {
+				"TITLE": "Zwei-Faktor-Authentifizierung",
+				"DESCRIPTION": "Ergänzen Sie die Anmeldung um einen per E-Mail gesendeten Code",
+				"EMAIL_METHOD": "Bestätigungscode per E-Mail",
+				"ENABLED": "Aktiviert",
+				"DISABLED": "Deaktiviert",
+				"TOGGLE_LABEL": "Zwei-Faktor-Authentifizierung umschalten",
+				"OAUTH_BLOCKED": "Sie können keine Zwei-Faktor-Authentifizierung einrichten, weil Sie sich mit OAuth registriert haben.",
+				"ENABLED_HINT": "Bei jeder Anmeldung wird ein an Ihre E-Mail-Adresse gesendeter Code abgefragt.",
+				"LOAD_ERROR": "Einstellungen zur Zwei-Faktor-Authentifizierung konnten nicht geladen werden",
+				"ERROR": "Zwei-Faktor-Authentifizierung konnte nicht aktualisiert werden. Bitte versuchen Sie es erneut."
 			}
 		},
 		"DANGER_ZONE_CARD": {

@@ -19,7 +19,25 @@
 		"ENTER_CREDENTIALS": "Enter your credentials to continue",
 		"DISCOVER_AND_CONNECT": "Discover & Connect",
 		"JOIN_NETWORK_DESC": "Join our network of professionals and unlock new opportunities.",
-		"SIGN_IN_AGREEMENT": "By signing in, you agree to our"
+		"SIGN_IN_AGREEMENT": "By signing in, you agree to our",
+		"TWO_FACTOR": {
+			"CODE_LABEL": "確認コード",
+			"CODE_HELP": "メールでお送りした 6 桁のコードを入力してください。",
+			"CODE_PLACEHOLDER": "123456",
+			"CODE_SENT": "確認コードをメールアドレス宛に送信しました。",
+			"INVALID_CODE": "コードが正しくありません。メールを確認してもう一度お試しください。",
+			"EXPIRED_CODE": "このコードは有効期限が切れています。新しいコードをリクエストしてください。",
+			"LOCKED": "コードの誤入力が多すぎます。確認は一時的にブロックされています。しばらくしてからお試しください。",
+			"SEND_FAILED": "確認コードを送信できませんでした。しばらくしてからお試しください。",
+			"EXPIRES_IN": "有効期限まで {minutes}:{seconds}",
+			"EXPIRED_HINT": "このコードは有効期限が切れています。新しいコードをリクエストしてください。",
+			"RESEND": "新しいコードを送信",
+			"RESENDING": "送信中...",
+			"RESEND_SUCCESS": "新しいコードを送信しました。",
+			"RESEND_FAILED": "新しいコードを送信できませんでした。もう一度お試しください。",
+			"RESEND_RATE_LIMITED": "コードのリクエストが多すぎます。しばらく待ってからお試しください。",
+			"BACK": "別のアカウントを使う"
+		}
 	},
 	"header": {
 		"OPEN_USER_MENU": "Open user menu"
@@ -660,6 +678,18 @@
 					"SAME_PASSWORD": "New password must be different from current password",
 					"GENERIC_ERROR": "An error occurred while updating your password. Please try again."
 				}
+			},
+			"TWO_FACTOR": {
+				"TITLE": "二要素認証",
+				"DESCRIPTION": "メールで届くコードによる 2 つ目のステップをログインに追加します",
+				"EMAIL_METHOD": "メールの確認コード",
+				"ENABLED": "有効",
+				"DISABLED": "無効",
+				"TOGGLE_LABEL": "二要素認証を切り替える",
+				"OAUTH_BLOCKED": "OAuth でサインアップしたため、二要素認証は設定できません。",
+				"ENABLED_HINT": "ログインのたびに、メールアドレス宛に送信されるコードの入力を求めます。",
+				"LOAD_ERROR": "二要素認証の設定を読み込めませんでした",
+				"ERROR": "二要素認証を更新できませんでした。もう一度お試しください。"
 			}
 		},
 		"DANGER_ZONE_CARD": {

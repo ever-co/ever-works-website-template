@@ -600,6 +600,34 @@ confirm, override, or refine.
   Spec 051 states it adds no new payment abstraction, and an idempotency
   parameter is a change to the shared provider interface and all four adapters —
   it belongs with the seam it changes, not inside an admin feature.
+
+## Spec 053 — Email two-factor authentication
+
+### Q-053a Should admin `users` rows be able to enable email 2FA as well?
+
+- **Context.** Spec 047 stores `two_factor_enabled`, the failed-attempt
+  counter and the lock timestamp on `client_profiles`, and surfaces the
+  toggle on `/client/settings/security`. An **admin** signs in through the
+  same credentials provider but has a `users` row with an admin role and no
+  client profile, so today the 2FA branch in
+  `lib/auth/credentials.ts` simply never fires for them. Admins are the
+  higher-value target, so the asymmetry is worth an explicit decision rather
+  than an accident of where the column happened to live.
+- **Options.**
+    - **Client profiles only (current).** One storage location, one settings
+      surface, no schema change to `users`. Admin accounts in this template are
+      few and typically operator-managed.
+    - Mirror the three columns onto `users`, add an admin-side settings card,
+      and branch on whichever row exists. Broader protection, but it doubles the
+      storage location for the same concept and needs a second settings surface
+      under `/admin`.
+    - Move the columns to `users` for **everyone** and read through the account
+      rather than the profile. Cleanest long-term shape, but it is a migration of
+      a column that already ships on `client_profiles` and is read by three admin
+      query projections and the admin advanced search.
+- **Default.** **Client profiles only.** Revisit together with any future
+  second factor (TOTP / WebAuthn), which would want a single `user`-level
+  factor registry anyway — that is the right moment to pay the migration.
 - **Owner.** Template maintainers.
 - **Status.** `open`.
 
@@ -631,8 +659,69 @@ confirm, override, or refine.
   extend, and `?format=pdf` already returns a 400 naming the supported formats
   rather than failing obscurely. Revisit if an operator asks for a print-ready
   statement rather than a data extract.
+
+### Q-053b Should enabling email 2FA require a verified email address?
+
+- **Context.** Spec 047 lets any credentials account switch on email 2FA. If
+  the address on file is wrong or unreachable, the member locks themselves
+  out at their next sign-in. The obvious guard — refuse to enable until
+  `client_profiles.email_verified` is `true` — is unusable today because that
+  column defaults to `false` and the sign-up flow never flips it, so the
+  guard would refuse essentially every account on a default deployment.
+- **Options.**
+    - **Allow, and guard only the unrecoverable case (current).** Enabling is
+      refused with `503` `EMAIL_NOT_CONFIGURED` when the deployment has no mail
+      provider at all — the case where a code could _never_ arrive — and the
+      operator unlock is documented in
+      [Email Two-Factor Authentication](authentication/two-factor-auth.md).
+    - Require `email_verified`, and make the sign-up flow actually set it.
+      Correct, but it is a change to registration and to every existing row,
+      which belongs in its own spec.
+    - Confirm the factor at enable time: send a code and require it before the
+      switch sticks. Proves deliverability without touching registration, at the
+      cost of an extra route and an extra UI step.
+- **Default.** **Allow, guarding only the unrecoverable case.** Revisit
+  together with any work that makes email verification mandatory at sign-up;
+  the enable-time confirmation is the natural follow-up if lockouts show up in
+  the field.
 - **Owner.** Template maintainers.
 - **Status.** `open`.
+
+---
+
+### Q-053c How should a session-free `/api` route resolve the tenant on a host-routed multi-tenant deployment?
+
+- **Context.** `POST /api/auth/2fa/resend` runs mid-login, so it has no
+  session, and Next middleware does not run for `/api` — the
+  `x-tenant-domain` header the middleware injects is therefore absent and
+  `getTenantId()` falls through to `TENANT_ID` / the default tenant. On a
+  deployment that routes tenants by host, a resend for a member outside that
+  tenant finds no account and (correctly, per the enumeration-safe envelope)
+  reports nothing. This is a property of every session-free `/api` route in
+  the repo, not of this one; the primary issuing path, the sign-in server
+  action, runs behind middleware and is tenant-correct.
+- **Options.**
+    - **Leave it (current).** The sign-in flow always works; only the "send a
+      new code" convenience is affected, and only on host-routed multi-tenant
+      deployments.
+    - Resolve the tenant from the request's own `Host` header inside the route
+      and thread it into the account / profile lookups. Needs a tenant argument
+      on `getClientAccountByEmail`, `verifyClientPassword` and
+      `getClientProfileByUserId`, which every other caller shares.
+    - Make the resend button re-submit the sign-in server action without a
+      code, so the issuing path is always the tenant-correct one, and keep the
+      route for programmatic callers.
+- **Default.** ~~Leave it~~ — **resolved at the resolver**, which turned out
+  to be a fourth option none of the three above described: `getTenantId()`'s
+  header step now falls back to the request's own `Host` when
+  `x-tenant-domain` is absent. That is the same value `proxy.ts` copies into
+  the header, so it trusts nothing new; it changes no signature, so the shared
+  helpers keep their callers; and it fixes every session-free `/api` route at
+  once, including a POST straight to `/api/auth/callback/credentials`. It can
+  only ever select an **existing** `tenant` row, so an unrecognised host falls
+  through to `TENANT_ID` / the default tenant exactly as before.
+- **Owner.** Template maintainers.
+- **Status.** `resolved` (PR #1048).
 
 ---
 

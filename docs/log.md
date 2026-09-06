@@ -55,6 +55,9 @@ sidebar_position: 99
   — so the pathname comparison is the load-bearing assertion. Covers the six
   static info pages, `/pages/<slug>` and a runtime-discovered item detail
   page, across the default and `/fr` locale prefixes (PR #1046).
+- `spec-053`: email two-factor authentication for client accounts — enable/disable card on `/client/settings/security`, hashed six-digit code emailed on every credentials sign-in, 10-minute expiry with resend, 5-failure / 15-minute database-tracked lockout, and OAuth-only accounts refused in the UI and at the API ([spec 053](spec/053-email-two-factor-auth/spec.md), [plan](spec/053-email-two-factor-auth/plan.md), [tasks](spec/053-email-two-factor-auth/tasks.md), Jira EW-135 … EW-142, PR #1048).
+- `docs/authentication`: added [Email Two-Factor Authentication](authentication/two-factor-auth.md) covering the member flow, the three `TWO_FACTOR_*` env vars, the operator unlock procedure, and the hash-only storage contract (PR #1048).
+- `questions`: added Q-047a — should admin `users` rows get email 2FA too? Default: no, client profiles only. Added Q-047b — should enabling 2FA require a verified email address? Default: allow, and guard only the unrecoverable no-mail-provider case. Added Q-047c — how should a session-free `/api` route resolve the tenant on a host-routed multi-tenant deployment? Resolved: `getTenantId()` falls back to the request's own `Host` when the proxy-injected `x-tenant-domain` is absent, which is what happens on every `/api` route (PR #1048).
 
 ## 2026-09-03
 
@@ -109,6 +112,7 @@ why** at a higher level than per-commit diffs.
 ## 2026-08-23 — Chore: force LF for container scripts (.gitattributes)
 
 - infra: `docker-entrypoint.sh`, `*.sh` and the Dockerfiles are now `text eol=lf` in `.gitattributes`. A Windows checkout (`core.autocrlf=true`) produced a `#!/bin/sh\r` shebang and the built site image died with `exec /usr/local/bin/docker-entrypoint.sh: no such file or directory` (2026-08-23, local image build while the CI runner pool was stalled). No runtime change for CI-built images. (PR: pending)
+- infra: `docker-entrypoint.sh`, `*.sh` and the Dockerfiles are now `text eol=lf` in `.gitattributes`. A Windows checkout (`core.autocrlf=true`) produced `#!/bin/sh\r` (a trailing carriage return, written here as an escape rather than as a literal CR — the literal is what a Windows checkout kept rewriting) and the built site image died with `exec /usr/local/bin/docker-entrypoint.sh: no such file or directory` (2026-08-23, local image build while the CI runner pool was stalled). No runtime change for CI-built images. (PR: pending)
 
 ## 2026-08-22
 

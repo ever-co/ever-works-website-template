@@ -10,6 +10,12 @@ const SECURITY_ACTIONS: ActivityType[] = [
 	ActivityType.SIGN_OUT,
 	ActivityType.UPDATE_PASSWORD,
 	ActivityType.VERIFY_EMAIL,
+	// Spec 046: turning email 2FA on or off, and the brute-force lockout, are
+	// security events the account owner must be able to see here — logging them
+	// without listing them would leave an audit trail nobody can read.
+	ActivityType.TWO_FACTOR_ENABLED,
+	ActivityType.TWO_FACTOR_DISABLED,
+	ActivityType.TWO_FACTOR_LOCKED,
 ];
 
 /**

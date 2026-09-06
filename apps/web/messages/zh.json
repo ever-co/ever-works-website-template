@@ -19,7 +19,25 @@
 		"ENTER_CREDENTIALS": "Enter your credentials to continue",
 		"DISCOVER_AND_CONNECT": "Discover & Connect",
 		"JOIN_NETWORK_DESC": "Join our network of professionals and unlock new opportunities.",
-		"SIGN_IN_AGREEMENT": "By signing in, you agree to our"
+		"SIGN_IN_AGREEMENT": "By signing in, you agree to our",
+		"TWO_FACTOR": {
+			"CODE_LABEL": "验证码",
+			"CODE_HELP": "请输入我们通过邮件发送给您的 6 位验证码。",
+			"CODE_PLACEHOLDER": "123456",
+			"CODE_SENT": "我们已将验证码发送到您的邮箱。",
+			"INVALID_CODE": "验证码不正确。请检查邮件后重试。",
+			"EXPIRED_CODE": "验证码已过期，请重新获取。",
+			"LOCKED": "错误验证码次数过多，验证已被临时阻止，请稍后再试。",
+			"SEND_FAILED": "无法发送验证码，请稍后再试。",
+			"EXPIRES_IN": "{minutes}:{seconds} 后过期",
+			"EXPIRED_HINT": "验证码已过期，请重新获取。",
+			"RESEND": "发送新验证码",
+			"RESENDING": "发送中...",
+			"RESEND_SUCCESS": "新的验证码正在发送。",
+			"RESEND_FAILED": "无法发送新的验证码，请重试。",
+			"RESEND_RATE_LIMITED": "验证码请求过于频繁，请稍后再试。",
+			"BACK": "使用其他账户"
+		}
 	},
 	"header": {
 		"OPEN_USER_MENU": "Open user menu"
@@ -671,6 +689,18 @@
 					"ONE_NUMBER": "一个数字",
 					"ONE_SPECIAL": "一个特殊字符"
 				}
+			},
+			"TWO_FACTOR": {
+				"TITLE": "双重身份验证",
+				"DESCRIPTION": "使用发送到您邮箱的验证码为登录添加第二步验证",
+				"EMAIL_METHOD": "邮箱验证码",
+				"ENABLED": "已启用",
+				"DISABLED": "已停用",
+				"TOGGLE_LABEL": "切换双重身份验证",
+				"OAUTH_BLOCKED": "由于您通过 OAuth 注册，无法设置双重身份验证。",
+				"ENABLED_HINT": "每次登录都会要求输入发送到您邮箱的验证码。",
+				"LOAD_ERROR": "无法加载双重身份验证设置",
+				"ERROR": "无法更新双重身份验证，请重试。"
 			}
 		},
 		"DANGER_ZONE_CARD": {

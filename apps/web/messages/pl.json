@@ -19,7 +19,25 @@
 		"ENTER_CREDENTIALS": "Enter your credentials to continue",
 		"DISCOVER_AND_CONNECT": "Discover & Connect",
 		"JOIN_NETWORK_DESC": "Join our network of professionals and unlock new opportunities.",
-		"SIGN_IN_AGREEMENT": "By signing in, you agree to our"
+		"SIGN_IN_AGREEMENT": "By signing in, you agree to our",
+		"TWO_FACTOR": {
+			"CODE_LABEL": "Kod weryfikacyjny",
+			"CODE_HELP": "Wpisz 6-cyfrowy kod, który wysłaliśmy na Twój e-mail.",
+			"CODE_PLACEHOLDER": "123456",
+			"CODE_SENT": "Wysłaliśmy kod weryfikacyjny na Twój adres e-mail.",
+			"INVALID_CODE": "Ten kod jest nieprawidłowy. Sprawdź e-mail i spróbuj ponownie.",
+			"EXPIRED_CODE": "Ten kod wygasł. Poproś o nowy.",
+			"LOCKED": "Zbyt wiele błędnych kodów. Weryfikacja jest tymczasowo zablokowana. Spróbuj później.",
+			"SEND_FAILED": "Nie udało się wysłać kodu weryfikacyjnego. Spróbuj później.",
+			"EXPIRES_IN": "Wygasa za {minutes}:{seconds}",
+			"EXPIRED_HINT": "Ten kod wygasł. Poproś o nowy.",
+			"RESEND": "Wyślij nowy kod",
+			"RESENDING": "Wysyłanie...",
+			"RESEND_SUCCESS": "Nowy kod jest w drodze.",
+			"RESEND_FAILED": "Nie udało się wysłać nowego kodu. Spróbuj ponownie.",
+			"RESEND_RATE_LIMITED": "Zbyt wiele żądań kodu. Odczekaj przed kolejną próbą.",
+			"BACK": "Użyj innego konta"
+		}
 	},
 	"header": {
 		"OPEN_USER_MENU": "Open user menu"
@@ -660,6 +678,18 @@
 					"SAME_PASSWORD": "New password must be different from current password",
 					"GENERIC_ERROR": "An error occurred while updating your password. Please try again."
 				}
+			},
+			"TWO_FACTOR": {
+				"TITLE": "Uwierzytelnianie dwuskładnikowe",
+				"DESCRIPTION": "Dodaj drugi krok logowania z kodem wysyłanym na e-mail",
+				"EMAIL_METHOD": "Kod weryfikacyjny e-mail",
+				"ENABLED": "Włączone",
+				"DISABLED": "Wyłączone",
+				"TOGGLE_LABEL": "Przełącz uwierzytelnianie dwuskładnikowe",
+				"OAUTH_BLOCKED": "Nie możesz skonfigurować uwierzytelniania dwuskładnikowego, ponieważ rejestracja nastąpiła przez OAuth.",
+				"ENABLED_HINT": "Przy każdym logowaniu poprosimy o kod wysłany na Twój adres e-mail.",
+				"LOAD_ERROR": "Nie udało się wczytać ustawień uwierzytelniania dwuskładnikowego",
+				"ERROR": "Nie udało się zaktualizować uwierzytelniania dwuskładnikowego. Spróbuj ponownie."
 			}
 		},
 		"DANGER_ZONE_CARD": {

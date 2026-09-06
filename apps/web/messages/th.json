@@ -19,7 +19,25 @@
 		"ENTER_CREDENTIALS": "Enter your credentials to continue",
 		"DISCOVER_AND_CONNECT": "Discover & Connect",
 		"JOIN_NETWORK_DESC": "Join our network of professionals and unlock new opportunities.",
-		"SIGN_IN_AGREEMENT": "By signing in, you agree to our"
+		"SIGN_IN_AGREEMENT": "By signing in, you agree to our",
+		"TWO_FACTOR": {
+			"CODE_LABEL": "รหัสยืนยัน",
+			"CODE_HELP": "กรอกรหัส 6 หลักที่เราส่งไปยังอีเมลของคุณ",
+			"CODE_PLACEHOLDER": "123456",
+			"CODE_SENT": "เราได้ส่งรหัสยืนยันไปยังอีเมลของคุณแล้ว",
+			"INVALID_CODE": "รหัสไม่ถูกต้อง กรุณาตรวจสอบอีเมลแล้วลองใหม่",
+			"EXPIRED_CODE": "รหัสนี้หมดอายุแล้ว กรุณาขอรหัสใหม่",
+			"LOCKED": "ใส่รหัสผิดหลายครั้งเกินไป การยืนยันถูกระงับชั่วคราว กรุณาลองใหม่ภายหลัง",
+			"SEND_FAILED": "เราไม่สามารถส่งรหัสยืนยันได้ กรุณาลองใหม่ภายหลัง",
+			"EXPIRES_IN": "หมดอายุใน {minutes}:{seconds}",
+			"EXPIRED_HINT": "รหัสนี้หมดอายุแล้ว กรุณาขอรหัสใหม่",
+			"RESEND": "ส่งรหัสใหม่",
+			"RESENDING": "กำลังส่ง...",
+			"RESEND_SUCCESS": "กำลังส่งรหัสใหม่",
+			"RESEND_FAILED": "เราไม่สามารถส่งรหัสใหม่ได้ กรุณาลองใหม่",
+			"RESEND_RATE_LIMITED": "ขอรหัสบ่อยเกินไป กรุณารอสักครู่ก่อนลองใหม่",
+			"BACK": "ใช้บัญชีอื่น"
+		}
 	},
 	"header": {
 		"OPEN_USER_MENU": "Open user menu"
@@ -660,6 +678,18 @@
 					"SAME_PASSWORD": "New password must be different from current password",
 					"GENERIC_ERROR": "An error occurred while updating your password. Please try again."
 				}
+			},
+			"TWO_FACTOR": {
+				"TITLE": "การยืนยันตัวตนสองขั้นตอน",
+				"DESCRIPTION": "เพิ่มขั้นตอนที่สองในการเข้าสู่ระบบด้วยรหัสที่ส่งไปยังอีเมลของคุณ",
+				"EMAIL_METHOD": "รหัสยืนยันทางอีเมล",
+				"ENABLED": "เปิดใช้งาน",
+				"DISABLED": "ปิดใช้งาน",
+				"TOGGLE_LABEL": "เปิดหรือปิดการยืนยันตัวตนสองขั้นตอน",
+				"OAUTH_BLOCKED": "คุณไม่สามารถตั้งค่าการยืนยันตัวตนสองขั้นตอนได้ เนื่องจากคุณสมัครด้วย OAuth",
+				"ENABLED_HINT": "ทุกครั้งที่เข้าสู่ระบบ ระบบจะขอรหัสที่ส่งไปยังอีเมลของคุณ",
+				"LOAD_ERROR": "ไม่สามารถโหลดการตั้งค่าการยืนยันตัวตนสองขั้นตอนได้",
+				"ERROR": "ไม่สามารถอัปเดตการยืนยันตัวตนสองขั้นตอนได้ กรุณาลองใหม่"
 			}
 		},
 		"DANGER_ZONE_CARD": {

@@ -19,7 +19,25 @@
 		"ENTER_CREDENTIALS": "Enter your credentials to continue",
 		"DISCOVER_AND_CONNECT": "Discover & Connect",
 		"JOIN_NETWORK_DESC": "Join our network of professionals and unlock new opportunities.",
-		"SIGN_IN_AGREEMENT": "By signing in, you agree to our"
+		"SIGN_IN_AGREEMENT": "By signing in, you agree to our",
+		"TWO_FACTOR": {
+			"CODE_LABEL": "رمز التحقق",
+			"CODE_HELP": "أدخل الرمز المكوّن من 6 أرقام الذي أرسلناه إلى بريدك الإلكتروني.",
+			"CODE_PLACEHOLDER": "123456",
+			"CODE_SENT": "أرسلنا رمز تحقق إلى بريدك الإلكتروني.",
+			"INVALID_CODE": "هذا الرمز غير صحيح. تحقّق من بريدك وحاول مرة أخرى.",
+			"EXPIRED_CODE": "انتهت صلاحية هذا الرمز. اطلب رمزًا جديدًا.",
+			"LOCKED": "محاولات خاطئة كثيرة. التحقق محظور مؤقتًا. حاول لاحقًا.",
+			"SEND_FAILED": "تعذّر إرسال رمز التحقق. حاول لاحقًا.",
+			"EXPIRES_IN": "تنتهي الصلاحية خلال {minutes}:{seconds}",
+			"EXPIRED_HINT": "انتهت صلاحية هذا الرمز. اطلب رمزًا جديدًا.",
+			"RESEND": "إرسال رمز جديد",
+			"RESENDING": "جارٍ الإرسال...",
+			"RESEND_SUCCESS": "رمز جديد في الطريق.",
+			"RESEND_FAILED": "تعذّر إرسال رمز جديد. يرجى المحاولة مرة أخرى.",
+			"RESEND_RATE_LIMITED": "طلبات رموز كثيرة. يرجى الانتظار قبل المحاولة مجددًا.",
+			"BACK": "استخدام حساب آخر"
+		}
 	},
 	"header": {
 		"OPEN_USER_MENU": "Open user menu"
@@ -659,6 +677,18 @@
 					"SAME_PASSWORD": "New password must be different from current password",
 					"GENERIC_ERROR": "An error occurred while updating your password. Please try again."
 				}
+			},
+			"TWO_FACTOR": {
+				"TITLE": "المصادقة الثنائية",
+				"DESCRIPTION": "أضف خطوة ثانية لتسجيل الدخول باستخدام رمز يُرسل إلى بريدك الإلكتروني",
+				"EMAIL_METHOD": "رمز التحقق عبر البريد الإلكتروني",
+				"ENABLED": "مفعّلة",
+				"DISABLED": "معطّلة",
+				"TOGGLE_LABEL": "تبديل المصادقة الثنائية",
+				"OAUTH_BLOCKED": "لا يمكنك إعداد المصادقة الثنائية لأنك سجّلت الدخول عبر OAuth.",
+				"ENABLED_HINT": "سيُطلب عند كل تسجيل دخول رمز يُرسل إلى بريدك الإلكتروني.",
+				"LOAD_ERROR": "تعذّر تحميل إعدادات المصادقة الثنائية",
+				"ERROR": "تعذّر تحديث المصادقة الثنائية. يرجى المحاولة مرة أخرى."
 			}
 		},
 		"DANGER_ZONE_CARD": {

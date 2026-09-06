@@ -19,7 +19,25 @@
 		"ENTER_CREDENTIALS": "Enter your credentials to continue",
 		"DISCOVER_AND_CONNECT": "Discover & Connect",
 		"JOIN_NETWORK_DESC": "Join our network of professionals and unlock new opportunities.",
-		"SIGN_IN_AGREEMENT": "By signing in, you agree to our"
+		"SIGN_IN_AGREEMENT": "By signing in, you agree to our",
+		"TWO_FACTOR": {
+			"CODE_LABEL": "Mã xác minh",
+			"CODE_HELP": "Nhập mã gồm 6 chữ số mà chúng tôi đã gửi qua email.",
+			"CODE_PLACEHOLDER": "123456",
+			"CODE_SENT": "Chúng tôi đã gửi mã xác minh tới địa chỉ email của bạn.",
+			"INVALID_CODE": "Mã không đúng. Vui lòng kiểm tra email và thử lại.",
+			"EXPIRED_CODE": "Mã này đã hết hạn. Hãy yêu cầu mã mới.",
+			"LOCKED": "Quá nhiều mã sai. Việc xác minh tạm thời bị chặn. Vui lòng thử lại sau.",
+			"SEND_FAILED": "Chúng tôi không gửi được mã xác minh. Vui lòng thử lại sau.",
+			"EXPIRES_IN": "Hết hạn sau {minutes}:{seconds}",
+			"EXPIRED_HINT": "Mã này đã hết hạn. Hãy yêu cầu mã mới.",
+			"RESEND": "Gửi mã mới",
+			"RESENDING": "Đang gửi...",
+			"RESEND_SUCCESS": "Mã mới đang được gửi.",
+			"RESEND_FAILED": "Chúng tôi không gửi được mã mới. Vui lòng thử lại.",
+			"RESEND_RATE_LIMITED": "Quá nhiều yêu cầu mã. Vui lòng đợi trước khi thử lại.",
+			"BACK": "Dùng tài khoản khác"
+		}
 	},
 	"header": {
 		"OPEN_USER_MENU": "Mở menu người dùng"
@@ -690,6 +708,18 @@
 					"SAME_PASSWORD": "Mật khẩu mới phải khác với mật khẩu hiện tại",
 					"GENERIC_ERROR": "Đã xảy ra lỗi khi cập nhật mật khẩu của bạn. "
 				}
+			},
+			"TWO_FACTOR": {
+				"TITLE": "Xác thực hai yếu tố",
+				"DESCRIPTION": "Thêm bước thứ hai khi đăng nhập bằng mã gửi tới email của bạn",
+				"EMAIL_METHOD": "Mã xác minh qua email",
+				"ENABLED": "Đã bật",
+				"DISABLED": "Đã tắt",
+				"TOGGLE_LABEL": "Bật hoặc tắt xác thực hai yếu tố",
+				"OAUTH_BLOCKED": "Bạn không thể thiết lập xác thực hai yếu tố vì bạn đã đăng ký bằng OAuth.",
+				"ENABLED_HINT": "Mỗi lần đăng nhập sẽ yêu cầu mã gửi tới địa chỉ email của bạn.",
+				"LOAD_ERROR": "Không tải được cài đặt xác thực hai yếu tố",
+				"ERROR": "Không thể cập nhật xác thực hai yếu tố. Vui lòng thử lại."
 			}
 		},
 		"THEME_COLORS_PAGE": {

@@ -19,7 +19,25 @@
 		"ENTER_CREDENTIALS": "Enter your credentials to continue",
 		"DISCOVER_AND_CONNECT": "Discover & Connect",
 		"JOIN_NETWORK_DESC": "Join our network of professionals and unlock new opportunities.",
-		"SIGN_IN_AGREEMENT": "By signing in, you agree to our"
+		"SIGN_IN_AGREEMENT": "By signing in, you agree to our",
+		"TWO_FACTOR": {
+			"CODE_LABEL": "인증 코드",
+			"CODE_HELP": "이메일로 보내드린 6자리 코드를 입력하세요.",
+			"CODE_PLACEHOLDER": "123456",
+			"CODE_SENT": "이메일 주소로 인증 코드를 보냈습니다.",
+			"INVALID_CODE": "코드가 올바르지 않습니다. 이메일을 확인한 뒤 다시 시도하세요.",
+			"EXPIRED_CODE": "코드가 만료되었습니다. 새 코드를 요청하세요.",
+			"LOCKED": "잘못된 코드를 너무 많이 입력했습니다. 인증이 일시적으로 차단되었습니다. 나중에 다시 시도하세요.",
+			"SEND_FAILED": "인증 코드를 보내지 못했습니다. 나중에 다시 시도하세요.",
+			"EXPIRES_IN": "{minutes}:{seconds} 후 만료",
+			"EXPIRED_HINT": "코드가 만료되었습니다. 새 코드를 요청하세요.",
+			"RESEND": "새 코드 보내기",
+			"RESENDING": "보내는 중...",
+			"RESEND_SUCCESS": "새 코드를 보내고 있습니다.",
+			"RESEND_FAILED": "새 코드를 보내지 못했습니다. 다시 시도해 주세요.",
+			"RESEND_RATE_LIMITED": "코드 요청이 너무 많습니다. 잠시 후 다시 시도하세요.",
+			"BACK": "다른 계정 사용"
+		}
 	},
 	"header": {
 		"OPEN_USER_MENU": "사용자 메뉴 열기"
@@ -690,6 +708,18 @@
 					"SAME_PASSWORD": "새 비밀번호는 현재 비밀번호와 달라야 합니다",
 					"GENERIC_ERROR": "비밀번호 업데이트 중 오류가 발생했습니다. 다시 시도해 주세요."
 				}
+			},
+			"TWO_FACTOR": {
+				"TITLE": "2단계 인증",
+				"DESCRIPTION": "이메일로 받은 코드를 사용해 로그인에 두 번째 단계를 추가합니다",
+				"EMAIL_METHOD": "이메일 인증 코드",
+				"ENABLED": "사용 중",
+				"DISABLED": "사용 안 함",
+				"TOGGLE_LABEL": "2단계 인증 켜기/끄기",
+				"OAUTH_BLOCKED": "OAuth로 가입했기 때문에 2단계 인증을 설정할 수 없습니다.",
+				"ENABLED_HINT": "로그인할 때마다 이메일 주소로 전송된 코드를 요청합니다.",
+				"LOAD_ERROR": "2단계 인증 설정을 불러오지 못했습니다",
+				"ERROR": "2단계 인증을 업데이트하지 못했습니다. 다시 시도해 주세요."
 			}
 		},
 		"THEME_COLORS_PAGE": {

@@ -9,6 +9,8 @@ import {
 	KeyRound,
 	MailCheck,
 	AlertTriangle,
+	ShieldCheck,
+	ShieldOff,
 	RefreshCw,
 	ChevronLeft,
 	ChevronRight,
@@ -61,6 +63,25 @@ const ACTION_META: Record<string, ActionMeta> = {
 		icon: MailCheck,
 		color: "text-violet-600 dark:text-violet-400",
 		bg: "bg-violet-50 dark:bg-violet-900/20 ring-violet-200 dark:ring-violet-800/40",
+	},
+	// Spec 046 — email two-factor authentication.
+	TWO_FACTOR_ENABLED: {
+		label: "Two-factor authentication enabled",
+		icon: ShieldCheck,
+		color: "text-emerald-600 dark:text-emerald-400",
+		bg: "bg-emerald-50 dark:bg-emerald-900/20 ring-emerald-200 dark:ring-emerald-800/40",
+	},
+	TWO_FACTOR_DISABLED: {
+		label: "Two-factor authentication disabled",
+		icon: ShieldOff,
+		color: "text-amber-600 dark:text-amber-400",
+		bg: "bg-amber-50 dark:bg-amber-900/20 ring-amber-200 dark:ring-amber-800/40",
+	},
+	TWO_FACTOR_LOCKED: {
+		label: "Verification locked after failed codes",
+		icon: AlertTriangle,
+		color: "text-red-600 dark:text-red-400",
+		bg: "bg-red-50 dark:bg-red-900/20 ring-red-200 dark:ring-red-800/40",
 	},
 };
 

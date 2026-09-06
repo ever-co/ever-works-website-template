@@ -19,7 +19,25 @@
 		"ENTER_CREDENTIALS": "Enter your credentials to continue",
 		"DISCOVER_AND_CONNECT": "Discover & Connect",
 		"JOIN_NETWORK_DESC": "Join our network of professionals and unlock new opportunities.",
-		"SIGN_IN_AGREEMENT": "By signing in, you agree to our"
+		"SIGN_IN_AGREEMENT": "By signing in, you agree to our",
+		"TWO_FACTOR": {
+			"CODE_LABEL": "Код підтвердження",
+			"CODE_HELP": "Введіть 6-значний код, який ми надіслали на вашу пошту.",
+			"CODE_PLACEHOLDER": "123456",
+			"CODE_SENT": "Ми надіслали код підтвердження на вашу електронну пошту.",
+			"INVALID_CODE": "Цей код неправильний. Перевірте пошту та спробуйте ще раз.",
+			"EXPIRED_CODE": "Термін дії коду минув. Запросіть новий.",
+			"LOCKED": "Забагато неправильних кодів. Перевірку тимчасово заблоковано. Спробуйте пізніше.",
+			"SEND_FAILED": "Не вдалося надіслати код підтвердження. Спробуйте пізніше.",
+			"EXPIRES_IN": "Спливає через {minutes}:{seconds}",
+			"EXPIRED_HINT": "Термін дії коду минув. Запросіть новий.",
+			"RESEND": "Надіслати новий код",
+			"RESENDING": "Надсилання...",
+			"RESEND_SUCCESS": "Новий код уже в дорозі.",
+			"RESEND_FAILED": "Не вдалося надіслати новий код. Спробуйте ще раз.",
+			"RESEND_RATE_LIMITED": "Забагато запитів коду. Зачекайте перед наступною спробою.",
+			"BACK": "Використати інший обліковий запис"
+		}
 	},
 	"header": {
 		"OPEN_USER_MENU": "Open user menu"
@@ -660,6 +678,18 @@
 					"SAME_PASSWORD": "New password must be different from current password",
 					"GENERIC_ERROR": "An error occurred while updating your password. Please try again."
 				}
+			},
+			"TWO_FACTOR": {
+				"TITLE": "Двофакторна автентифікація",
+				"DESCRIPTION": "Додайте другий крок входу з кодом, надісланим на вашу пошту",
+				"EMAIL_METHOD": "Код підтвердження електронною поштою",
+				"ENABLED": "Увімкнено",
+				"DISABLED": "Вимкнено",
+				"TOGGLE_LABEL": "Перемкнути двофакторну автентифікацію",
+				"OAUTH_BLOCKED": "Ви не можете налаштувати двофакторну автентифікацію, оскільки зареєструвалися через OAuth.",
+				"ENABLED_HINT": "Під час кожного входу буде запитано код, надісланий на вашу пошту.",
+				"LOAD_ERROR": "Не вдалося завантажити налаштування двофакторної автентифікації",
+				"ERROR": "Не вдалося оновити двофакторну автентифікацію. Спробуйте ще раз."
 			}
 		},
 		"DANGER_ZONE_CARD": {

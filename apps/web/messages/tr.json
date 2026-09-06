@@ -19,7 +19,25 @@
 		"ENTER_CREDENTIALS": "Enter your credentials to continue",
 		"DISCOVER_AND_CONNECT": "Discover & Connect",
 		"JOIN_NETWORK_DESC": "Join our network of professionals and unlock new opportunities.",
-		"SIGN_IN_AGREEMENT": "By signing in, you agree to our"
+		"SIGN_IN_AGREEMENT": "By signing in, you agree to our",
+		"TWO_FACTOR": {
+			"CODE_LABEL": "Doğrulama kodu",
+			"CODE_HELP": "Size e-postayla gönderdiğimiz 6 haneli kodu girin.",
+			"CODE_PLACEHOLDER": "123456",
+			"CODE_SENT": "E-posta adresinize bir doğrulama kodu gönderdik.",
+			"INVALID_CODE": "Bu kod doğru değil. E-postanızı kontrol edip tekrar deneyin.",
+			"EXPIRED_CODE": "Bu kodun süresi doldu. Yeni bir tane isteyin.",
+			"LOCKED": "Çok fazla hatalı kod. Doğrulama geçici olarak engellendi. Daha sonra tekrar deneyin.",
+			"SEND_FAILED": "Doğrulama kodunuz gönderilemedi. Daha sonra tekrar deneyin.",
+			"EXPIRES_IN": "{minutes}:{seconds} içinde sona erer",
+			"EXPIRED_HINT": "Bu kodun süresi doldu. Yeni bir tane isteyin.",
+			"RESEND": "Yeni kod gönder",
+			"RESENDING": "Gönderiliyor...",
+			"RESEND_SUCCESS": "Yeni bir kod yolda.",
+			"RESEND_FAILED": "Yeni kod gönderilemedi. Lütfen tekrar deneyin.",
+			"RESEND_RATE_LIMITED": "Çok fazla kod isteği. Tekrar denemeden önce bekleyin.",
+			"BACK": "Farklı bir hesap kullan"
+		}
 	},
 	"header": {
 		"OPEN_USER_MENU": "Kullanıcı menüsünü aç"
@@ -690,6 +708,18 @@
 					"SAME_PASSWORD": "Yeni şifre, mevcut şifreden farklı olmalıdır",
 					"GENERIC_ERROR": "Şifreniz güncellenirken bir hata oluştu. Lütfen tekrar deneyin."
 				}
+			},
+			"TWO_FACTOR": {
+				"TITLE": "İki Faktörlü Kimlik Doğrulama",
+				"DESCRIPTION": "E-postanıza gönderilen bir kodla oturum açmaya ikinci bir adım ekleyin",
+				"EMAIL_METHOD": "E-posta doğrulama kodu",
+				"ENABLED": "Etkin",
+				"DISABLED": "Devre dışı",
+				"TOGGLE_LABEL": "İki faktörlü kimlik doğrulamayı aç/kapat",
+				"OAUTH_BLOCKED": "OAuth ile kaydolduğunuz için iki faktörlü kimlik doğrulamayı ayarlayamazsınız.",
+				"ENABLED_HINT": "Her oturum açışta e-posta adresinize gönderilen bir kod istenecek.",
+				"LOAD_ERROR": "İki faktörlü kimlik doğrulama ayarları yüklenemedi",
+				"ERROR": "İki faktörlü kimlik doğrulama güncellenemedi. Lütfen tekrar deneyin."
 			}
 		},
 		"THEME_COLORS_PAGE": {

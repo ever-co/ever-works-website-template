@@ -19,7 +19,25 @@
 		"ENTER_CREDENTIALS": "Enter your credentials to continue",
 		"DISCOVER_AND_CONNECT": "Discover & Connect",
 		"JOIN_NETWORK_DESC": "Join our network of professionals and unlock new opportunities.",
-		"SIGN_IN_AGREEMENT": "By signing in, you agree to our"
+		"SIGN_IN_AGREEMENT": "By signing in, you agree to our",
+		"TWO_FACTOR": {
+			"CODE_LABEL": "सत्यापन कोड",
+			"CODE_HELP": "हमने आपको ईमेल पर जो 6 अंकों का कोड भेजा है, उसे दर्ज करें।",
+			"CODE_PLACEHOLDER": "123456",
+			"CODE_SENT": "हमने आपके ईमेल पते पर एक सत्यापन कोड भेजा है।",
+			"INVALID_CODE": "यह कोड सही नहीं है। अपना ईमेल देखें और पुनः प्रयास करें।",
+			"EXPIRED_CODE": "यह कोड समाप्त हो गया है। नया कोड मांगें।",
+			"LOCKED": "बहुत सारे गलत कोड। सत्यापन अस्थायी रूप से अवरुद्ध है। बाद में पुनः प्रयास करें।",
+			"SEND_FAILED": "हम आपका सत्यापन कोड नहीं भेज सके। बाद में पुनः प्रयास करें।",
+			"EXPIRES_IN": "{minutes}:{seconds} में समाप्त",
+			"EXPIRED_HINT": "यह कोड समाप्त हो गया है। नया कोड मांगें।",
+			"RESEND": "नया कोड भेजें",
+			"RESENDING": "भेजा जा रहा है...",
+			"RESEND_SUCCESS": "नया कोड भेज दिया गया है।",
+			"RESEND_FAILED": "हम नया कोड नहीं भेज सके। कृपया पुनः प्रयास करें।",
+			"RESEND_RATE_LIMITED": "बहुत सारे कोड अनुरोध। पुनः प्रयास से पहले प्रतीक्षा करें।",
+			"BACK": "दूसरा खाता उपयोग करें"
+		}
 	},
 	"header": {
 		"OPEN_USER_MENU": "Open user menu"
@@ -660,6 +678,18 @@
 					"SAME_PASSWORD": "New password must be different from current password",
 					"GENERIC_ERROR": "An error occurred while updating your password. Please try again."
 				}
+			},
+			"TWO_FACTOR": {
+				"TITLE": "दो-चरणीय प्रमाणीकरण",
+				"DESCRIPTION": "आपके ईमेल पर भेजे गए कोड से साइन-इन में दूसरा चरण जोड़ें",
+				"EMAIL_METHOD": "ईमेल सत्यापन कोड",
+				"ENABLED": "सक्षम",
+				"DISABLED": "अक्षम",
+				"TOGGLE_LABEL": "दो-चरणीय प्रमाणीकरण चालू या बंद करें",
+				"OAUTH_BLOCKED": "आप दो-चरणीय प्रमाणीकरण सेट नहीं कर सकते क्योंकि आपने OAuth से साइन अप किया है।",
+				"ENABLED_HINT": "हर साइन-इन पर आपके ईमेल पते पर भेजा गया कोड मांगा जाएगा।",
+				"LOAD_ERROR": "दो-चरणीय प्रमाणीकरण सेटिंग्स लोड नहीं हो सकीं",
+				"ERROR": "दो-चरणीय प्रमाणीकरण अपडेट नहीं हो सका। कृपया पुनः प्रयास करें।"
 			}
 		},
 		"DANGER_ZONE_CARD": {

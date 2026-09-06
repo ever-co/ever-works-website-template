@@ -19,7 +19,25 @@
 		"ENTER_CREDENTIALS": "Enter your credentials to continue",
 		"DISCOVER_AND_CONNECT": "Discover & Connect",
 		"JOIN_NETWORK_DESC": "Join our network of professionals and unlock new opportunities.",
-		"SIGN_IN_AGREEMENT": "By signing in, you agree to our"
+		"SIGN_IN_AGREEMENT": "By signing in, you agree to our",
+		"TWO_FACTOR": {
+			"CODE_LABEL": "Code de vérification",
+			"CODE_HELP": "Saisissez le code à 6 chiffres que nous vous avons envoyé par e-mail.",
+			"CODE_PLACEHOLDER": "123456",
+			"CODE_SENT": "Nous avons envoyé un code de vérification à votre adresse e-mail.",
+			"INVALID_CODE": "Ce code est incorrect. Vérifiez votre e-mail et réessayez.",
+			"EXPIRED_CODE": "Ce code a expiré. Demandez-en un nouveau.",
+			"LOCKED": "Trop de codes incorrects. La vérification est temporairement bloquée. Réessayez plus tard.",
+			"SEND_FAILED": "Nous n'avons pas pu envoyer votre code de vérification. Réessayez plus tard.",
+			"EXPIRES_IN": "Expire dans {minutes}:{seconds}",
+			"EXPIRED_HINT": "Ce code a expiré. Demandez-en un nouveau.",
+			"RESEND": "Envoyer un nouveau code",
+			"RESENDING": "Envoi...",
+			"RESEND_SUCCESS": "Un nouveau code est en route.",
+			"RESEND_FAILED": "Nous n'avons pas pu envoyer un nouveau code. Veuillez réessayer.",
+			"RESEND_RATE_LIMITED": "Trop de demandes de code. Veuillez patienter avant de réessayer.",
+			"BACK": "Utiliser un autre compte"
+		}
 	},
 	"header": {
 		"OPEN_USER_MENU": "Ouvrir le menu utilisateur"
@@ -661,6 +679,18 @@
 					"SAME_PASSWORD": "Le nouveau mot de passe doit être différent du mot de passe actuel",
 					"GENERIC_ERROR": "Une erreur s'est produite lors de la mise à jour de votre mot de passe. Veuillez réessayer."
 				}
+			},
+			"TWO_FACTOR": {
+				"TITLE": "Authentification à deux facteurs",
+				"DESCRIPTION": "Ajoutez une deuxième étape à la connexion avec un code envoyé par e-mail",
+				"EMAIL_METHOD": "Code de vérification par e-mail",
+				"ENABLED": "Activée",
+				"DISABLED": "Désactivée",
+				"TOGGLE_LABEL": "Activer ou désactiver l'authentification à deux facteurs",
+				"OAUTH_BLOCKED": "Vous ne pouvez pas configurer l'authentification à deux facteurs car vous vous êtes inscrit avec OAuth.",
+				"ENABLED_HINT": "Chaque connexion demandera un code envoyé à votre adresse e-mail.",
+				"LOAD_ERROR": "Impossible de charger les paramètres d'authentification à deux facteurs",
+				"ERROR": "Impossible de mettre à jour l'authentification à deux facteurs. Veuillez réessayer."
 			}
 		},
 		"DANGER_ZONE_CARD": {

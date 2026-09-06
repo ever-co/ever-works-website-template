@@ -19,7 +19,25 @@
 		"ENTER_CREDENTIALS": "Enter your credentials to continue",
 		"DISCOVER_AND_CONNECT": "Discover & Connect",
 		"JOIN_NETWORK_DESC": "Join our network of professionals and unlock new opportunities.",
-		"SIGN_IN_AGREEMENT": "By signing in, you agree to our"
+		"SIGN_IN_AGREEMENT": "By signing in, you agree to our",
+		"TWO_FACTOR": {
+			"CODE_LABEL": "Verificatiecode",
+			"CODE_HELP": "Voer de 6-cijferige code in die we je per e-mail hebben gestuurd.",
+			"CODE_PLACEHOLDER": "123456",
+			"CODE_SENT": "We hebben een verificatiecode naar je e-mailadres gestuurd.",
+			"INVALID_CODE": "Die code klopt niet. Controleer je e-mail en probeer het opnieuw.",
+			"EXPIRED_CODE": "Deze code is verlopen. Vraag een nieuwe aan.",
+			"LOCKED": "Te veel onjuiste codes. Verificatie is tijdelijk geblokkeerd. Probeer het later opnieuw.",
+			"SEND_FAILED": "We konden je verificatiecode niet versturen. Probeer het later opnieuw.",
+			"EXPIRES_IN": "Verloopt over {minutes}:{seconds}",
+			"EXPIRED_HINT": "Deze code is verlopen. Vraag een nieuwe aan.",
+			"RESEND": "Nieuwe code sturen",
+			"RESENDING": "Versturen...",
+			"RESEND_SUCCESS": "Een nieuwe code is onderweg.",
+			"RESEND_FAILED": "We konden geen nieuwe code versturen. Probeer het opnieuw.",
+			"RESEND_RATE_LIMITED": "Te veel codeverzoeken. Wacht even voordat je het opnieuw probeert.",
+			"BACK": "Een ander account gebruiken"
+		}
 	},
 	"header": {
 		"OPEN_USER_MENU": "Open user menu"
@@ -660,6 +678,18 @@
 					"SAME_PASSWORD": "New password must be different from current password",
 					"GENERIC_ERROR": "An error occurred while updating your password. Please try again."
 				}
+			},
+			"TWO_FACTOR": {
+				"TITLE": "Tweefactorauthenticatie",
+				"DESCRIPTION": "Voeg een tweede stap toe aan het inloggen met een code die naar je e-mail wordt gestuurd",
+				"EMAIL_METHOD": "Verificatiecode via e-mail",
+				"ENABLED": "Ingeschakeld",
+				"DISABLED": "Uitgeschakeld",
+				"TOGGLE_LABEL": "Tweefactorauthenticatie in- of uitschakelen",
+				"OAUTH_BLOCKED": "Je kunt geen tweefactorauthenticatie instellen omdat je je met OAuth hebt aangemeld.",
+				"ENABLED_HINT": "Bij elke aanmelding wordt om een code gevraagd die naar je e-mailadres is gestuurd.",
+				"LOAD_ERROR": "Instellingen voor tweefactorauthenticatie konden niet worden geladen",
+				"ERROR": "Tweefactorauthenticatie kon niet worden bijgewerkt. Probeer het opnieuw."
 			}
 		},
 		"DANGER_ZONE_CARD": {

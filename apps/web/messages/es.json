@@ -19,7 +19,25 @@
 		"ENTER_CREDENTIALS": "Enter your credentials to continue",
 		"DISCOVER_AND_CONNECT": "Discover & Connect",
 		"JOIN_NETWORK_DESC": "Join our network of professionals and unlock new opportunities.",
-		"SIGN_IN_AGREEMENT": "By signing in, you agree to our"
+		"SIGN_IN_AGREEMENT": "By signing in, you agree to our",
+		"TWO_FACTOR": {
+			"CODE_LABEL": "Código de verificación",
+			"CODE_HELP": "Introduce el código de 6 dígitos que te enviamos por correo.",
+			"CODE_PLACEHOLDER": "123456",
+			"CODE_SENT": "Hemos enviado un código de verificación a tu dirección de correo.",
+			"INVALID_CODE": "Ese código no es correcto. Revisa tu correo e inténtalo de nuevo.",
+			"EXPIRED_CODE": "Este código ha caducado. Solicita uno nuevo.",
+			"LOCKED": "Demasiados códigos incorrectos. La verificación está bloqueada temporalmente. Inténtalo más tarde.",
+			"SEND_FAILED": "No pudimos enviar tu código de verificación. Inténtalo más tarde.",
+			"EXPIRES_IN": "Caduca en {minutes}:{seconds}",
+			"EXPIRED_HINT": "Este código ha caducado. Solicita uno nuevo.",
+			"RESEND": "Enviar un código nuevo",
+			"RESENDING": "Enviando...",
+			"RESEND_SUCCESS": "Un nuevo código está en camino.",
+			"RESEND_FAILED": "No pudimos enviar un código nuevo. Inténtalo de nuevo.",
+			"RESEND_RATE_LIMITED": "Demasiadas solicitudes de código. Espera antes de volver a intentarlo.",
+			"BACK": "Usar otra cuenta"
+		}
 	},
 	"header": {
 		"OPEN_USER_MENU": "Abrir menú de usuario"
@@ -662,6 +680,18 @@
 					"SAME_PASSWORD": "La nueva contraseña debe ser diferente a la actual",
 					"GENERIC_ERROR": "Ocurrió un error al actualizar tu contraseña. Por favor intenta de nuevo."
 				}
+			},
+			"TWO_FACTOR": {
+				"TITLE": "Autenticación de dos factores",
+				"DESCRIPTION": "Añade un segundo paso al inicio de sesión con un código enviado a tu correo",
+				"EMAIL_METHOD": "Código de verificación por correo",
+				"ENABLED": "Activada",
+				"DISABLED": "Desactivada",
+				"TOGGLE_LABEL": "Activar o desactivar la autenticación de dos factores",
+				"OAUTH_BLOCKED": "No puedes configurar la autenticación de dos factores porque te registraste con OAuth.",
+				"ENABLED_HINT": "Cada inicio de sesión pedirá un código enviado a tu dirección de correo.",
+				"LOAD_ERROR": "No se pudieron cargar los ajustes de autenticación de dos factores",
+				"ERROR": "No se pudo actualizar la autenticación de dos factores. Inténtalo de nuevo."
 			}
 		},
 		"DANGER_ZONE_CARD": {

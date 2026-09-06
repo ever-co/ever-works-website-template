@@ -123,13 +123,38 @@ export class EmailService {
     });
   }
 
-  async sendTwoFactorTokenEmail(email: string, token: string): Promise<any> {
+  /**
+   * Send the one-time sign-in code for email two-factor authentication
+   * (EW-138).
+   *
+   * Uses the branded `two-factor-code` template — code in a large
+   * monospaced block, explicit expiry, and a "you didn't try to sign in"
+   * warning — instead of the bare `<p>Your 2FA code</p>` this method sent
+   * before. `options` is optional so the previous two-argument signature
+   * keeps working.
+   */
+  async sendTwoFactorTokenEmail(
+    email: string,
+    token: string,
+    options?: { expiresInMinutes?: number; userName?: string }
+  ): Promise<any> {
     this.ensureAvailable();
+    const { getTwoFactorCodeTemplate } = await import("./templates");
+    const template = getTwoFactorCodeTemplate({
+      code: token,
+      customerEmail: email,
+      userName: options?.userName,
+      expiresInMinutes: options?.expiresInMinutes ?? 10,
+      companyUrl: this.domain,
+      securityUrl: `${this.domain}/client/settings/security`,
+    });
+
     return this.provider!.sendEmail({
       from: this.defaultFrom,
       to: email,
-      subject: "2FA Code",
-      html: `<p>Your 2FA code: ${token}</p>`,
+      subject: template.subject,
+      html: template.html,
+      text: template.text,
     });
   }
 
@@ -284,6 +309,33 @@ async function mailService() {
   });
 }
 
+/**
+ * Is a usable mail provider configured right now?
+ *
+ * Used by the 2FA enable route (spec 053): turning on a factor that is
+ * delivered by email on a deployment with no mail provider would lock the
+ * member out of their own account at the next sign-in, so the toggle
+ * refuses rather than accepting a setting it cannot honour.
+ *
+ * `isServiceAvailable()` alone is not enough. The provider factory never
+ * throws on a misconfiguration — it silently substitutes
+ * `MockEmailProvider`, which accepts every send and delivers nothing, so a
+ * deployment with (say) `EMAIL_PROVIDER=smtp` but only a Resend key set
+ * reports "available" while nothing can ever arrive. The resolved provider
+ * name is therefore checked too. Never throws — a failure to resolve
+ * configuration answers `false`.
+ */
+export async function isEmailServiceConfigured(): Promise<boolean> {
+  try {
+    const service = await mailService();
+    if (!service.isServiceAvailable()) return false;
+    return service.getProviderName().toLowerCase() !== 'mock';
+  } catch (error) {
+    console.warn('[EMAIL] Could not determine mail service availability:', error);
+    return false;
+  }
+}
+
 // Result type for email operations when service is unavailable
 interface EmailSkippedResult {
   skipped: true;
@@ -344,9 +396,13 @@ export const sendNewsletterUnsubscriptionEmail = async (email: string) => {
   );
 };
 
-export const sendTwoFactorTokenEmail = async (email: string, token: string) => {
+export const sendTwoFactorTokenEmail = async (
+  email: string,
+  token: string,
+  options?: { expiresInMinutes?: number; userName?: string }
+) => {
   return tryEmailOperation(
-    (service) => service.sendTwoFactorTokenEmail(email, token),
+    (service) => service.sendTwoFactorTokenEmail(email, token, options),
     'sendTwoFactorTokenEmail'
   );
 };

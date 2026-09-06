@@ -19,7 +19,25 @@
 		"ENTER_CREDENTIALS": "Enter your credentials to continue",
 		"DISCOVER_AND_CONNECT": "Discover & Connect",
 		"JOIN_NETWORK_DESC": "Join our network of professionals and unlock new opportunities.",
-		"SIGN_IN_AGREEMENT": "By signing in, you agree to our"
+		"SIGN_IN_AGREEMENT": "By signing in, you agree to our",
+		"TWO_FACTOR": {
+			"CODE_LABEL": "Kode verifikasi",
+			"CODE_HELP": "Masukkan kode 6 digit yang kami kirim melalui email.",
+			"CODE_PLACEHOLDER": "123456",
+			"CODE_SENT": "Kami telah mengirim kode verifikasi ke alamat email Anda.",
+			"INVALID_CODE": "Kode tersebut tidak benar. Periksa email Anda dan coba lagi.",
+			"EXPIRED_CODE": "Kode ini sudah kedaluwarsa. Minta kode baru.",
+			"LOCKED": "Terlalu banyak kode salah. Verifikasi diblokir sementara. Coba lagi nanti.",
+			"SEND_FAILED": "Kami tidak dapat mengirim kode verifikasi Anda. Coba lagi nanti.",
+			"EXPIRES_IN": "Kedaluwarsa dalam {minutes}:{seconds}",
+			"EXPIRED_HINT": "Kode ini sudah kedaluwarsa. Minta kode baru.",
+			"RESEND": "Kirim kode baru",
+			"RESENDING": "Mengirim...",
+			"RESEND_SUCCESS": "Kode baru sedang dikirim.",
+			"RESEND_FAILED": "Kami tidak dapat mengirim kode baru. Silakan coba lagi.",
+			"RESEND_RATE_LIMITED": "Terlalu banyak permintaan kode. Harap tunggu sebelum mencoba lagi.",
+			"BACK": "Gunakan akun lain"
+		}
 	},
 	"header": {
 		"OPEN_USER_MENU": "Buka menu pengguna"
@@ -690,6 +708,18 @@
 					"SAME_PASSWORD": "Kata sandi baru harus berbeda dari kata sandi saat ini",
 					"GENERIC_ERROR": "Terjadi kesalahan saat memperbarui kata sandi Anda. Silakan coba lagi."
 				}
+			},
+			"TWO_FACTOR": {
+				"TITLE": "Autentikasi Dua Faktor",
+				"DESCRIPTION": "Tambahkan langkah kedua saat masuk dengan kode yang dikirim ke email Anda",
+				"EMAIL_METHOD": "Kode verifikasi email",
+				"ENABLED": "Aktif",
+				"DISABLED": "Nonaktif",
+				"TOGGLE_LABEL": "Aktifkan atau nonaktifkan autentikasi dua faktor",
+				"OAUTH_BLOCKED": "Anda tidak dapat menyiapkan autentikasi dua faktor karena mendaftar dengan OAuth.",
+				"ENABLED_HINT": "Setiap kali masuk, kode yang dikirim ke alamat email Anda akan diminta.",
+				"LOAD_ERROR": "Gagal memuat pengaturan autentikasi dua faktor",
+				"ERROR": "Autentikasi dua faktor tidak dapat diperbarui. Silakan coba lagi."
 			}
 		},
 		"THEME_COLORS_PAGE": {

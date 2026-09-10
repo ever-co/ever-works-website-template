@@ -544,8 +544,8 @@ importers:
         specifier: ^8.48.0
         version: 8.56.1(eslint@9.39.4(jiti@2.6.1))(typescript@5.9.3)
       baseline-browser-mapping:
-        specifier: ^2.8.32
-        version: 2.10.0
+        specifier: ^2.11.0
+        version: 2.11.0
       cross-env:
         specifier: ^10.1.0
         version: 10.1.0
@@ -7123,8 +7123,8 @@ packages:
     resolution: {integrity: sha512-lGe34o6EHj9y3Kts9R4ZYs/Gr+6N7MCaMlIFA3F1R2O5/m7K06AxfSeO5530PEERE6/WyEg3lsuyw4GHlPZHog==}
     engines: {node: ^4.5.0 || >= 5.9}
 
-  baseline-browser-mapping@2.10.0:
-    resolution: {integrity: sha512-lIyg0szRfYbiy67j9KN8IyeD7q7hcmqnJ1ddWmNt19ItGpNN64mnllmxUNFIOdOm6by97jlL6wfpTTJrmnjWAA==}
+  baseline-browser-mapping@2.11.0:
+    resolution: {integrity: sha512-oCu2wfipvX3AePSgmOuKkIywOu+8n9psz7hXYmk56ghpu3+7KzNIBopaOs4c9BrtdnTtW30unG9GTfHo7EwERQ==}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -21575,7 +21575,7 @@ snapshots:
 
   base64id@2.0.0: {}
 
-  baseline-browser-mapping@2.10.0: {}
+  baseline-browser-mapping@2.11.0: {}
 
   batch@0.6.1: {}
 
@@ -21667,7 +21667,7 @@ snapshots:
 
   browserslist@4.28.1:
     dependencies:
-      baseline-browser-mapping: 2.10.0
+      baseline-browser-mapping: 2.11.0
       caniuse-lite: 1.0.30001792
       electron-to-chromium: 1.5.307
       node-releases: 2.0.36
@@ -25366,7 +25366,7 @@ snapshots:
     dependencies:
       '@next/env': 16.2.11
       '@swc/helpers': 0.5.15
-      baseline-browser-mapping: 2.10.0
+      baseline-browser-mapping: 2.11.0
       caniuse-lite: 1.0.30001792
       postcss: 8.5.23
       react: 19.2.5

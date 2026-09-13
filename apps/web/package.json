@@ -121,7 +121,7 @@
 		"import-in-the-middle": "^2.0.0",
 		"isomorphic-git": "^1.29.0",
 		"jose": "^6.0.9",
-		"js-yaml": "^4.3.1",
+		"js-yaml": "^4.3.2",
 		"lodash.throttle": "^4.1.1",
 		"lucide-react": "^0.475.0",
 		"mapbox-gl": "^3.18.0",
